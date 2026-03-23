@@ -1,9 +1,12 @@
+import { Type } from 'class-transformer';
+
 export class BaseQueryParamsDto {
-  //для трансформации в number
   @Type(() => Number)
   pageNumber: number = 1;
+
   @Type(() => Number)
   pageSize: number = 10;
+
   sortDirection: SortDirection = SortDirection.Desc;
 
   calculateSkip() {
