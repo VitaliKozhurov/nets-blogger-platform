@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument, type UserModuleType } from '../domain/user.schema';
 import { GetUsersQueryParamsDto } from '../dto/get-users-query-params.dto';
 import { QueryFilter } from 'mongoose';
 import { PaginationResponseDto } from 'src/core/dto';
 import { UserResponseDto } from '../dto/user-response.dto';
+import { User } from '../domain/user.schema';
+import type { UserModuleType } from '../domain/user.types';
 
 @Injectable()
 export class UsersQueryRepository {

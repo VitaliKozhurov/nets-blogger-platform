@@ -1,4 +1,4 @@
-import { UserDocument } from '../domain/user.schema';
+import { UserDocument } from '../domain/user.types';
 
 export class UserResponseDto {
   id: string;
@@ -9,7 +9,7 @@ export class UserResponseDto {
   static mapToView(userDocument: UserDocument): UserResponseDto {
     const dto = new UserResponseDto();
 
-    dto.id = userDocument.id;
+    dto.id = userDocument._id.toString();
     dto.login = userDocument.login;
     dto.email = userDocument.email;
     dto.createdAt = userDocument.createdAt.toISOString();

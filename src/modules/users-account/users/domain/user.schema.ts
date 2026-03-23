@@ -1,5 +1,6 @@
+import { EmailConfirmation, EmailConfirmationSchema } from './email-confirmation.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { CreateUserInstanceDto } from '../dto/create-user-instance.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class User {
@@ -9,14 +10,35 @@ export class User {
   @Prop({ type: String, required: true })
   email: string;
 
+  @Prop({ type: String, required: true })
+  passwordHash: string;
+
+  @Prop({ type: EmailConfirmationSchema, required: true })
+  emailConfirmation: EmailConfirmation;
+
   createdAt: Date;
 
   @Prop({ type: Date, nullable: true })
   deletedAt: Date | null;
 }
 
-export type UserDocument = HydratedDocument<User>;
-
 export const UserSchema = SchemaFactory.createForClass(User);
 
-export type UserModuleType = Model<UserDocument>;
+UserSchema.static('createInstance', async function (dto: CreateUserInstanceDto) {
+  const user = new this();
+
+  user.login = dto.login;
+  user.email = dto.email;
+  user.passwordHash = dto.passwordHash;
+  user.emailConfirmation = {
+    isConfirmed: true,
+    confirmationCode: null,
+    expirationDate: null,
+  };
+});
+
+UserSchema.method('softDelete', function () {
+  if (!this.deletedAt) {
+    this.deletedAt = new Date();
+  }
+});
