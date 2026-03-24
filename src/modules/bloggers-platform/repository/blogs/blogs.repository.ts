@@ -11,7 +11,10 @@ export class BlogsRepository {
   ) {}
 
   async getById(id: string) {
-    const user = await this.BlogModel.findById(id).exec();
+    const user = await this.BlogModel.findOne({
+      _id: id,
+      deletedAt: null,
+    }).exec();
 
     if (!user) {
       throw new NotFoundException('User not found');

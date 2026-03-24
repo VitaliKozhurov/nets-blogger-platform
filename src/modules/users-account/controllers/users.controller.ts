@@ -9,10 +9,10 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { UsersQueryRepository } from '../../repository/users/users-query.repository';
-import { UsersService } from '../../application/users/users.service';
-import { GetUsersQueryParamsDto } from '../../dto/users/get-users-query-params.dto';
-import { CreateUserRequestDto } from '../../dto/users/create-user-request.dto';
+import { UsersQueryRepository } from '../repository/users/users-query.repository';
+import { UsersService } from '../application/users.service';
+import { GetUsersQueryParamsDto } from '../dto/users/get-users-query-params.dto';
+import { CreateUserRequestDto } from '../dto/users/create-user-request.dto';
 
 @Controller('users')
 export class UsersController {

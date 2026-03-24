@@ -11,7 +11,10 @@ export class UsersRepository {
   ) {}
 
   async getById(id: string) {
-    const user = await this.UserModel.findById(id).exec();
+    const user = await this.UserModel.findOne({
+      _id: id,
+      deletedAt: null,
+    }).exec();
 
     if (!user) {
       throw new NotFoundException('User not found');

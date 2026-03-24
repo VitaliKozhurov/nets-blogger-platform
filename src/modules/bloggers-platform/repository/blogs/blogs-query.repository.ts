@@ -43,7 +43,10 @@ export class BlogsQueryRepository {
   }
 
   async getByIdOrThrowNotFoundError(id: string): Promise<BlogResponseDto> {
-    const blog = await this.BlogModel.findById(id).exec();
+    const blog = await this.BlogModel.findOne({
+      _id: id,
+      deletedAt: null,
+    }).exec();
 
     if (!blog) {
       throw new NotFoundException('Blog not found');

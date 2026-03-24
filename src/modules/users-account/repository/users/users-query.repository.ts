@@ -54,7 +54,10 @@ export class UsersQueryRepository {
   }
 
   async getByIdOrThrowNotFoundError(id: string): Promise<UserResponseDto> {
-    const user = await this.UserModel.findById(id).exec();
+    const user = await this.UserModel.findOne({
+      _id: id,
+      deletedAt: null,
+    }).exec();
 
     if (!user) {
       throw new NotFoundException('User not found');

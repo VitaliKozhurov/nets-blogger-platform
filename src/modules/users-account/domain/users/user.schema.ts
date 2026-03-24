@@ -35,6 +35,7 @@ UserSchema.static('createInstance', async function (dto: CreateUserInstanceDto) 
     confirmationCode: null,
     expirationDate: null,
   };
+  user.deletedAt = null;
 
   return user;
 });
