@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { QueryFilter } from 'mongoose';
 import { PaginationResponseDto } from 'src/core/dto';
 import { User } from '../../domain/users/user.schema';
-import { UserDocument, type UserModuleType } from '../../domain/users/user.types';
+import { UserDocument, type UserModelType } from '../../domain/users/user.types';
 import { GetUsersQueryParamsDto } from '../../dto/users/get-users-query-params.dto';
 import { UserResponseDto } from '../../dto/users/user-response.dto';
 
@@ -12,10 +12,10 @@ import { UserResponseDto } from '../../dto/users/user-response.dto';
 export class UsersQueryRepository {
   constructor(
     @InjectModel(User.name)
-    private UserModel: UserModuleType
+    private UserModel: UserModelType
   ) {}
 
-  async getAll(query: GetUsersQueryParamsDto) {
+  async getAll(query: GetUsersQueryParamsDto): Promise<PaginationResponseDto<UserResponseDto[]>> {
     const filter: QueryFilter<UserDocument> = {
       deletedAt: null,
     };
@@ -53,7 +53,7 @@ export class UsersQueryRepository {
     });
   }
 
-  async getByIdOrThrowNotFoundError(id: string) {
+  async getByIdOrThrowNotFoundError(id: string): Promise<UserResponseDto> {
     const user = await this.UserModel.findById(id).exec();
 
     if (!user) {

@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../../domain/users/user.schema';
-import { UserDocument, type UserModuleType } from '../../domain/users/user.types';
+import { UserDocument, type UserModelType } from '../../domain/users/user.types';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectModel(User.name)
-    private UserModel: UserModuleType
+    private UserModel: UserModelType
   ) {}
 
   async getById(id: string) {
