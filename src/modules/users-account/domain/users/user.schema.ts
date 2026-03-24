@@ -1,6 +1,6 @@
+import { CreateUserInstanceDto } from '../../dto/users/create-user-instance.dto';
 import { EmailConfirmation, EmailConfirmationSchema } from './email-confirmation.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { CreateUserInstanceDto } from '../dto/create-user-instance.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class User {
@@ -35,6 +35,8 @@ UserSchema.static('createInstance', async function (dto: CreateUserInstanceDto) 
     confirmationCode: null,
     expirationDate: null,
   };
+
+  return user;
 });
 
 UserSchema.method('softDelete', function () {

@@ -7,8 +7,12 @@ export const getMongooseConfig = (
 ): MongooseModuleFactoryOptions => {
   return {
     uri: configService.getOrThrow('MONGO_DB_URL'),
+    retryAttempts: 5,
+    retryDelay: 3000,
     onConnectionCreate: connection => {
-      Logger.log('✅ Database connected successfully!', 'DB');
+      connection.on('connected', () => {
+        Logger.log('✅ Database connected successfully!', 'DB');
+      });
 
       connection.on('error', error => {
         Logger.error(`❌ Mongo error: ${error.message}`, error.stack, 'DB');

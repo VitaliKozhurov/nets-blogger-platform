@@ -1,6 +1,7 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { CreateUserInstanceDto } from '../dto/create-user-instance.dto';
+
 import { User } from './user.schema';
+import { CreateUserInstanceDto } from '../../dto/users/create-user-instance.dto';
 
 export type UserDocument = HydratedDocument<User, UserMethodsType>;
 
@@ -9,7 +10,7 @@ export type UserMethodsType = {
 };
 
 export type UserStaticMethodsType = {
-  createInstance(dto: CreateUserInstanceDto): UserDocument;
+  createInstance(dto: CreateUserInstanceDto): Promise<UserDocument>;
 };
 
-export type UserModuleType = Model<User, unknown, UserMethodsType> & UserStaticMethodsType;
+export type UserModuleType = Model<UserDocument, unknown, UserMethodsType> & UserStaticMethodsType;

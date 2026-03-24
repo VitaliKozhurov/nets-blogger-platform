@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../domain/user.schema';
+
 import { InjectModel } from '@nestjs/mongoose';
-import { UsersRepository } from '../repository/users.repository';
-import { CreateUserRequestDto } from '../dto/create-user-request.dto';
-import { PasswordHashAdapter } from '../adapters/passwordHashAdapter';
-import { type UserModuleType } from '../domain/user.types';
+
+import { PasswordHashAdapter } from '../../adapters/passwordHashAdapter';
+import { User } from '../../domain/users/user.schema';
+import { type UserModuleType } from '../../domain/users/user.types';
+import { UsersRepository } from '../../repository/users/users.repository';
+import { CreateUserRequestDto } from '../../dto/users/create-user-request.dto';
 
 @Injectable()
 export class UsersService {
@@ -20,7 +22,9 @@ export class UsersService {
 
     const passwordHash = await this.passwordHashAdapter.createHash(password);
 
-    const newUser = this.UserModel.createInstance({ login, email, passwordHash });
+    const newUser = await this.UserModel.createInstance({ login, email, passwordHash });
+
+    console.log(newUser);
 
     await this.userRepository.save(newUser);
 

@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { GetUsersQueryParamsDto } from '../dto/get-users-query-params.dto';
+
 import { QueryFilter } from 'mongoose';
 import { PaginationResponseDto } from 'src/core/dto';
-import { UserResponseDto } from '../dto/user-response.dto';
-import { User } from '../domain/user.schema';
-import type { UserModuleType } from '../domain/user.types';
+import { User } from '../../domain/users/user.schema';
+import { UserDocument, type UserModuleType } from '../../domain/users/user.types';
+import { GetUsersQueryParamsDto } from '../../dto/users/get-users-query-params.dto';
+import { UserResponseDto } from '../../dto/users/user-response.dto';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -52,7 +53,7 @@ export class UsersQueryRepository {
     });
   }
 
-  async getById(id: string) {
+  async getByIdOrThrowNotFoundError(id: string) {
     const user = await this.UserModel.findById(id).exec();
 
     if (!user) {

@@ -1,4 +1,4 @@
-import { UserDocument } from '../domain/user.types';
+import { UserDocument } from '../../domain/users/user.types';
 
 export class UserResponseDto {
   id: string;
