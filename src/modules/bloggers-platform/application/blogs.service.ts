@@ -15,7 +15,7 @@ export class BlogsService {
   ) {}
 
   async create(dto: CreateBlogRequestDto) {
-    const newBlog = await this.BlogModel.createInstance(dto);
+    const newBlog = this.BlogModel.createInstance(dto);
 
     await this.blogRepository.save(newBlog);
 

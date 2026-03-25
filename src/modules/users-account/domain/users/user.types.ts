@@ -10,7 +10,7 @@ export type UserMethodsType = {
 };
 
 export type UserStaticMethodsType = {
-  createInstance(dto: CreateUserInstanceDto): Promise<UserDocument>;
+  createInstance(dto: CreateUserInstanceDto): UserDocument;
 };
 
 export type UserModelType = Model<UserDocument, unknown, UserMethodsType> & UserStaticMethodsType;

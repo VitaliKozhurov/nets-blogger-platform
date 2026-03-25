@@ -1,6 +1,5 @@
-export class CreatePostRequestDto {
-  title: string;
-  shortDescription: string;
-  content: string;
+import { CreatePostByBlogIdRequestDto } from './create-post-by-blog-id-request.dto';
+
+export class CreatePostRequestDto extends CreatePostByBlogIdRequestDto {
   blogId: string;
 }

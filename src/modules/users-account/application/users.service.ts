@@ -22,7 +22,7 @@ export class UsersService {
 
     const passwordHash = await this.passwordHashAdapter.createHash(password);
 
-    const newUser = await this.UserModel.createInstance({ login, email, passwordHash });
+    const newUser = this.UserModel.createInstance({ login, email, passwordHash });
 
     await this.userRepository.save(newUser);
 

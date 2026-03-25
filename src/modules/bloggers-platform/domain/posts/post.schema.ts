@@ -1,4 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { CreatePostRequestDto } from '../../dto/posts/create-post-request.dto';
+import { UpdatePostRequestDto } from '../../dto/posts/update-post-request.dto';
+import { LikesCountInfo } from '../likes/likes-count-info.schema';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Post {
@@ -19,11 +22,8 @@ export class Post {
 
   createdAt: Date;
 
-  @Prop({ type: Number, required: true })
-  likesCount: number;
-
-  @Prop({ type: Number, required: true })
-  dislikesCount: number;
+  @Prop({ type: LikesCountInfo, required: true })
+  likesInfo: LikesCountInfo;
 
   @Prop({ type: Date, nullable: true })
   deletedAt: Date | null;
@@ -31,8 +31,32 @@ export class Post {
 
 export const PostSchema = SchemaFactory.createForClass(Post);
 
+PostSchema.static('createInstance', async function (blogName: string, dto: CreatePostRequestDto) {
+  const post = new this();
+
+  post.title = dto.title;
+  post.shortDescription = dto.shortDescription;
+  post.content = dto.content;
+  post.blogId = dto.blogId;
+  post.blogName = blogName;
+  post.likesInfo.likesCount = 0;
+  post.likesInfo.dislikesCount = 0;
+  post.deletedAt = null;
+
+  return post;
+});
+
 PostSchema.method('softDelete', function () {
   if (!this.deletedAt) {
     this.deletedAt = new Date();
   }
+});
+
+PostSchema.method('update', function (dto: UpdatePostRequestDto) {
+  this.title = dto.title;
+  this.shortDescription = dto.shortDescription;
+  this.content = dto.content;
+  this.blogId = dto.blogId;
+
+  return this;
 });

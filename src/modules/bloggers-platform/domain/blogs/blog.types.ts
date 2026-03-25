@@ -11,7 +11,7 @@ export type BlogMethodsType = {
 };
 
 export type BlogStaticMethodsType = {
-  createInstance(dto: CreateBlogRequestDto): Promise<BlogDocument>;
+  createInstance(dto: CreateBlogRequestDto): BlogDocument;
 };
 
 export type BlogModelType = Model<BlogDocument, unknown, BlogMethodsType> & BlogStaticMethodsType;
