@@ -24,6 +24,15 @@ export class Post {
 
   @Prop({ type: Number, required: true })
   dislikesCount: number;
+
+  @Prop({ type: Date, nullable: true })
+  deletedAt: Date | null;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
+
+PostSchema.method('softDelete', function () {
+  if (!this.deletedAt) {
+    this.deletedAt = new Date();
+  }
+});

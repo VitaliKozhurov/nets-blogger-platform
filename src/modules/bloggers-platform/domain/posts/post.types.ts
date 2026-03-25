@@ -4,7 +4,7 @@ import { Post } from './post.schema';
 export type PostDocument = HydratedDocument<Post, PostMethodsType>;
 
 export type PostMethodsType = {
-  someMethod(): void;
+  softDelete(): void;
 };
 
 export type PostStaticMethodsType = {
