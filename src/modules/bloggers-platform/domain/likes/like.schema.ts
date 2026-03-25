@@ -7,6 +7,9 @@ export class Like {
   authorId: string;
 
   @Prop({ type: String, required: true })
+  login: string;
+
+  @Prop({ type: String, required: true })
   parentId: string;
 
   createdAt: Date;
