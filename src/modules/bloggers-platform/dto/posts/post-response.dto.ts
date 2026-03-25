@@ -37,8 +37,8 @@ export class PostResponseDto {
     dto.blogName = postDocument.blogName;
     dto.createdAt = postDocument.createdAt.toISOString();
 
-    dto.extendedLikesInfo.likesCount = postDocument.likesCount;
-    dto.extendedLikesInfo.dislikesCount = postDocument.dislikesCount;
+    dto.extendedLikesInfo.likesCount = postDocument.likesInfo.likesCount;
+    dto.extendedLikesInfo.dislikesCount = postDocument.likesInfo.dislikesCount;
     dto.extendedLikesInfo.myStatus = myStatus;
     dto.extendedLikesInfo.newestLikes = newestLikes;
 

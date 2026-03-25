@@ -5,6 +5,9 @@ import { LikesCountInfo } from '../likes/likes-count-info.schema';
 @Schema({ timestamps: true, versionKey: false })
 export class Comment {
   @Prop({ type: String, required: true })
+  postId: string;
+
+  @Prop({ type: String, required: true })
   content: string;
 
   @Prop({ type: CommentatorInfo, required: true })
