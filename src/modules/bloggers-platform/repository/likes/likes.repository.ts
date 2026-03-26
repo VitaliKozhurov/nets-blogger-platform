@@ -11,12 +11,19 @@ export class LikesRepository {
     private LikeModel: LikeModelType
   ) {}
 
-  async getMyStatus(args: { parentId: string; authorId?: string }) {
-    const { parentId, authorId } = args;
+  async getLikesForUser(args: { authorId: string; parentIds: string[] }) {
+    const { authorId, parentIds } = args;
 
-    if (!authorId) {
-      return LikeStatus.None;
-    }
+    return this.LikeModel.find({
+      parentId: { $in: parentIds },
+      authorId,
+    })
+      .lean()
+      .exec();
+  }
+
+  async getMyStatus(args: { parentId: string; authorId: string }) {
+    const { parentId, authorId } = args;
 
     const like = await this.LikeModel.findOne({ parentId, authorId }).lean().exec();
 
