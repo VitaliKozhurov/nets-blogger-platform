@@ -1,13 +1,13 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { PaginationResponseDto } from 'src/core/dto';
 import { Comment } from '../../domain/comments/comment.schema';
 import { type CommentModelType } from '../../domain/comments/comment.types';
-import { PaginationResponseDto } from 'src/core/dto';
-import { CommentResponseDto } from '../../dto/comments/comment-response.dto';
-import { LikesRepository } from '../likes/likes.repository';
 import { Like } from '../../domain/likes/like.schema';
 import { type LikeModelType } from '../../domain/likes/like.types';
+import { CommentResponseDto } from '../../dto/comments/comment-response.dto';
 import { LikeStatus } from '../../types/likes/like-status.types';
+import { LikesRepository } from '../likes/likes.repository';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -23,20 +23,26 @@ export class CommentsQueryRepository {
   }): Promise<PaginationResponseDto<CommentResponseDto[]>> {
     const { postId, userId } = args;
 
-    const comments = await this.CommentModel.find({ postId }).lean().exec();
+    const comments = await this.CommentModel.find({ postId, deletedAt: null }).lean().exec();
 
     const commentsIds = comments.map(c => c._id.toString());
 
-    const likes = await this.LikeModel.find({ parentId: { $in: commentsIds } });
+    const userLikes = await this.LikeModel.find({
+      parentId: { $in: commentsIds },
+      authorId: userId,
+    })
+      .lean()
+      .exec();
 
-    const likesWithMyStatus = likes.reduce(
-      (acc, curr) => {
-        acc[curr._id.toString()] = curr.authorId === userId ? curr.status : LikeStatus.None;
+    const likesMap = new Map<string, LikeStatus>();
 
-        return acc;
-      },
-      {} as Record<string, LikeStatus>
-    );
+    userLikes.forEach(like => likesMap.set(like.parentId, like.status));
+
+    const items = comments.map(comment => {
+      const myStatus = likesMap.get(comment._id.toString()) ?? LikeStatus.None;
+
+      return CommentResponseDto.mapToView(comment, myStatus);
+    });
 
     return {} as Promise<PaginationResponseDto<CommentResponseDto[]>>;
   }
