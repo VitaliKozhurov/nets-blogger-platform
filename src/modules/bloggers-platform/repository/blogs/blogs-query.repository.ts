@@ -14,7 +14,7 @@ export class BlogsQueryRepository {
     private BlogModel: BlogModelType
   ) {}
 
-  async getAll(query: GetBlogsQueryParamsDto): Promise<PaginationResponseDto<BlogResponseDto[]>> {
+  async findAll(query: GetBlogsQueryParamsDto): Promise<PaginationResponseDto<BlogResponseDto[]>> {
     const filter: QueryFilter<BlogDocument> = {
       deletedAt: null,
     };
@@ -42,7 +42,7 @@ export class BlogsQueryRepository {
     });
   }
 
-  async getByIdOrThrowNotFoundError(id: string): Promise<BlogResponseDto> {
+  async findByIdOrThrow(id: string): Promise<BlogResponseDto> {
     const blog = await this.BlogModel.findOne({
       _id: id,
       deletedAt: null,

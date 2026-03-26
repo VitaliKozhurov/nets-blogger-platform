@@ -10,7 +10,7 @@ export class UsersRepository {
     private UserModel: UserModelType
   ) {}
 
-  async getById(id: string) {
+  async findByIdOrThrow(id: string) {
     const user = await this.UserModel.findOne({
       _id: id,
       deletedAt: null,

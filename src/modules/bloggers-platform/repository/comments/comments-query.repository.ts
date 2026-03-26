@@ -62,10 +62,7 @@ export class CommentsQueryRepository {
     });
   }
 
-  async getByIdOrThrowNotFoundError(args: {
-    commentId: string;
-    userId?: string;
-  }): Promise<CommentResponseDto> {
+  async findByIdOrThrow(args: { commentId: string; userId?: string }): Promise<CommentResponseDto> {
     const { commentId, userId } = args;
 
     const comment = await this.CommentModel.findOne({

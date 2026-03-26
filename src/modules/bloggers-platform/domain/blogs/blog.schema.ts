@@ -4,6 +4,8 @@ import { UpdateBlogRequestDto } from '../../dto/blogs/update-blog-request.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Blog {
+  id: string;
+
   @Prop({ type: String, required: true })
   name: string;
 
@@ -23,6 +25,10 @@ export class Blog {
 }
 
 export const BlogSchema = SchemaFactory.createForClass(Blog);
+
+BlogSchema.virtual('id').get(function () {
+  return this._id.toString();
+});
 
 BlogSchema.static('createInstance', async function (dto: CreateBlogRequestDto) {
   const blog = new this();

@@ -30,7 +30,7 @@ export class UsersService {
   }
 
   async delete(id: string) {
-    const user = await this.userRepository.getById(id);
+    const user = await this.userRepository.findByIdOrThrow(id);
 
     user.softDelete();
 

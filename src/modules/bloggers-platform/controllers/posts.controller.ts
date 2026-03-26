@@ -12,20 +12,20 @@ export class PostsController {
   ) {}
 
   @Get()
-  async getAll() {
-    return this.postsQueryRepository.getAll();
+  async findAll() {
+    return this.postsQueryRepository.findAll();
   }
 
   @Get(':id')
   async getById(@Param('id') id: string) {
-    return this.postsQueryRepository.getByIdOrThrowNotFoundError(id);
+    return this.postsQueryRepository.findByIdOrThrow(id);
   }
 
   @Post()
   async create(dto: CreatePostRequestDto) {
     const postId = await this.postsService.create(dto);
 
-    return this.postsQueryRepository.getByIdOrThrowNotFoundError(postId);
+    return this.postsQueryRepository.findByIdOrThrow(postId);
   }
 
   @Put(':id')
@@ -41,7 +41,5 @@ export class PostsController {
   }
 
   @Get(':id/comments')
-  async getPostComments(@Param('id') id: string) {
-    
-  }
+  async getPostComments(@Param('id') id: string) {}
 }

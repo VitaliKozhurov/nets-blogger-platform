@@ -29,20 +29,20 @@ export class BlogsController {
   ) {}
 
   @Get()
-  async getAll(@Query() query: GetBlogsQueryParamsDto) {
-    return this.blogsQueryRepository.getAll(query);
+  async findAll(@Query() query: GetBlogsQueryParamsDto) {
+    return this.blogsQueryRepository.findAll(query);
   }
 
   @Get(':id')
   async getById(@Param('id') id: string) {
-    return this.blogsQueryRepository.getByIdOrThrowNotFoundError(id);
+    return this.blogsQueryRepository.findByIdOrThrow(id);
   }
 
   @Post()
   async create(@Body() dto: CreateBlogRequestDto) {
     const blogId = await this.blogsService.create(dto);
 
-    return this.blogsQueryRepository.getByIdOrThrowNotFoundError(blogId);
+    return this.blogsQueryRepository.findByIdOrThrow(blogId);
   }
 
   @Put(':id')
@@ -59,13 +59,13 @@ export class BlogsController {
 
   @Get(':id/posts')
   async getPostsForBlog(@Param('id') id: string) {
-    return this.postsQueryRepository.getAllForBlog(id);
+    return this.postsQueryRepository.findAllForBlogId(id);
   }
 
   @Post(':id/posts')
   async createPost(@Param('id') id: string, @Body() dto: CreatePostByBlogIdRequestDto) {
     const postId = await this.postsService.create({ blogId: id, ...dto });
 
-    return this.postsQueryRepository.getByIdOrThrowNotFoundError(postId);
+    return this.postsQueryRepository.findByIdOrThrow({ postId });
   }
 }

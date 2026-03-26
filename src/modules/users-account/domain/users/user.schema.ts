@@ -4,6 +4,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema({ timestamps: true, versionKey: false })
 export class User {
+  id: string;
+
   @Prop({ type: String, required: true })
   login: string;
 
@@ -23,6 +25,10 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('id').get(function () {
+  return this._id.toString();
+});
 
 UserSchema.static('createInstance', async function (dto: CreateUserInstanceDto) {
   const user = new this();

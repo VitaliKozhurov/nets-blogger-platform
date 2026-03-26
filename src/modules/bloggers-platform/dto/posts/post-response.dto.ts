@@ -1,3 +1,4 @@
+import { LikeDocument } from '../../domain/likes/like.types';
 import { LikeStatus } from '../../types/likes/like-status.types';
 import { PostDocument } from './../../domain/posts/post.types';
 
@@ -22,12 +23,13 @@ export class PostResponseDto {
     newestLikes: NewestLike[];
   };
 
-  static mapToView(
-    postDocument: PostDocument,
-    myStatus: LikeStatus,
-    newestLikes: NewestLike[]
-  ): PostResponseDto {
+  static mapToView(args: {
+    postDocument: PostDocument;
+    myStatus: LikeStatus;
+    newestLikes: LikeDocument[];
+  }): PostResponseDto {
     const dto = new PostResponseDto();
+    const { postDocument, myStatus, newestLikes } = args;
 
     dto.id = postDocument._id.toString();
     dto.title = postDocument.title;
@@ -40,7 +42,11 @@ export class PostResponseDto {
     dto.extendedLikesInfo.likesCount = postDocument.likesInfo.likesCount;
     dto.extendedLikesInfo.dislikesCount = postDocument.likesInfo.dislikesCount;
     dto.extendedLikesInfo.myStatus = myStatus;
-    dto.extendedLikesInfo.newestLikes = newestLikes;
+    dto.extendedLikesInfo.newestLikes = newestLikes.map(like => ({
+      addedAt: like.addedLikeDate?.toISOString() ?? '',
+      userId: like.authorId,
+      login: like.login,
+    }));
 
     return dto;
   }

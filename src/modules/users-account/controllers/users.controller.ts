@@ -17,20 +17,20 @@ import { CreateUserRequestDto } from '../dto/users/create-user-request.dto';
 @Controller('users')
 export class UsersController {
   constructor(
-    private usersQueryRepository: UsersQueryRepository,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private usersQueryRepository: UsersQueryRepository
   ) {}
 
   @Get()
-  async getAll(@Query() query: GetUsersQueryParamsDto) {
-    return this.usersQueryRepository.getAll(query);
+  async findAll(@Query() query: GetUsersQueryParamsDto) {
+    return this.usersQueryRepository.findAll(query);
   }
 
   @Post()
   async create(@Body() dto: CreateUserRequestDto) {
     const userId = await this.usersService.create(dto);
 
-    return this.usersQueryRepository.getByIdOrThrowNotFoundError(userId);
+    return this.usersQueryRepository.findByIdOrThrow(userId);
   }
 
   @Delete(':id')

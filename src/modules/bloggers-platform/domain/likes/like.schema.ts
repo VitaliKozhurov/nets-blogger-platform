@@ -14,8 +14,14 @@ export class Like {
 
   createdAt: Date;
 
-  @Prop({ type: Number, required: true, enum: LikeStatus, default: LikeStatus.None })
+  @Prop({ type: String, required: true, enum: LikeStatus, default: LikeStatus.None })
   status: LikeStatus;
+
+  @Prop({ type: Date, nullable: true, default: null })
+  addedLikeDate: Date | null;
+
+  @Prop({ type: Date, nullable: true })
+  deletedAt: Date | null;
 }
 
 export const LikeSchema = SchemaFactory.createForClass(Like);

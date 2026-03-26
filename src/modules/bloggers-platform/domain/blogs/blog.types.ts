@@ -14,4 +14,4 @@ export type BlogStaticMethodsType = {
   createInstance(dto: CreateBlogRequestDto): BlogDocument;
 };
 
-export type BlogModelType = Model<BlogDocument, unknown, BlogMethodsType> & BlogStaticMethodsType;
+export type BlogModelType = Model<Blog, unknown, BlogMethodsType> & BlogStaticMethodsType;

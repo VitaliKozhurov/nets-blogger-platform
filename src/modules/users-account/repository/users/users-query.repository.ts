@@ -15,7 +15,7 @@ export class UsersQueryRepository {
     private UserModel: UserModelType
   ) {}
 
-  async getAll(query: GetUsersQueryParamsDto): Promise<PaginationResponseDto<UserResponseDto[]>> {
+  async findAll(query: GetUsersQueryParamsDto): Promise<PaginationResponseDto<UserResponseDto[]>> {
     const filter: QueryFilter<UserDocument> = {
       deletedAt: null,
     };
@@ -53,7 +53,7 @@ export class UsersQueryRepository {
     });
   }
 
-  async getByIdOrThrowNotFoundError(id: string): Promise<UserResponseDto> {
+  async findByIdOrThrow(id: string): Promise<UserResponseDto> {
     const user = await this.UserModel.findOne({
       _id: id,
       deletedAt: null,
