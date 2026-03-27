@@ -10,7 +10,7 @@ export class BlogsRepository {
     private BlogModel: BlogModelType
   ) {}
 
-  async getById(id: string) {
+  async getByIdOrFail(id: string) {
     const user = await this.BlogModel.findOne({
       _id: id,
       deletedAt: null,

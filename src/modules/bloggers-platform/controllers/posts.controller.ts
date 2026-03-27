@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -36,7 +37,7 @@ export class PostsController {
   }
 
   @Post()
-  async create(dto: CreatePostRequestDto) {
+  async create(@Body() dto: CreatePostRequestDto) {
     const postId = await this.postsService.create(dto);
 
     return this.postsQueryRepository.findByIdOrThrow({ postId });
@@ -44,7 +45,7 @@ export class PostsController {
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async update(@Param('id') id: string, dto: UpdatePostRequestDto) {
+  async update(@Param('id') id: string, @Body() dto: UpdatePostRequestDto) {
     return this.postsService.update(id, dto);
   }
 

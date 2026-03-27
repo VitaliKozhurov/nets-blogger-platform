@@ -4,8 +4,8 @@ import { Post } from '../domain/posts/post.schema';
 import { type PostModelType } from '../domain/posts/post.types';
 import { CreatePostRequestDto } from '../dto/posts/create-post-request.dto';
 import { UpdatePostRequestDto } from '../dto/posts/update-post-request.dto';
-import { PostsRepository } from '../repository/posts/posts.repository';
 import { BlogsRepository } from '../repository/blogs/blogs.repository';
+import { PostsRepository } from '../repository/posts/posts.repository';
 
 @Injectable()
 export class PostsService {
@@ -17,9 +17,9 @@ export class PostsService {
   ) {}
 
   async create(dto: CreatePostRequestDto) {
-    const blog = await this.blogsRepository.getById(dto.blogId);
+    const blog = await this.blogsRepository.getByIdOrFail(dto.blogId);
 
-    const newPost = this.PostModel.createInstance(blog._id.toString(), dto);
+    const newPost = await this.PostModel.createInstance(blog._id.toString(), dto);
 
     await this.postsRepository.save(newPost);
 
@@ -27,7 +27,7 @@ export class PostsService {
   }
 
   async update(postId: string, dto: UpdatePostRequestDto) {
-    const post = await this.postsRepository.getById(postId);
+    const post = await this.postsRepository.getByIdOrFail(postId);
 
     const updatedPost = post.update(dto);
 
@@ -35,7 +35,7 @@ export class PostsService {
   }
 
   async delete(id: string) {
-    const post = await this.postsRepository.getById(id);
+    const post = await this.postsRepository.getByIdOrFail(id);
 
     post.softDelete();
 

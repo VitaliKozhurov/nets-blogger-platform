@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog } from '../../domain/blogs/blog.schema';
-import { BlogDocument, type BlogModelType } from '../../domain/blogs/blog.types';
-import { GetBlogsQueryParamsDto } from '../../dto/blogs/get-blogs-query-params.dto';
 import { QueryFilter } from 'mongoose';
 import { PaginationResponseDto } from 'src/core/dto';
+import { Blog } from '../../domain/blogs/blog.schema';
+import { BlogDocument, type BlogModelType } from '../../domain/blogs/blog.types';
 import { BlogResponseDto } from '../../dto/blogs/blog-response.dto';
+import { GetBlogsQueryParamsDto } from '../../dto/blogs/get-blogs-query-params.dto';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -20,7 +20,7 @@ export class BlogsQueryRepository {
     };
 
     if (query.searchNameTerm) {
-      filter.$or = [{ login: { $regex: query.searchNameTerm, $options: 'i' } }];
+      filter.$or = [{ name: { $regex: query.searchNameTerm, $options: 'i' } }];
     }
 
     const blogsPromise = this.BlogModel.find(filter)

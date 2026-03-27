@@ -4,7 +4,6 @@ import { PasswordHashAdapter } from './adapters/passwordHashAdapter';
 import { UsersService } from './application/users.service';
 import { UsersController } from './controllers/users.controller';
 import { User, UserSchema } from './domain/users/user.schema';
-import { UsersExternalRepository } from './repository/users/users-external.repository';
 import { UsersQueryRepository } from './repository/users/users-query.repository';
 import { UsersRepository } from './repository/users/users.repository';
 
@@ -12,6 +11,6 @@ import { UsersRepository } from './repository/users/users.repository';
   imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository, UsersQueryRepository, PasswordHashAdapter],
-  exports: [UsersExternalRepository],
+  exports: [],
 })
 export class UsersAccountModule {}

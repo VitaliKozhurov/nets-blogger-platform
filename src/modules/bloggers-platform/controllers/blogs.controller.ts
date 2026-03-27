@@ -18,12 +18,14 @@ import { UpdateBlogRequestDto } from '../dto/blogs/update-blog-request.dto';
 import { CreatePostByBlogIdRequestDto } from '../dto/posts/create-post-by-blog-id-request.dto';
 import { GetPostsQueryParamsDto } from '../dto/posts/get-posts-query-params.dto';
 import { BlogsQueryRepository } from '../repository/blogs/blogs-query.repository';
+import { BlogsRepository } from '../repository/blogs/blogs.repository';
 import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
     private blogsQueryRepository: BlogsQueryRepository,
+    private blogsRepository: BlogsRepository,
     private postsQueryRepository: PostsQueryRepository,
     private blogsService: BlogsService,
     private postsService: PostsService
@@ -60,6 +62,8 @@ export class BlogsController {
 
   @Get(':id/posts')
   async getPostsForBlog(@Param('id') id: string, @Query() query: GetPostsQueryParamsDto) {
+    await this.blogsRepository.getByIdOrFail(id);
+
     return this.postsQueryRepository.findAllForBlogId({ blogId: id, query });
   }
 

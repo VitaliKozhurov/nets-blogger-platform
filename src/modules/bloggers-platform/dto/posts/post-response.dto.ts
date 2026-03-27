@@ -39,14 +39,16 @@ export class PostResponseDto {
     dto.blogName = postDocument.blogName;
     dto.createdAt = postDocument.createdAt.toISOString();
 
-    dto.extendedLikesInfo.likesCount = postDocument.likesInfo.likesCount;
-    dto.extendedLikesInfo.dislikesCount = postDocument.likesInfo.dislikesCount;
-    dto.extendedLikesInfo.myStatus = myStatus;
-    dto.extendedLikesInfo.newestLikes = newestLikes.map(like => ({
-      addedAt: like.addedLikeDate?.toISOString() ?? '',
-      userId: like.authorId,
-      login: like.login,
-    }));
+    dto.extendedLikesInfo = {
+      likesCount: postDocument.likesInfo.likesCount,
+      dislikesCount: postDocument.likesInfo.dislikesCount,
+      myStatus: myStatus,
+      newestLikes: newestLikes.map(like => ({
+        addedAt: like.addedLikeDate?.toISOString() ?? '',
+        userId: like.authorId,
+        login: like.login,
+      })),
+    };
 
     return dto;
   }

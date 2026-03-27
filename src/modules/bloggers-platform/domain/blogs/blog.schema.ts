@@ -17,7 +17,7 @@ export class Blog {
 
   createdAt: Date;
 
-  @Prop({ type: Boolean, required: true })
+  @Prop({ type: Boolean, required: true, default: false })
   isMembership: boolean;
 
   @Prop({ type: Date, nullable: true })
@@ -36,7 +36,7 @@ BlogSchema.static('createInstance', async function (dto: CreateBlogRequestDto) {
   blog.name = dto.name;
   blog.description = dto.description;
   blog.websiteUrl = dto.websiteUrl;
-  blog.isMembership = true;
+  blog.isMembership = false;
   blog.deletedAt = null;
 
   return blog;

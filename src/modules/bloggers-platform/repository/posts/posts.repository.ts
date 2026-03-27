@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException, Post } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Post } from '../../domain/posts/post.schema';
 import { PostDocument, type PostModelType } from '../../domain/posts/post.types';
 
 @Injectable()
@@ -9,7 +10,7 @@ export class PostsRepository {
     private PostModel: PostModelType
   ) {}
 
-  async getById(id: string) {
+  async getByIdOrFail(id: string) {
     const post = await this.PostModel.findOne({
       _id: id,
       deletedAt: null,

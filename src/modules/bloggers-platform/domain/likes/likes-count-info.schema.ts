@@ -1,4 +1,4 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema({ _id: false, versionKey: false })
 export class LikesCountInfo {
@@ -8,3 +8,5 @@ export class LikesCountInfo {
   @Prop({ type: Number, required: true })
   dislikesCount: number;
 }
+
+export const LikesCountInfoSchema = SchemaFactory.createForClass(LikesCountInfo);

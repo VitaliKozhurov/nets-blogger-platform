@@ -1,7 +1,7 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { Post } from './post.schema';
 import { CreatePostRequestDto } from '../../dto/posts/create-post-request.dto';
 import { UpdatePostRequestDto } from '../../dto/posts/update-post-request.dto';
+import { Post } from './post.schema';
 
 export type PostDocument = HydratedDocument<Post, PostMethodsType>;
 
@@ -11,7 +11,7 @@ export type PostMethodsType = {
 };
 
 export type PostStaticMethodsType = {
-  createInstance(blogId: string, dto: CreatePostRequestDto): PostDocument;
+  createInstance(blogId: string, dto: CreatePostRequestDto): Promise<PostDocument>;
 };
 
 export type PostModelType = Model<PostDocument, unknown, PostMethodsType> & PostStaticMethodsType;

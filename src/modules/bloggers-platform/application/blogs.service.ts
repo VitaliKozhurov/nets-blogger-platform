@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog } from '../domain/blogs/blog.schema';
 import { type BlogModelType } from '../domain/blogs/blog.types';
-import { BlogsRepository } from '../repository/blogs/blogs.repository';
 import { CreateBlogRequestDto } from '../dto/blogs/create-blog-request.dto';
 import { UpdateBlogRequestDto } from '../dto/blogs/update-blog-request.dto';
+import { BlogsRepository } from '../repository/blogs/blogs.repository';
 
 @Injectable()
 export class BlogsService {
@@ -15,7 +15,7 @@ export class BlogsService {
   ) {}
 
   async create(dto: CreateBlogRequestDto) {
-    const newBlog = this.BlogModel.createInstance(dto);
+    const newBlog = await this.BlogModel.createInstance(dto);
 
     await this.blogRepository.save(newBlog);
 
@@ -23,7 +23,7 @@ export class BlogsService {
   }
 
   async update(blogId: string, dto: UpdateBlogRequestDto) {
-    const blog = await this.blogRepository.getById(blogId);
+    const blog = await this.blogRepository.getByIdOrFail(blogId);
 
     const updatedBlog = blog.update(dto);
 
@@ -31,7 +31,7 @@ export class BlogsService {
   }
 
   async delete(id: string) {
-    const blog = await this.blogRepository.getById(id);
+    const blog = await this.blogRepository.getByIdOrFail(id);
 
     blog.softDelete();
 

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { CreatePostRequestDto } from '../../dto/posts/create-post-request.dto';
 import { UpdatePostRequestDto } from '../../dto/posts/update-post-request.dto';
-import { LikesCountInfo } from '../likes/likes-count-info.schema';
+import { LikesCountInfo, LikesCountInfoSchema } from '../likes/likes-count-info.schema';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Post {
@@ -22,7 +22,7 @@ export class Post {
 
   createdAt: Date;
 
-  @Prop({ type: LikesCountInfo, required: true })
+  @Prop({ type: LikesCountInfoSchema, required: true })
   likesInfo: LikesCountInfo;
 
   @Prop({ type: Date, nullable: true })
@@ -39,8 +39,7 @@ PostSchema.static('createInstance', async function (blogName: string, dto: Creat
   post.content = dto.content;
   post.blogId = dto.blogId;
   post.blogName = blogName;
-  post.likesInfo.likesCount = 0;
-  post.likesInfo.dislikesCount = 0;
+  post.likesInfo = { likesCount: 0, dislikesCount: 0 };
   post.deletedAt = null;
 
   return post;

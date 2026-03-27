@@ -1,7 +1,8 @@
-import { Inject, Injectable, NotFoundException, Post } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PaginationResponseDto } from 'src/core/dto';
 import { LikeDocument } from '../../domain/likes/like.types';
+import { Post } from '../../domain/posts/post.schema';
 import { PostDocument, type PostModelType } from '../../domain/posts/post.types';
 import { GetPostsByBlogIdQueryParamsDto } from '../../dto/blogs/get-posts-by-blog-id-query-params.dto';
 import { GetPostsQueryParamsDto } from '../../dto/posts/get-posts-query-params.dto';
