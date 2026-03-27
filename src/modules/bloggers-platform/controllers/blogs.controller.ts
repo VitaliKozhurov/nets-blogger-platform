@@ -10,13 +10,14 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { BlogsQueryRepository } from '../repository/blogs/blogs-query.repository';
 import { BlogsService } from '../application/blogs.service';
-import { GetBlogsQueryParamsDto } from '../dto/blogs/get-blogs-query-params.dto';
+import { PostsService } from '../application/posts.service';
 import { CreateBlogRequestDto } from '../dto/blogs/create-blog-request.dto';
+import { GetBlogsQueryParamsDto } from '../dto/blogs/get-blogs-query-params.dto';
 import { UpdateBlogRequestDto } from '../dto/blogs/update-blog-request.dto';
 import { CreatePostByBlogIdRequestDto } from '../dto/posts/create-post-by-blog-id-request.dto';
-import { PostsService } from '../application/posts.service';
+import { GetPostsQueryParamsDto } from '../dto/posts/get-posts-query-params.dto';
+import { BlogsQueryRepository } from '../repository/blogs/blogs-query.repository';
 import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
 
 @Controller('blogs')
@@ -58,8 +59,8 @@ export class BlogsController {
   }
 
   @Get(':id/posts')
-  async getPostsForBlog(@Param('id') id: string) {
-    return this.postsQueryRepository.findAllForBlogId(id);
+  async getPostsForBlog(@Param('id') id: string, @Query() query: GetPostsQueryParamsDto) {
+    return this.postsQueryRepository.findAllForBlogId({ blogId: id, query });
   }
 
   @Post(':id/posts')

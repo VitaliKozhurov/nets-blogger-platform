@@ -1,6 +1,6 @@
-import { Prop, Schema } from '@nestjs/mongoose';
-import { CommentatorInfo } from './commentator-info.schema';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { LikesCountInfo } from '../likes/likes-count-info.schema';
+import { CommentatorInfo } from './commentator-info.schema';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Comment {
@@ -21,3 +21,5 @@ export class Comment {
   @Prop({ type: Date, nullable: true })
   deletedAt: Date | null;
 }
+
+export const CommentSchema = SchemaFactory.createForClass(Comment);
