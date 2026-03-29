@@ -11,5 +11,5 @@ export type CommentStaticMethodsType = {
   someMethod(): void;
 };
 
-export type CommentModelType = Model<CommentDocument, unknown, CommentMethodsType> &
+export type CommentModelType = Model<Comment, unknown, CommentMethodsType> &
   CommentStaticMethodsType;

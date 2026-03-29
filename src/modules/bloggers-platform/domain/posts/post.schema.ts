@@ -5,6 +5,8 @@ import { LikesCountInfo, LikesCountInfoSchema } from '../likes/likes-count-info.
 
 @Schema({ timestamps: true, versionKey: false })
 export class Post {
+  id: string;
+
   @Prop({ type: String, required: true })
   title: string;
 

@@ -3,6 +3,8 @@ import { LikeStatus } from '../../types/likes/like-status.types';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Like {
+  id: string;
+
   @Prop({ type: String, required: true })
   authorId: string;
 

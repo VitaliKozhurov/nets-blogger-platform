@@ -11,4 +11,4 @@ export type LikeStaticMethodsType = {
   someMethod(): void;
 };
 
-export type LikeModelType = Model<LikeDocument, unknown, LikeMethodsType> & LikeStaticMethodsType;
+export type LikeModelType = Model<Like, unknown, LikeMethodsType> & LikeStaticMethodsType;

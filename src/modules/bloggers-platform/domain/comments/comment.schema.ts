@@ -1,21 +1,23 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { LikesCountInfo } from '../likes/likes-count-info.schema';
-import { CommentatorInfo } from './commentator-info.schema';
+import { LikesCountInfo, LikesCountInfoSchema } from '../likes/likes-count-info.schema';
+import { CommentatorInfo, CommentatorInfoSchema } from './commentator-info.schema';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Comment {
+  id: string;
+
   @Prop({ type: String, required: true })
   postId: string;
 
   @Prop({ type: String, required: true })
   content: string;
 
-  @Prop({ type: CommentatorInfo, required: true })
+  @Prop({ type: CommentatorInfoSchema, required: true })
   commentatorInfo: CommentatorInfo;
 
   createdAt: Date;
 
-  @Prop({ type: LikesCountInfo, required: true })
+  @Prop({ type: LikesCountInfoSchema, required: true })
   likesInfo: LikesCountInfo;
 
   @Prop({ type: Date, nullable: true })
