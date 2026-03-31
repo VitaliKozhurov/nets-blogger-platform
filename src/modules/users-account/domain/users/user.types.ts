@@ -13,4 +13,4 @@ export type UserStaticMethodsType = {
   createInstance(dto: CreateUserInstanceDto): Promise<UserDocument>;
 };
 
-export type UserModelType = Model<User, unknown, UserMethodsType> & UserStaticMethodsType;
+export type UserModelType = Model<UserDocument, unknown, UserMethodsType> & UserStaticMethodsType;

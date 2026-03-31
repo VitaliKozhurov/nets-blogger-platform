@@ -14,4 +14,4 @@ export type PostStaticMethodsType = {
   createInstance(blogId: string, dto: CreatePostRequestDto): Promise<PostDocument>;
 };
 
-export type PostModelType = Model<Post, unknown, PostMethodsType> & PostStaticMethodsType;
+export type PostModelType = Model<PostDocument, unknown, PostMethodsType> & PostStaticMethodsType;
