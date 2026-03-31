@@ -5,7 +5,7 @@ import { UsersSortBy } from '../../types/users/users-sort-by.types';
 
 export class GetUsersQueryParamsDto extends BaseQueryParamsDto {
   @ApiPropertyOptional({
-    description: 'Search by login',
+    description: 'Filter users by login',
     example: 'admin',
     type: String,
     nullable: true,
@@ -13,18 +13,18 @@ export class GetUsersQueryParamsDto extends BaseQueryParamsDto {
   searchLoginTerm: Nullable<string> = null;
 
   @ApiPropertyOptional({
-    description: 'Search by email',
-    example: 'admin',
+    description: 'Filter users by email address',
+    example: 'admin@example.com',
     type: String,
     nullable: true,
   })
   searchEmailTerm: Nullable<string> = null;
 
   @ApiProperty({
-    description: 'Sort by props',
+    description: 'Field to sort users by',
     example: 'createdAt',
     enum: UsersSortBy,
-    enumName: 'Sort by options',
+    enumName: 'UsersSortBy',
   })
   sortBy: UsersSortBy = UsersSortBy.CreatedAt;
 

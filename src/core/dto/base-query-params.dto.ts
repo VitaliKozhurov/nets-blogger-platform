@@ -7,26 +7,32 @@ export enum SortDirection {
 
 export class BaseQueryParamsDto {
   @ApiProperty({
-    description: 'Current page number',
-    example: 1,
     type: Number,
+    description: 'Page number for pagination',
+    example: 1,
+    minimum: 1,
+    default: 1,
   })
   @Type(() => Number)
   pageNumber: number = 1;
 
   @ApiProperty({
-    description: 'Items count per page ',
-    example: 10,
     type: Number,
+    description: 'Number of items per page',
+    example: 10,
+    minimum: 1,
+    maximum: 100,
+    default: 10,
   })
   @Type(() => Number)
   pageSize: number = 10;
 
   @ApiProperty({
-    description: 'Sort direction',
+    description: 'Sort order direction',
     example: 'desc',
     enum: SortDirection,
-    enumName: 'Sorting',
+    enumName: 'SortDirection',
+    default: SortDirection.Desc,
   })
   sortDirection: SortDirection = SortDirection.Desc;
 
