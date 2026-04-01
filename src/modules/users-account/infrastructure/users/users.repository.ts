@@ -23,6 +23,19 @@ export class UsersRepository {
     return user;
   }
 
+  async findByLoginOrEmail(loginOrEmail: string) {
+    const user = await this.UserModel.findOne({
+      $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+      deletedAt: null,
+    }).exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async save(userDocument: UserDocument) {
     await userDocument.save();
   }

@@ -8,6 +8,7 @@ import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-pla
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { getMongooseConfig } from './config/mongoose.config';
+import { CryptoModule } from './modules/crypto/crypto.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { getMongooseConfig } from './config/mongoose.config';
     }),
     UsersAccountModule,
     BloggersPlatformModule,
+    CryptoModule,
     TestsModule,
   ],
   controllers: [AppController],
