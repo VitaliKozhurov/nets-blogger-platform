@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import { CreateUserRequestDto } from '../dto/users/create-user-request.dto';
@@ -16,8 +17,12 @@ import { UsersQueryRepository } from '../infrastructure/users/users-query.reposi
 import { CreateUserSwaggerDecorator } from '../decorators/create-user-swagger.decorator';
 import { GetUsersSwaggerDecorator } from '../decorators/get-users-swagger.decorator';
 import { DeleteUserSwaggerDecorator } from '../decorators/delete-user-swagger.decorator';
+import { BasicAuthGuard } from '../guards/basic-auth/basic-auth.guard';
+import { ApiBasicAuth } from '@nestjs/swagger';
 
 @Controller('users')
+@UseGuards(BasicAuthGuard)
+@ApiBasicAuth('basicAuth')
 export class UsersController {
   constructor(
     private usersService: UsersService,

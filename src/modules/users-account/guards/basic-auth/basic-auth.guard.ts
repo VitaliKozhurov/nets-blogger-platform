@@ -1,8 +1,9 @@
-import { CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../public/public.guard';
 import { Request } from 'express';
 
+@Injectable()
 export class BasicAuthGuard implements CanActivate {
   private readonly validUsername = 'admin';
   private readonly validPassword = 'qwerty';

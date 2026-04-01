@@ -6,6 +6,14 @@ export const setupSwaggerConfig = (app: INestApplication) => {
     .setTitle('Blogger Platform')
     .setDescription('Blogger Platform API description')
     .setVersion('1.0')
+    .addBasicAuth(
+      {
+        type: 'http',
+        scheme: 'basic',
+        description: 'Enter the administrator login and password',
+      },
+      'basicAuth'
+    )
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
