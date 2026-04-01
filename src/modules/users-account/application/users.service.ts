@@ -6,7 +6,7 @@ import { PasswordHashAdapter } from '../adapters/passwordHashAdapter';
 import { User } from '../domain/users/user.schema';
 import { type UserModelType } from '../domain/users/user.types';
 import { CreateUserRequestDto } from '../dto/users/create-user-request.dto';
-import { UsersRepository } from '../repository/users/users.repository';
+import { UsersRepository } from '../infrastructure/users/users.repository';
 
 @Injectable()
 export class UsersService {

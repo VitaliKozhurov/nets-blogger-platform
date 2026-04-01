@@ -1,7 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BaseQueryParamsDto } from 'src/core/dto/base-query-params.dto';
 import { type Nullable } from 'src/core/types';
-import { UsersSortBy } from '../../types/users/users-sort-by.types';
+
+export enum UsersSortBy {
+  CreatedAt = 'createdAt',
+  Login = 'login',
+  Email = 'email',
+}
 
 export class GetUsersQueryParamsDto extends BaseQueryParamsDto {
   @ApiPropertyOptional({

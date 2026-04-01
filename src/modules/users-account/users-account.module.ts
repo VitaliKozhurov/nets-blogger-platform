@@ -4,8 +4,8 @@ import { PasswordHashAdapter } from './adapters/passwordHashAdapter';
 import { UsersService } from './application/users.service';
 import { UsersController } from './controllers/users.controller';
 import { User, UserSchema } from './domain/users/user.schema';
-import { UsersQueryRepository } from './repository/users/users-query.repository';
-import { UsersRepository } from './repository/users/users.repository';
+import { UsersQueryRepository } from './infrastructure/users/users-query.repository';
+import { UsersRepository } from './infrastructure/users/users.repository';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
