@@ -1,12 +1,12 @@
 import { MongooseModuleFactoryOptions } from '@nestjs/mongoose';
-import { AppConfigService } from './config.types';
-import { Logger } from '@nestjs/common';
 
-export const getMongooseConfig = (
-  configService: AppConfigService
-): MongooseModuleFactoryOptions => {
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EnvVariables, EnvVariablesType } from './env.interface';
+
+export const getMongooseConfig = (configService: ConfigService): MongooseModuleFactoryOptions => {
   return {
-    uri: configService.getOrThrow('MONGO_DB_URL'),
+    uri: configService.getOrThrow<EnvVariablesType['MONGO_DB_URL']>(EnvVariables.MONGO_DB_URL),
     retryAttempts: 5,
     retryDelay: 3000,
     onConnectionCreate: connection => {
