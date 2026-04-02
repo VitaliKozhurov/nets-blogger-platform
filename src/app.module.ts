@@ -9,6 +9,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { getMongooseConfig } from './config/mongoose.config';
 import { CryptoModule } from './modules/crypto/crypto.module';
+import { APP_FILTER } from '@nestjs/core';
+import { DomainHttpExceptionsFilter, GlobalHttpExceptionsFilter } from './core/exceptions';
 
 @Module({
   imports: [
@@ -23,6 +25,16 @@ import { CryptoModule } from './modules/crypto/crypto.module';
     TestsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: GlobalHttpExceptionsFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: DomainHttpExceptionsFilter,
+    },
+  ],
 })
 export class AppModule {}

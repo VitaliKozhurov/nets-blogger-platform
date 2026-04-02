@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+
 export enum SortDirection {
   Asc = 'asc',
   Desc = 'desc',

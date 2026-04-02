@@ -1,4 +1,4 @@
-import { BaseQueryParamsDto } from 'src/core/dto/base-query-params.dto';
+import { BaseQueryParamsDto } from 'src/core/dto';
 import { PostsSortBy } from '../../types/posts/posts-sort-by.types';
 
 export class GetPostsQueryParamsDto extends BaseQueryParamsDto {

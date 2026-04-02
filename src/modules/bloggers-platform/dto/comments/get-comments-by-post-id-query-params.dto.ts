@@ -1,4 +1,4 @@
-import { BaseQueryParamsDto } from 'src/core/dto/base-query-params.dto';
+import { BaseQueryParamsDto } from 'src/core/dto';
 import { CommentsSortBy } from '../../types/comments/comments-sort-by.types';
 
 export class GetCommentsByPostIdQueryParamsDto extends BaseQueryParamsDto {

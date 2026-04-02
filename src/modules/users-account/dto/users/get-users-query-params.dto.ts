@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BaseQueryParamsDto } from 'src/core/dto/base-query-params.dto';
+import { BaseQueryParamsDto } from 'src/core/dto';
 import { type Nullable } from 'src/core/types';
 
 export enum UsersSortBy {
