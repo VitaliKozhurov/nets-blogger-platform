@@ -1,7 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
-import { UserResponseDto } from '../dto/users/user-response.dto';
-import { ApiOkResponsePaginated } from 'src/core/decorators/custom-ok-api-response.decorator';
+import { ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiOkResponsePaginated } from 'src/core/decorators';
+import {
+  GetUsersQueryParamsDocumentationDto,
+  UserResponseDocumentationDto,
+} from '../dto/doc/user.doc';
 
 export const GetUsersSwaggerDecorator = () => {
   return applyDecorators(
@@ -10,6 +13,7 @@ export const GetUsersSwaggerDecorator = () => {
       description:
         'Fetches a paginated list of users with support for filtering, sorting, and searching. Returns users based on the provided query parameters.',
     }),
-    ApiOkResponsePaginated(UserResponseDto)
+    ApiQuery({ type: GetUsersQueryParamsDocumentationDto }),
+    ApiOkResponsePaginated(UserResponseDocumentationDto)
   );
 };

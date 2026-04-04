@@ -1,6 +1,6 @@
-import { CreateUserInstanceDto } from '../../dto/users/create-user-instance.dto';
-import { EmailConfirmation, EmailConfirmationSchema } from './email-confirmation.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { EmailConfirmation, EmailConfirmationSchema } from './email-confirmation.schema';
+import { CreateUserInstanceDto } from './user.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class User {

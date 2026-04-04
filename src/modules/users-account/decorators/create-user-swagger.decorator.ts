@@ -1,7 +1,6 @@
-import { CreateUserRequestDto } from './../dto/users/create-user-request.dto';
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
-import { UserResponseDto } from '../dto/users/user-response.dto';
+import { CreateUserDocumentationDto, UserResponseDocumentationDto } from '../dto/doc/user.doc';
 
 export const CreateUserSwaggerDecorator = () => {
   return applyDecorators(
@@ -11,11 +10,11 @@ export const CreateUserSwaggerDecorator = () => {
         'Creates a new user account with the provided information. Returns the created user data.',
     }),
     ApiBody({
-      type: CreateUserRequestDto,
+      type: CreateUserDocumentationDto,
       description: 'User registration data including email, password, and profile information',
     }),
     ApiCreatedResponse({
-      type: UserResponseDto,
+      type: UserResponseDocumentationDto,
       description: 'Returns the newly created user',
     })
   );

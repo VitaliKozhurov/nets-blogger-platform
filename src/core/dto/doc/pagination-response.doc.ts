@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IPaginationResponseDto } from '../contracts/pagination-response.dto';
 
-export class PaginationResponseDto<T> {
+export class PaginationResponseDocumentationDto<T> implements IPaginationResponseDto<T> {
   items: T;
 
   @ApiProperty({
@@ -26,19 +27,4 @@ export class PaginationResponseDto<T> {
     description: 'Number of items per page',
   })
   pageSize: number;
-
-  static mapToViewModel<T>(data: {
-    items: T;
-    page: number;
-    size: number;
-    totalCount: number;
-  }): PaginationResponseDto<T> {
-    return {
-      totalCount: data.totalCount,
-      pagesCount: Math.ceil(data.totalCount / data.size),
-      page: data.page,
-      pageSize: data.size,
-      items: data.items,
-    };
-  }
 }

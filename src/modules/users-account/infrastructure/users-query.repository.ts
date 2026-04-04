@@ -3,10 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { QueryFilter } from 'mongoose';
 import { PaginationResponseDto } from 'src/core/dto';
-import { User } from '../../domain/users/user.schema';
-import { UserDocument, type UserModelType } from '../../domain/users/user.types';
-import { GetUsersQueryParamsDto } from '../../dto/users/get-users-query-params.dto';
-import { UserResponseDto } from '../../dto/users/user-response.dto';
+import { User } from '../domain/users/user.schema';
+import { UserDocument, type UserModelType } from '../domain/users/user.types';
+
+import { GetUsersQueryParamsDto } from '../dto/user/get-users-query-params.dto';
+import { UserResponseDto } from '../dto/user/user-response.dto';
 
 @Injectable()
 export class UsersQueryRepository {

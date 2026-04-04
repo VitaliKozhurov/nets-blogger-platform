@@ -1,12 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { IBaseQueryParamsDto } from '../contracts/base-query-params.dto';
+import { SortDirection } from '../contracts/sort-direction';
 
-export enum SortDirection {
-  Asc = 'asc',
-  Desc = 'desc',
-}
-
-export class BaseQueryParamsDto {
+export class BaseQueryParamsDocumentationDto implements IBaseQueryParamsDto {
   @ApiProperty({
     type: Number,
     description: 'Page number for pagination',
@@ -14,8 +10,7 @@ export class BaseQueryParamsDto {
     minimum: 1,
     default: 1,
   })
-  @Type(() => Number)
-  pageNumber: number = 1;
+  pageNumber: number;
 
   @ApiProperty({
     type: Number,
@@ -25,8 +20,7 @@ export class BaseQueryParamsDto {
     maximum: 100,
     default: 10,
   })
-  @Type(() => Number)
-  pageSize: number = 10;
+  pageSize: number;
 
   @ApiProperty({
     description: 'Sort order direction',
@@ -35,9 +29,5 @@ export class BaseQueryParamsDto {
     enumName: 'SortDirection',
     default: SortDirection.Desc,
   })
-  sortDirection: SortDirection = SortDirection.Desc;
-
-  calculateSkip() {
-    return (this.pageNumber - 1) * this.pageSize;
-  }
+  sortDirection: SortDirection;
 }

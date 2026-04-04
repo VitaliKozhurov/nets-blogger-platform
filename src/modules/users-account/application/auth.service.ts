@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { LoginUserRequestDto } from '../dto/auth/login-request.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../domain/users/user.schema';
-import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
-import { UsersRepository } from '../infrastructure/users/users.repository';
 import { Nullable } from 'src/core/types';
+import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
+import { User } from '../domain/users/user.schema';
+import { LoginUserRequestDto } from '../dto/auth/login-request.dto';
+import { UsersRepository } from '../infrastructure/users.repository';
 
 @Injectable()
 export class AuthService {

@@ -1,6 +1,6 @@
 import { HydratedDocument, Model } from 'mongoose';
 
-import { CreateUserInstanceDto } from '../../dto/users/create-user-instance.dto';
+import { CreateUserInstanceDto } from './user.dto';
 import { User } from './user.schema';
 
 export type UserDocument = HydratedDocument<User, UserMethodsType>;
