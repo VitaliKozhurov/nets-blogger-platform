@@ -7,10 +7,11 @@ import { User, UserSchema } from './domain/users/user.schema';
 import { UsersQueryRepository } from './infrastructure/users-query.repository';
 import { UsersRepository } from './infrastructure/users.repository';
 import { CryptoModule } from '../crypto/crypto.module';
+import { AuthController } from './controllers/auth.controller';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), CryptoModule],
-  controllers: [UsersController],
+  controllers: [AuthController, UsersController],
   providers: [UsersService, UsersRepository, UsersQueryRepository],
   exports: [],
 })
