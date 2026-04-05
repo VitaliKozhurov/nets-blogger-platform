@@ -15,7 +15,7 @@ export interface ICreatePostDto {
   blogId: string;
 }
 
-export interface IUpdatePostDto {}
+export interface IUpdatePostDto extends ICreatePostDto {}
 
 type NewestLike = {
   addedAt: string;

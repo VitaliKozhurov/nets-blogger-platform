@@ -1,17 +1,16 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { CreatePostRequestDto } from '../../dto/posts/create-post-request.dto';
-import { UpdatePostRequestDto } from '../../dto/posts/update-post-request.dto';
 import { Post } from './post.schema';
+import { ICreatePostDto, IUpdatePostDto } from '../../dto/contracts/post.dto';
 
 export type PostDocument = HydratedDocument<Post, PostMethodsType>;
 
 export type PostMethodsType = {
   softDelete(): void;
-  update(dto: UpdatePostRequestDto): PostDocument;
+  update(dto: IUpdatePostDto): PostDocument;
 };
 
 export type PostStaticMethodsType = {
-  createInstance(blogId: string, dto: CreatePostRequestDto): Promise<PostDocument>;
+  createInstance(blogId: string, dto: ICreatePostDto): Promise<PostDocument>;
 };
 
 export type PostModelType = Model<PostDocument, unknown, PostMethodsType> & PostStaticMethodsType;

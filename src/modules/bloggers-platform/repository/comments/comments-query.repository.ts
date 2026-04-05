@@ -1,12 +1,13 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginationResponseDto } from 'src/core/dto';
 import { Comment } from '../../domain/comments/comment.schema';
 import { type CommentModelType } from '../../domain/comments/comment.types';
-import { CommentResponseDto } from '../../dto/comments/comment-response.dto';
-import { LikeStatus } from '../../types/likes/like-status.types';
 import { LikesRepository } from '../likes/likes.repository';
-import { GetCommentsByPostIdQueryParamsDto } from '../../dto/comments/get-comments-by-post-id-query-params.dto';
+import { IGetCommentsByPostIdQueryParamsDto } from '../../dto/contracts/comment.dto';
+import { PaginationResponseMapperDto } from 'src/core/dto';
+import { getPaginationParams } from 'src/core/utils';
+import { CommentResponseMapperDto } from '../../dto/mappers/comment.mapper';
+import { LikeStatus } from '../../dto/contracts/like.dto';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -18,14 +19,15 @@ export class CommentsQueryRepository {
   async getAllByPostId(args: {
     postId: string;
     userId?: string;
-    query: GetCommentsByPostIdQueryParamsDto;
-  }): Promise<PaginationResponseDto<CommentResponseDto[]>> {
+    query: IGetCommentsByPostIdQueryParamsDto;
+  }): Promise<PaginationResponseMapperDto<CommentResponseMapperDto[]>> {
     const { postId, userId, query } = args;
+    const { sort, skip, limit } = getPaginationParams(query);
 
     const commentsPromise = this.CommentModel.find({ postId, deletedAt: null })
-      .sort(query.getSortOptions())
-      .skip(query.calculateSkip())
-      .limit(query.pageSize)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
       .lean()
       .exec();
 
@@ -51,10 +53,10 @@ export class CommentsQueryRepository {
         ? (likesMap.get(comment._id.toString()) ?? LikeStatus.None)
         : LikeStatus.None;
 
-      return CommentResponseDto.mapToView(comment, myStatus);
+      return CommentResponseMapperDto.mapToView(comment, myStatus);
     });
 
-    return PaginationResponseDto.mapToViewModel({
+    return PaginationResponseMapperDto.mapToViewModel({
       items,
       totalCount,
       page: query.pageNumber,
@@ -62,7 +64,10 @@ export class CommentsQueryRepository {
     });
   }
 
-  async findByIdOrThrow(args: { commentId: string; userId?: string }): Promise<CommentResponseDto> {
+  async findByIdOrThrow(args: {
+    commentId: string;
+    userId?: string;
+  }): Promise<CommentResponseMapperDto> {
     const { commentId, userId } = args;
 
     const comment = await this.CommentModel.findOne({
@@ -83,6 +88,6 @@ export class CommentsQueryRepository {
         })
       : LikeStatus.None;
 
-    return CommentResponseDto.mapToView(comment, myStatus);
+    return CommentResponseMapperDto.mapToView(comment, myStatus);
   }
 }

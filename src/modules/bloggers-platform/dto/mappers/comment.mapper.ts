@@ -1,22 +1,19 @@
-import { LikeStatus } from '../../types/likes/like-status.types';
 import { CommentDocument } from '../../domain/comments/comment.types';
+import { ICommentResponseDto } from '../contracts/comment.dto';
+import { LikeStatus } from '../contracts/like.dto';
 
-export class CommentResponseDto {
+export class CommentResponseMapperDto implements ICommentResponseDto {
   id: string;
   content: string;
-  commentatorInfo: {
-    userId: string;
-    userLogin: string;
-  };
+  commentatorInfo: { userId: string; userLogin: string };
   createdAt: string;
   likesInfo: {
     likesCount: number;
     dislikesCount: number;
     myStatus: LikeStatus;
   };
-
-  static mapToView(commentDocument: CommentDocument, myStatus: LikeStatus): CommentResponseDto {
-    const dto = new CommentResponseDto();
+  static mapToView(commentDocument: CommentDocument, myStatus: LikeStatus): ICommentResponseDto {
+    const dto = new CommentResponseMapperDto();
 
     dto.id = commentDocument._id.toString();
     dto.content = commentDocument.content;

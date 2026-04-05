@@ -22,6 +22,7 @@ import {
 } from '../dto/validation/user.validation';
 import { BasicAuthGuard } from '../guards/basic-auth/basic-auth.guard';
 import { UsersQueryRepository } from '../infrastructure/users-query.repository';
+import { ObjectIdValidationPipe } from 'src/core/pipes';
 
 @Controller('users')
 @UseGuards(BasicAuthGuard)
@@ -49,7 +50,7 @@ export class UsersController {
   @Delete(':id')
   @DeleteUserSwaggerDecorator()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.usersService.delete(id);
   }
 }

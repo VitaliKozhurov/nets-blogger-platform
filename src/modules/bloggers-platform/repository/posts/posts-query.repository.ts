@@ -1,14 +1,16 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PaginationResponseDto } from 'src/core/dto';
+
 import { LikeDocument } from '../../domain/likes/like.types';
 import { Post } from '../../domain/posts/post.schema';
 import { PostDocument, type PostModelType } from '../../domain/posts/post.types';
-import { GetPostsByBlogIdQueryParamsDto } from '../../dto/blogs/get-posts-by-blog-id-query-params.dto';
-import { GetPostsQueryParamsDto } from '../../dto/posts/get-posts-query-params.dto';
-import { PostResponseDto } from '../../dto/posts/post-response.dto';
-import { LikeStatus } from '../../types/likes/like-status.types';
+
 import { LikesRepository } from '../likes/likes.repository';
+import { IGetPostsQueryParamsDto } from '../../dto/contracts/post.dto';
+import { getPaginationParams } from 'src/core/utils';
+import { PaginationResponseMapperDto } from 'src/core/dto';
+import { PostResponseMapperDto } from '../../dto/mappers/post.mapper';
+import { LikeStatus } from '../../dto/contracts/like.dto';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -19,15 +21,17 @@ export class PostsQueryRepository {
   ) {}
 
   async findAll(args: {
-    query: GetPostsQueryParamsDto;
+    query: IGetPostsQueryParamsDto;
     userId?: string;
-  }): Promise<PaginationResponseDto<PostResponseDto[]>> {
+  }): Promise<PaginationResponseMapperDto<PostResponseMapperDto[]>> {
     const { query, userId } = args;
 
+    const { sort, skip, limit } = getPaginationParams(query);
+
     const postsPromise = this.PostModel.find({ deletedAtL: null })
-      .sort(query.getSortOptions())
-      .skip(query.calculateSkip())
-      .limit(query.pageSize)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
       .lean()
       .exec();
 
@@ -37,9 +41,9 @@ export class PostsQueryRepository {
 
     const postsWithLikeInfo = await this.enrichWithLikes({ posts, userId });
 
-    const items = postsWithLikeInfo.map(post => PostResponseDto.mapToView(post));
+    const items = postsWithLikeInfo.map(post => PostResponseMapperDto.mapToView(post));
 
-    return PaginationResponseDto.mapToViewModel({
+    return PaginationResponseMapperDto.mapToViewModel({
       items,
       totalCount,
       page: query.pageNumber,
@@ -50,14 +54,16 @@ export class PostsQueryRepository {
   async findAllForBlogId(args: {
     blogId: string;
     userId?: string;
-    query: GetPostsByBlogIdQueryParamsDto;
-  }): Promise<PaginationResponseDto<PostResponseDto[]>> {
+    query: IGetPostsQueryParamsDto;
+  }): Promise<PaginationResponseMapperDto<PostResponseMapperDto[]>> {
     const { blogId, userId, query } = args;
 
+    const { sort, skip, limit } = getPaginationParams(query);
+
     const postsPromise = this.PostModel.find({ blogId, deletedAt: null })
-      .sort(query.getSortOptions())
-      .skip(query.calculateSkip())
-      .limit(query.pageSize)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
       .lean()
       .exec();
 
@@ -67,9 +73,9 @@ export class PostsQueryRepository {
 
     const postsWithLikeInfo = await this.enrichWithLikes({ posts, userId });
 
-    const items = postsWithLikeInfo.map(post => PostResponseDto.mapToView(post));
+    const items = postsWithLikeInfo.map(post => PostResponseMapperDto.mapToView(post));
 
-    return PaginationResponseDto.mapToViewModel({
+    return PaginationResponseMapperDto.mapToViewModel({
       items,
       page: query.pageNumber,
       size: query.pageSize,
@@ -77,7 +83,7 @@ export class PostsQueryRepository {
     });
   }
 
-  async findByIdOrThrow(args: { postId: string; userId?: string }): Promise<PostResponseDto> {
+  async findByIdOrThrow(args: { postId: string; userId?: string }): Promise<PostResponseMapperDto> {
     const { postId, userId } = args;
 
     const post = await this.PostModel.findOne({ _id: postId, deletedAt: null }).lean().exec();
@@ -94,7 +100,7 @@ export class PostsQueryRepository {
 
     const [myStatus, newestLikes] = await Promise.all([myStatusPromise, newestLikesPromise]);
 
-    return PostResponseDto.mapToView({ postDocument: post, myStatus, newestLikes });
+    return PostResponseMapperDto.mapToView({ postDocument: post, myStatus, newestLikes });
   }
 
   async enrichWithLikes(args: { posts: PostDocument[]; userId?: string }) {

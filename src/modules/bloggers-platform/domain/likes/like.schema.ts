@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { LikeStatus } from '../../types/likes/like-status.types';
+import { LikeStatus } from '../../dto/contracts/like.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Like {

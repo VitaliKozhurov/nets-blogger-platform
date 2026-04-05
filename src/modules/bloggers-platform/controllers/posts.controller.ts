@@ -11,7 +11,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { PostsService } from '../application/posts.service';
-import { GetCommentsByPostIdQueryParamsDto } from '../dto/comments/get-comments-by-post-id-query-params.dto';
 import {
   CreatePostRequestBodyValidationDto,
   GetPostsQueryParamsValidationDto,
@@ -19,6 +18,8 @@ import {
 } from '../dto/validation/post.validation';
 import { CommentsQueryRepository } from '../repository/comments/comments-query.repository';
 import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
+import { ObjectIdValidationPipe } from 'src/core/pipes';
+import { GetCommentsByPostIdQueryParamsValidationDto } from '../dto/validation/comment.validation';
 
 @Controller('posts')
 export class PostsController {
@@ -34,7 +35,7 @@ export class PostsController {
   }
 
   @Get(':id')
-  async getById(@Param('id') id: string) {
+  async getById(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.postsQueryRepository.findByIdOrThrow({ postId: id });
   }
 
@@ -47,20 +48,23 @@ export class PostsController {
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async update(@Param('id') id: string, @Body() dto: UpdatePostRequestBodyValidationDto) {
+  async update(
+    @Param('id', ObjectIdValidationPipe) id: string,
+    @Body() dto: UpdatePostRequestBodyValidationDto
+  ) {
     return this.postsService.update(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.postsService.delete(id);
   }
 
   @Get(':id/comments')
   async getPostComments(
-    @Param('id') id: string,
-    @Query() query: GetCommentsByPostIdQueryParamsDto
+    @Param('id', ObjectIdValidationPipe) id: string,
+    @Query() query: GetCommentsByPostIdQueryParamsValidationDto
   ) {
     return this.commentsQueryRepository.getAllByPostId({ postId: id, query });
   }

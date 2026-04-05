@@ -2,14 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Like } from '../../domain/likes/like.schema';
 import { LikeDocument, type LikeModelType } from '../../domain/likes/like.types';
-import { LikeStatus } from '../../types/likes/like-status.types';
+
 import { Types } from 'mongoose';
+import { LikeStatus } from '../../dto/contracts/like.dto';
 
 const LIKES_LIMIT_COUNT = 3;
 
 type NewestLikesAggregationResult = {
   _id: Types.ObjectId;
-  newestLikes: LikeDocument[]
+  newestLikes: LikeDocument[];
 };
 
 @Injectable()

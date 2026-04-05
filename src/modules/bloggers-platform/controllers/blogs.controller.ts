@@ -25,6 +25,7 @@ import {
 import { BlogsQueryRepository } from '../repository/blogs/blogs-query.repository';
 import { BlogsRepository } from '../repository/blogs/blogs.repository';
 import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
+import { ObjectIdValidationPipe } from 'src/core/pipes';
 
 @Controller('blogs')
 export class BlogsController {
@@ -42,7 +43,7 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async getById(@Param('id') id: string) {
+  async getById(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.blogsQueryRepository.findByIdOrThrow(id);
   }
 
@@ -55,18 +56,24 @@ export class BlogsController {
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async update(@Param('id') id: string, @Body() dto: UpdateBlogRequestBodyValidationDto) {
+  async update(
+    @Param('id', ObjectIdValidationPipe) id: string,
+    @Body() dto: UpdateBlogRequestBodyValidationDto
+  ) {
     await this.blogsService.update(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id') id: string) {
+  async delete(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.blogsService.delete(id);
   }
 
   @Get(':id/posts')
-  async getPostsForBlog(@Param('id') id: string, @Query() query: GetPostsQueryParamsValidationDto) {
+  async getPostsForBlog(
+    @Param('id', ObjectIdValidationPipe) id: string,
+    @Query() query: GetPostsQueryParamsValidationDto
+  ) {
     await this.blogsRepository.getByIdOrFail(id);
 
     return this.postsQueryRepository.findAllForBlogId({ blogId: id, query });
@@ -74,7 +81,7 @@ export class BlogsController {
 
   @Post(':id/posts')
   async createPost(
-    @Param('id') id: string,
+    @Param('id', ObjectIdValidationPipe) id: string,
     @Body() dto: CreatePostByBlogIdRequestBodyValidationDto
   ) {
     const postId = await this.postsService.create({ blogId: id, ...dto });

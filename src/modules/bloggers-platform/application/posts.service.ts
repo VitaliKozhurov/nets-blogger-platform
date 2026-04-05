@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post } from '../domain/posts/post.schema';
 import { type PostModelType } from '../domain/posts/post.types';
-import { CreatePostRequestDto } from '../dto/posts/create-post-request.dto';
-import { UpdatePostRequestDto } from '../dto/posts/update-post-request.dto';
 import { BlogsRepository } from '../repository/blogs/blogs.repository';
 import { PostsRepository } from '../repository/posts/posts.repository';
+import { ICreatePostDto, IUpdatePostDto } from '../dto/contracts/post.dto';
 
 @Injectable()
 export class PostsService {
@@ -16,7 +15,7 @@ export class PostsService {
     private blogsRepository: BlogsRepository
   ) {}
 
-  async create(dto: CreatePostRequestDto) {
+  async create(dto: ICreatePostDto) {
     const blog = await this.blogsRepository.getByIdOrFail(dto.blogId);
 
     const newPost = await this.PostModel.createInstance(blog._id.toString(), dto);
@@ -26,7 +25,7 @@ export class PostsService {
     return newPost._id.toString();
   }
 
-  async update(postId: string, dto: UpdatePostRequestDto) {
+  async update(postId: string, dto: IUpdatePostDto) {
     const post = await this.postsRepository.getByIdOrFail(postId);
 
     const updatedPost = post.update(dto);
