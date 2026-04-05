@@ -1,11 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { QueryFilter } from 'mongoose';
-import { PaginationResponseDto } from 'src/core/dto';
+
+import { PaginationResponseMapperDto } from 'src/core/dto';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { getPaginationParams } from 'src/core/utils';
 import { Blog } from '../../domain/blogs/blog.schema';
 import { BlogDocument, type BlogModelType } from '../../domain/blogs/blog.types';
-import { BlogResponseDto } from '../../dto/blogs/blog-response.dto';
-import { GetBlogsQueryParamsDto } from '../../dto/blogs/get-blogs-query-params.dto';
+import { IGetBlogsQueryParamsDto } from '../../dto/contracts/blog.dto';
+import { BlogResponseMapperDto } from '../../dto/mappers/blog.mapper';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -14,7 +17,9 @@ export class BlogsQueryRepository {
     private BlogModel: BlogModelType
   ) {}
 
-  async findAll(query: GetBlogsQueryParamsDto): Promise<PaginationResponseDto<BlogResponseDto[]>> {
+  async findAll(
+    query: IGetBlogsQueryParamsDto
+  ): Promise<PaginationResponseMapperDto<BlogResponseMapperDto[]>> {
     const filter: QueryFilter<BlogDocument> = {
       deletedAt: null,
     };
@@ -23,10 +28,12 @@ export class BlogsQueryRepository {
       filter.$or = [{ name: { $regex: query.searchNameTerm, $options: 'i' } }];
     }
 
+    const { sort, skip, limit } = getPaginationParams(query);
+
     const blogsPromise = this.BlogModel.find(filter)
-      .sort(query.getSortOptions())
-      .skip(query.calculateSkip())
-      .limit(query.pageSize)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
       .lean()
       .exec();
 
@@ -34,24 +41,27 @@ export class BlogsQueryRepository {
 
     const [items, totalCount] = await Promise.all([blogsPromise, totalCountPromise]);
 
-    return PaginationResponseDto.mapToViewModel({
-      items: items.map(BlogResponseDto.mapToView),
+    return PaginationResponseMapperDto.mapToViewModel({
+      items: items.map(BlogResponseMapperDto.mapToView),
       totalCount,
       page: query.pageNumber,
       size: query.pageSize,
     });
   }
 
-  async findByIdOrThrow(id: string): Promise<BlogResponseDto> {
+  async findByIdOrThrow(id: string): Promise<BlogResponseMapperDto> {
     const blog = await this.BlogModel.findOne({
       _id: id,
       deletedAt: null,
     }).exec();
 
     if (!blog) {
-      throw new NotFoundException('Blog not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'Blog not found',
+      });
     }
 
-    return BlogResponseDto.mapToView(blog);
+    return BlogResponseMapperDto.mapToView(blog);
   }
 }

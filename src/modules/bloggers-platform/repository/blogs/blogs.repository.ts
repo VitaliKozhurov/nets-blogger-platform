@@ -1,7 +1,8 @@
-import { Blog } from './../../domain/blogs/blog.schema';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { BlogDocument, type BlogModelType } from '../../domain/blogs/blog.types';
+import { Blog } from './../../domain/blogs/blog.schema';
 
 @Injectable()
 export class BlogsRepository {
@@ -17,7 +18,10 @@ export class BlogsRepository {
     }).exec();
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'Blog not found',
+      });
     }
 
     return user;

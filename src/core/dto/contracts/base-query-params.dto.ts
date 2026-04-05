@@ -1,6 +1,6 @@
 import { SortDirection } from './sort-direction';
 
-export class IBaseQueryParamsDto {
+export interface IBaseQueryParamsDto {
   pageNumber: number;
   pageSize: number;
   sortDirection: SortDirection;

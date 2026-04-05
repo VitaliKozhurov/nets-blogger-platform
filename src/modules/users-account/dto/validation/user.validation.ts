@@ -1,9 +1,9 @@
 import { IsEnum, Matches } from 'class-validator';
 import { IsOptionStringParam, IsStringWithTrim } from 'src/core/decorators';
-import { BaseQueryParamsValidationDto, IBaseQueryParamsDto } from 'src/core/dto';
+import { BaseQueryParamsValidationDto } from 'src/core/dto';
 import { type Nullable } from 'src/core/types';
 import { EMAIL_REGEX, LOGIN_REGEX } from '../../constants/regex';
-import { ICreateUserDto, UsersSortBy } from '../contracts/user.dto';
+import { ICreateUserDto, IGetUsersQueryParamsDto, UsersSortBy } from '../contracts/user.dto';
 
 export class CreateUserRequestBodyDto implements ICreateUserDto {
   @IsStringWithTrim(3, 10)
@@ -19,7 +19,7 @@ export class CreateUserRequestBodyDto implements ICreateUserDto {
 
 export class GetUsersQueryParamsDto
   extends BaseQueryParamsValidationDto
-  implements IBaseQueryParamsDto
+  implements IGetUsersQueryParamsDto
 {
   @IsOptionStringParam()
   searchLoginTerm: Nullable<string> = null;

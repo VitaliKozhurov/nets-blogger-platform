@@ -1,14 +1,9 @@
 import { LikeDocument } from '../../domain/likes/like.types';
-import { LikeStatus } from '../../types/likes/like-status.types';
-import { PostDocument } from './../../domain/posts/post.types';
+import { PostDocument } from '../../domain/posts/post.types';
+import { LikeStatus } from '../contracts/like.dto';
+import { IPostResponseDto } from '../contracts/post.dto';
 
-type NewestLike = {
-  addedAt: string;
-  userId: string;
-  login: string;
-};
-
-export class PostResponseDto {
+export class PostResponseMapperDto implements IPostResponseDto {
   id: string;
   title: string;
   shortDescription: string;
@@ -20,15 +15,15 @@ export class PostResponseDto {
     likesCount: number;
     dislikesCount: number;
     myStatus: LikeStatus;
-    newestLikes: NewestLike[];
+    newestLikes: { addedAt: string; userId: string; login: string }[];
   };
 
   static mapToView(args: {
     postDocument: PostDocument;
     myStatus: LikeStatus;
     newestLikes: LikeDocument[];
-  }): PostResponseDto {
-    const dto = new PostResponseDto();
+  }): IPostResponseDto {
+    const dto = new PostResponseMapperDto();
     const { postDocument, myStatus, newestLikes } = args;
 
     dto.id = postDocument._id.toString();

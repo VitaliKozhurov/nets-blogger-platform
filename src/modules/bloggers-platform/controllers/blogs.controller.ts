@@ -12,11 +12,14 @@ import {
 } from '@nestjs/common';
 import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../application/posts.service';
-import { CreateBlogRequestDto } from '../dto/blogs/create-blog-request.dto';
-import { GetBlogsQueryParamsDto } from '../dto/blogs/get-blogs-query-params.dto';
-import { UpdateBlogRequestDto } from '../dto/blogs/update-blog-request.dto';
+
 import { CreatePostByBlogIdRequestDto } from '../dto/posts/create-post-by-blog-id-request.dto';
 import { GetPostsQueryParamsDto } from '../dto/posts/get-posts-query-params.dto';
+import {
+  CreateBlogRequestBodyDto,
+  GetBlogsQueryParamsDto,
+  UpdateBlogRequestBodyDto,
+} from '../dto/validation/blog.validation';
 import { BlogsQueryRepository } from '../repository/blogs/blogs-query.repository';
 import { BlogsRepository } from '../repository/blogs/blogs.repository';
 import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
@@ -42,7 +45,7 @@ export class BlogsController {
   }
 
   @Post()
-  async create(@Body() dto: CreateBlogRequestDto) {
+  async create(@Body() dto: CreateBlogRequestBodyDto) {
     const blogId = await this.blogsService.create(dto);
 
     return this.blogsQueryRepository.findByIdOrThrow(blogId);
@@ -50,7 +53,7 @@ export class BlogsController {
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async update(@Param('id') id: string, @Body() dto: UpdateBlogRequestDto) {
+  async update(@Param('id') id: string, @Body() dto: UpdateBlogRequestBodyDto) {
     await this.blogsService.update(id, dto);
   }
 

@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { CreateBlogRequestDto } from '../../dto/blogs/create-blog-request.dto';
-import { UpdateBlogRequestDto } from '../../dto/blogs/update-blog-request.dto';
+import { ICreateBlogDto, IUpdateBlogDto } from '../../dto/contracts/blog.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Blog {
@@ -30,7 +29,7 @@ BlogSchema.virtual('id').get(function () {
   return this._id.toString();
 });
 
-BlogSchema.static('createInstance', async function (dto: CreateBlogRequestDto) {
+BlogSchema.static('createInstance', async function (dto: ICreateBlogDto) {
   const blog = new this();
 
   blog.name = dto.name;
@@ -48,7 +47,7 @@ BlogSchema.method('softDelete', function () {
   }
 });
 
-BlogSchema.method('update', function (dto: UpdateBlogRequestDto) {
+BlogSchema.method('update', function (dto: IUpdateBlogDto) {
   this.name = dto.name;
   this.description = dto.description;
   this.websiteUrl = dto.websiteUrl;
