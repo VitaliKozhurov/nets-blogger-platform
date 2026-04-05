@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { QueryFilter } from 'mongoose';
-import { PaginationResponseDto } from 'src/core/dto';
+import { PaginationResponseMapperDto } from 'src/core/dto';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { getPaginationParams } from 'src/core/utils';
 import { User } from '../domain/users/user.schema';
 import { UserDocument, type UserModelType } from '../domain/users/user.types';
-
-import { GetUsersQueryParamsDto } from '../dto/user/get-users-query-params.dto';
-import { UserResponseDto } from '../dto/user/user-response.dto';
+import { IGetUsersQueryParamsDto } from '../dto/contracts/user.dto';
+import { UserResponseMapperDto } from '../dto/mappers/user.mapper';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -16,7 +17,9 @@ export class UsersQueryRepository {
     private UserModel: UserModelType
   ) {}
 
-  async findAll(query: GetUsersQueryParamsDto): Promise<PaginationResponseDto<UserResponseDto[]>> {
+  async findAll(
+    query: IGetUsersQueryParamsDto
+  ): Promise<PaginationResponseMapperDto<UserResponseMapperDto[]>> {
     const filter: QueryFilter<UserDocument> = {
       deletedAt: null,
     };
@@ -35,10 +38,12 @@ export class UsersQueryRepository {
       });
     }
 
+    const { sort, skip, limit } = getPaginationParams(query);
+
     const usersPromise = this.UserModel.find(filter)
-      .sort(query.getSortOptions())
-      .skip(query.calculateSkip())
-      .limit(query.pageSize)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
       .lean()
       .exec();
 
@@ -46,24 +51,27 @@ export class UsersQueryRepository {
 
     const [items, totalCount] = await Promise.all([usersPromise, totalCountPromise]);
 
-    return PaginationResponseDto.mapToViewModel({
-      items: items.map(UserResponseDto.mapToView),
+    return PaginationResponseMapperDto.mapToViewModel({
+      items: items.map(UserResponseMapperDto.mapToView),
       totalCount,
       page: query.pageNumber,
       size: query.pageSize,
     });
   }
 
-  async findByIdOrThrow(id: string): Promise<UserResponseDto> {
+  async findByIdOrThrow(id: string): Promise<UserResponseMapperDto> {
     const user = await this.UserModel.findOne({
       _id: id,
       deletedAt: null,
     }).exec();
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'User not found',
+      });
     }
 
-    return UserResponseDto.mapToView(user);
+    return UserResponseMapperDto.mapToView(user);
   }
 }

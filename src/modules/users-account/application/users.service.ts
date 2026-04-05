@@ -6,6 +6,7 @@ import { PasswordHasherService } from '../../crypto/password-hasher.service';
 import { User } from '../domain/users/user.schema';
 import { type UserModelType } from '../domain/users/user.types';
 
+import { ICreateUserDto } from '../dto/contracts/user.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
 
 @Injectable()
@@ -17,10 +18,8 @@ export class UsersService {
     private passwordHasherService: PasswordHasherService
   ) {}
 
-  async create(dto: CreateUserRequestDto) {
+  async create(dto: ICreateUserDto) {
     const { login, email, password } = dto;
-
-    console.log('DTO: ', dto);
 
     const passwordHash = await this.passwordHasherService.createHash(password);
 

@@ -3,7 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Nullable } from 'src/core/types';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import { User } from '../domain/users/user.schema';
-import { LoginUserRequestDto } from '../dto/auth/login-request.dto';
+
+import { IUserLoginDto } from '../dto/contracts/auth.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
 
 @Injectable()
@@ -14,9 +15,7 @@ export class AuthService {
     private userRepository: UsersRepository
   ) {}
 
-  async validateUser(
-    dto: LoginUserRequestDto
-  ): Promise<Nullable<{ userId: string; login: string }>> {
+  async login(dto: IUserLoginDto): Promise<Nullable<{ userId: string; login: string }>> {
     const { loginOrEmail, password } = dto;
 
     const user = await this.userRepository.findByLoginOrEmail(loginOrEmail);

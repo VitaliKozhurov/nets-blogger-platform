@@ -1,7 +1,7 @@
-import { ApiProperty, ApiSchema } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
+import { IUserLoginDto } from '../contracts/auth.dto';
 
-@ApiSchema({ name: 'User login schema', description: 'Login user fields' })
-export class LoginUserRequestDto {
+export class UserLoginDocumentationDto implements IUserLoginDto {
   @ApiProperty({ type: String, description: 'User login or email', example: 'google@gmail.com' })
   loginOrEmail: string;
 
