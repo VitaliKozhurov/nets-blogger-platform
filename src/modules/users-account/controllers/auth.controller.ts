@@ -10,20 +10,23 @@ import {
 } from '../dto/validation/auth.validation';
 import { PasswordRecoverySwaggerDecorator } from '../decorators/password-recovery-swagger.decorator';
 import { NewPasswordSwaggerDecorator } from '../decorators/new-password-swagger.decorator';
-import { RegistrationConfirmationSwaggerDecorator } from '../decorators/registration-confirmation-swagger.dto';
+import { RegistrationConfirmationSwaggerDecorator } from '../decorators/registration-confirmation-swagger.decorator';
 import { RegistrationSwaggerDecorator } from '../decorators/registration-swagger.decorator';
-import { RegistrationEmailResendingSwaggerDecorator } from '../decorators/registration-email-resending-swagger.decortor';
+import { RegistrationEmailResendingSwaggerDecorator } from '../decorators/registration-email-resending-swagger.decorator';
 import { MeSwaggerDecorator } from '../decorators/me-swagger.decorator';
 import { BearerAuthGuard } from '../guards/bearer-auth/bearer-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { AuthService } from '../application/auth.service';
 
 @Controller('auth')
 export class AuthController {
+  constructor(private authService: AuthService) {}
+
   @Post('login')
   @UserLoginSwaggerDecorator()
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: UserLoginRequestBodyValidationDto) {
-    return dto;
+    return this.authService.login(dto);
   }
 
   @Post('password-recovery')

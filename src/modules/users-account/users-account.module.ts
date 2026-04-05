@@ -10,6 +10,8 @@ import { CryptoModule } from '../crypto/crypto.module';
 import { AuthController } from './controllers/auth.controller';
 import { ConfigModule } from '@nestjs/config';
 import { BearerAuthGuard } from './guards/bearer-auth/bearer-auth.guard';
+import { TokenService } from './application/token.service';
+import { AuthService } from './application/auth.service';
 
 @Module({
   imports: [
@@ -19,7 +21,14 @@ import { BearerAuthGuard } from './guards/bearer-auth/bearer-auth.guard';
     JwtModule.register({}),
   ],
   controllers: [AuthController, UsersController],
-  providers: [UsersService, UsersRepository, UsersQueryRepository, BearerAuthGuard],
+  providers: [
+    UsersService,
+    AuthService,
+    UsersRepository,
+    UsersQueryRepository,
+    BearerAuthGuard,
+    TokenService,
+  ],
   exports: [],
 })
 export class UsersAccountModule {}

@@ -2,7 +2,7 @@ export type EnvVariablesType = {
   MONGO_DB_URL: string;
   NODE_ENV: 'development' | 'production' | 'test' | 'staging';
   PORT: number;
-  JWT_ACCESS_TOKEN_TTL: string;
+  JWT_ACCESS_TOKEN_TTL: number;
   JWT_ACCESS_TOKEN_SECRET: string;
 };
 

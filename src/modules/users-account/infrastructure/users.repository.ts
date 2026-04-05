@@ -33,6 +33,15 @@ export class UsersRepository {
       deletedAt: null,
     }).exec();
 
+    return user;
+  }
+
+  async findByLoginOrEmailOrThrow(loginOrEmail: string) {
+    const user = await this.UserModel.findOne({
+      $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+      deletedAt: null,
+    }).exec();
+
     if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.NOT_FOUND_ERROR,

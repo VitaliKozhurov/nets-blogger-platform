@@ -26,7 +26,7 @@ export class BearerAuthGuard implements CanActivate {
     }
 
     try {
-      const secret = this.configService.get<string>(EnvVariables.JWT_ACCESS_TOKEN_SECRET);
+      const secret = this.configService.getOrThrow<string>(EnvVariables.JWT_ACCESS_TOKEN_SECRET);
 
       const payload = await this.jwtService.verifyAsync<AccessTokenPayload>(token, { secret });
 
