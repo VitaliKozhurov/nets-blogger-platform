@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { UserLoginSwaggerDecorator } from '../decorators/user-login-swagger.decorator';
 import {
   NewPasswordRequestBodyValidationDto,
@@ -14,6 +14,8 @@ import { RegistrationConfirmationSwaggerDecorator } from '../decorators/registra
 import { RegistrationSwaggerDecorator } from '../decorators/registration-swagger.decorator';
 import { RegistrationEmailResendingSwaggerDecorator } from '../decorators/registration-email-resending-swagger.decortor';
 import { MeSwaggerDecorator } from '../decorators/me-swagger.decorator';
+import { BearerAuthGuard } from '../guards/bearer-auth/bearer-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -62,6 +64,8 @@ export class AuthController {
   }
 
   @Get('me')
+  @ApiBearerAuth('bearerAuth')
+  @UseGuards(BearerAuthGuard)
   @MeSwaggerDecorator()
   async me() {}
 }

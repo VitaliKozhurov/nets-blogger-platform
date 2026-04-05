@@ -25,3 +25,8 @@ export interface IRegistrationConfirmationDto {
 export interface IRegistrationEmailResendingDto {
   email: string;
 }
+
+export interface AccessTokenPayload {
+  userId: string;
+  login: string;
+}

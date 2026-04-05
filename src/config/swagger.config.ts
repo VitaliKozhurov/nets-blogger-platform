@@ -14,6 +14,14 @@ export const setupSwaggerConfig = (app: INestApplication) => {
       },
       'basicAuth'
     )
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        description: 'Enter your JWT access token',
+      },
+      'bearerAuth'
+    )
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
