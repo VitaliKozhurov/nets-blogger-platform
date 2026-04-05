@@ -13,13 +13,15 @@ import {
 import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../application/posts.service';
 
-import { CreatePostByBlogIdRequestDto } from '../dto/posts/create-post-by-blog-id-request.dto';
-import { GetPostsQueryParamsDto } from '../dto/posts/get-posts-query-params.dto';
 import {
-  CreateBlogRequestBodyDto,
-  GetBlogsQueryParamsDto,
-  UpdateBlogRequestBodyDto,
+  CreateBlogRequestBodyValidationDto,
+  GetBlogsQueryParamsValidationDto,
+  UpdateBlogRequestBodyValidationDto,
 } from '../dto/validation/blog.validation';
+import {
+  CreatePostByBlogIdRequestBodyValidationDto,
+  GetPostsQueryParamsValidationDto,
+} from '../dto/validation/post.validation';
 import { BlogsQueryRepository } from '../repository/blogs/blogs-query.repository';
 import { BlogsRepository } from '../repository/blogs/blogs.repository';
 import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
@@ -35,7 +37,7 @@ export class BlogsController {
   ) {}
 
   @Get()
-  async findAll(@Query() query: GetBlogsQueryParamsDto) {
+  async findAll(@Query() query: GetBlogsQueryParamsValidationDto) {
     return this.blogsQueryRepository.findAll(query);
   }
 
@@ -45,7 +47,7 @@ export class BlogsController {
   }
 
   @Post()
-  async create(@Body() dto: CreateBlogRequestBodyDto) {
+  async create(@Body() dto: CreateBlogRequestBodyValidationDto) {
     const blogId = await this.blogsService.create(dto);
 
     return this.blogsQueryRepository.findByIdOrThrow(blogId);
@@ -53,7 +55,7 @@ export class BlogsController {
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async update(@Param('id') id: string, @Body() dto: UpdateBlogRequestBodyDto) {
+  async update(@Param('id') id: string, @Body() dto: UpdateBlogRequestBodyValidationDto) {
     await this.blogsService.update(id, dto);
   }
 
@@ -64,14 +66,17 @@ export class BlogsController {
   }
 
   @Get(':id/posts')
-  async getPostsForBlog(@Param('id') id: string, @Query() query: GetPostsQueryParamsDto) {
+  async getPostsForBlog(@Param('id') id: string, @Query() query: GetPostsQueryParamsValidationDto) {
     await this.blogsRepository.getByIdOrFail(id);
 
     return this.postsQueryRepository.findAllForBlogId({ blogId: id, query });
   }
 
   @Post(':id/posts')
-  async createPost(@Param('id') id: string, @Body() dto: CreatePostByBlogIdRequestDto) {
+  async createPost(
+    @Param('id') id: string,
+    @Body() dto: CreatePostByBlogIdRequestBodyValidationDto
+  ) {
     const postId = await this.postsService.create({ blogId: id, ...dto });
 
     return this.postsQueryRepository.findByIdOrThrow({ postId });

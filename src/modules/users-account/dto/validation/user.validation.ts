@@ -5,7 +5,7 @@ import { type Nullable } from 'src/core/types';
 import { EMAIL_REGEX, LOGIN_REGEX } from '../../constants/regex';
 import { ICreateUserDto, IGetUsersQueryParamsDto, UsersSortBy } from '../contracts/user.dto';
 
-export class CreateUserRequestBodyDto implements ICreateUserDto {
+export class CreateUserRequestBodyValidationDto implements ICreateUserDto {
   @IsStringWithTrim(3, 10)
   @Matches(LOGIN_REGEX)
   login: string;
@@ -17,7 +17,7 @@ export class CreateUserRequestBodyDto implements ICreateUserDto {
   email: string;
 }
 
-export class GetUsersQueryParamsDto
+export class GetUsersQueryParamsValidationDto
   extends BaseQueryParamsValidationDto
   implements IGetUsersQueryParamsDto
 {

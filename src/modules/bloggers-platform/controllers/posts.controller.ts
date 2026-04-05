@@ -12,9 +12,11 @@ import {
 } from '@nestjs/common';
 import { PostsService } from '../application/posts.service';
 import { GetCommentsByPostIdQueryParamsDto } from '../dto/comments/get-comments-by-post-id-query-params.dto';
-import { CreatePostRequestDto } from '../dto/posts/create-post-request.dto';
-import { GetPostsQueryParamsDto } from '../dto/posts/get-posts-query-params.dto';
-import { UpdatePostRequestDto } from '../dto/posts/update-post-request.dto';
+import {
+  CreatePostRequestBodyValidationDto,
+  GetPostsQueryParamsValidationDto,
+  UpdatePostRequestBodyValidationDto,
+} from '../dto/validation/post.validation';
 import { CommentsQueryRepository } from '../repository/comments/comments-query.repository';
 import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
 
@@ -27,7 +29,7 @@ export class PostsController {
   ) {}
 
   @Get()
-  async findAll(@Query() query: GetPostsQueryParamsDto) {
+  async findAll(@Query() query: GetPostsQueryParamsValidationDto) {
     return this.postsQueryRepository.findAll({ query });
   }
 
@@ -37,7 +39,7 @@ export class PostsController {
   }
 
   @Post()
-  async create(@Body() dto: CreatePostRequestDto) {
+  async create(@Body() dto: CreatePostRequestBodyValidationDto) {
     const postId = await this.postsService.create(dto);
 
     return this.postsQueryRepository.findByIdOrThrow({ postId });
@@ -45,7 +47,7 @@ export class PostsController {
 
   @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async update(@Param('id') id: string, @Body() dto: UpdatePostRequestDto) {
+  async update(@Param('id') id: string, @Body() dto: UpdatePostRequestBodyValidationDto) {
     return this.postsService.update(id, dto);
   }
 

@@ -3,15 +3,15 @@ import { BaseQueryParamsValidationDto } from 'src/core/dto';
 import { Nullable } from 'src/core/types';
 import { BlogsSortBy, ICreateBlogDto, IGetBlogsQueryParamsDto } from '../contracts/blog.dto';
 
-export class CreateBlogRequestBodyDto implements ICreateBlogDto {
+export class CreateBlogRequestBodyValidationDto implements ICreateBlogDto {
   name: string;
   description: string;
   websiteUrl: string;
 }
 
-export class UpdateBlogRequestBodyDto extends CreateBlogRequestBodyDto {}
+export class UpdateBlogRequestBodyValidationDto extends CreateBlogRequestBodyValidationDto {}
 
-export class GetBlogsQueryParamsDto
+export class GetBlogsQueryParamsValidationDto
   extends BaseQueryParamsValidationDto
   implements IGetBlogsQueryParamsDto
 {

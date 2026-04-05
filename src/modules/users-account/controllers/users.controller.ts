@@ -17,8 +17,8 @@ import { DeleteUserSwaggerDecorator } from '../decorators/delete-user-swagger.de
 import { GetUsersSwaggerDecorator } from '../decorators/get-users-swagger.decorator';
 
 import {
-  CreateUserRequestBodyDto,
-  GetUsersQueryParamsDto,
+  CreateUserRequestBodyValidationDto,
+  GetUsersQueryParamsValidationDto,
 } from '../dto/validation/user.validation';
 import { BasicAuthGuard } from '../guards/basic-auth/basic-auth.guard';
 import { UsersQueryRepository } from '../infrastructure/users-query.repository';
@@ -34,13 +34,13 @@ export class UsersController {
 
   @Get()
   @GetUsersSwaggerDecorator()
-  async findAll(@Query() query: GetUsersQueryParamsDto) {
+  async findAll(@Query() query: GetUsersQueryParamsValidationDto) {
     return this.usersQueryRepository.findAll(query);
   }
 
   @Post()
   @CreateUserSwaggerDecorator()
-  async create(@Body() dto: CreateUserRequestBodyDto) {
+  async create(@Body() dto: CreateUserRequestBodyValidationDto) {
     const userId = await this.usersService.create(dto);
 
     return this.usersQueryRepository.findByIdOrThrow(userId);
