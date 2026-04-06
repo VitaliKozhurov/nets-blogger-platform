@@ -5,16 +5,18 @@ import { Nullable } from 'src/core/types';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import { User } from '../domain/users/user.schema';
 
-import { IPasswordRecoveryDto, IUserLoginDto } from '../dto/contracts/auth.dto';
+import { IPasswordRecoveryDto, IRegistrationDto, IUserLoginDto } from '../dto/contracts/auth.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { DomainException } from 'src/core/exceptions';
 import { TokenService } from './token.service';
 import { EmailService } from 'src/modules/notifications/email.service';
+import { type UserModelType } from '../domain/users/user.types';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name)
+    private UserModel: UserModelType,
     private passwordHasherService: PasswordHasherService,
     private userRepository: UsersRepository,
     private tokenService: TokenService,
@@ -39,8 +41,36 @@ export class AuthService {
     return { accessToken };
   }
 
-  async passwordRecovery(dto: IPasswordRecoveryDto) {
-    return this.emailService.sendConfirmationCode({ email: dto.email, code: '123' });
+  async registration(dto: IRegistrationDto) {
+    const userExistenceCheck = await this.UserModel.checkIsUserExist(dto);
+
+    if (userExistenceCheck.isExist) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'User with the given email or login already exists',
+        extensions: [{ field: userExistenceCheck.field, message: 'Incorrect credentials' }],
+      });
+    }
+
+    // TODO add logic for creating user without confirmation !!!
+  }
+
+  async passwordRecovery(dto: IPasswordRecoveryDto): Promise<boolean> {
+    const user = await this.userRepository.findByLoginOrEmail(dto.email);
+
+    if (user) {
+      const code = user.setPasswordRecoverySettings();
+
+      await this.userRepository.save(user);
+
+      this.emailService
+        .sendConfirmationCode({ email: dto.email, code })
+        .catch(err => console.log(err));
+
+      return true;
+    }
+
+    return false;
   }
 
   private async validateUser(dto: { loginOrEmail: string; password: string }) {

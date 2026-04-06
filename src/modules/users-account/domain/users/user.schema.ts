@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { EmailConfirmation, EmailConfirmationSchema } from './email-confirmation.schema';
 import { CreateUserInstanceDto } from './user.dto';
+import { PasswordRecovery, PasswordRecoverySchema } from './password-recovery.schema';
+import { randomUUID } from 'crypto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class User {
@@ -17,6 +19,9 @@ export class User {
 
   @Prop({ type: EmailConfirmationSchema, required: true })
   emailConfirmation: EmailConfirmation;
+
+  @Prop({ type: PasswordRecoverySchema, required: true })
+  passwordRecovery: PasswordRecovery;
 
   createdAt: Date;
 
@@ -46,8 +51,38 @@ UserSchema.static('createInstance', async function (dto: CreateUserInstanceDto) 
   return user;
 });
 
+UserSchema.static('checkIsUserExist', async function async(dto: { login: string; email: string }) {
+  const userByLoginPromise = this.findOne({ deletedAt: null, login: dto.login });
+  const userByEmailPromise = this.findOne({ deletedAt: null, email: dto.email });
+
+  const [userByLogin, userByEmail] = await Promise.all([userByLoginPromise, userByEmailPromise]);
+
+  if (userByLogin) {
+    return { isExist: true, byField: 'login' };
+  }
+
+  if (userByEmail) {
+    return { isExist: true, byField: 'email' };
+  }
+
+  return { isExist: false };
+});
+
 UserSchema.method('softDelete', function () {
   if (!this.deletedAt) {
     this.deletedAt = new Date();
   }
+});
+
+UserSchema.method('setPasswordRecoverySettings', function () {
+  const expirationDate = new Date();
+
+  expirationDate.setHours(expirationDate.getHours() + 1);
+
+  const code = randomUUID();
+
+  this.passwordRecovery.code = code;
+  this.passwordRecovery.expirationDate = expirationDate;
+
+  return code;
 });
