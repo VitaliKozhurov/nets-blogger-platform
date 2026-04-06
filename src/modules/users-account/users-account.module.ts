@@ -13,6 +13,7 @@ import { BearerAuthGuard } from './guards/bearer-auth/bearer-auth.guard';
 import { TokenService } from './application/token.service';
 import { AuthService } from './application/auth.service';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     CryptoModule,
     JwtModule.register({}),
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 10000, limit: 5 }] }),
+    NotificationsModule,
   ],
   controllers: [AuthController, UsersController],
   providers: [
@@ -30,11 +32,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
     UsersQueryRepository,
     BearerAuthGuard,
     TokenService,
-
-    // {
-    //   provide: APP_GUARD, // ← ДОБАВИТЬ ЭТО
-    //   useClass: ThrottlerGuard, // ← ДОБАВИТЬ ЭТО
-    // },
   ],
   exports: [],
 })

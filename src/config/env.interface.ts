@@ -4,6 +4,8 @@ export type EnvVariablesType = {
   PORT: number;
   JWT_ACCESS_TOKEN_TTL: number;
   JWT_ACCESS_TOKEN_SECRET: string;
+  APP_EMAIL_ADDRESS: string;
+  APP_EMAIL_PASSWORD: string;
 };
 
 export enum EnvVariables {
@@ -12,4 +14,6 @@ export enum EnvVariables {
   PORT = 'PORT',
   JWT_ACCESS_TOKEN_TTL = 'JWT_ACCESS_TOKEN_TTL',
   JWT_ACCESS_TOKEN_SECRET = 'JWT_ACCESS_TOKEN_SECRET',
+  APP_EMAIL_ADDRESS = 'APP_EMAIL_ADDRESS',
+  APP_EMAIL_PASSWORD = 'APP_EMAIL_PASSWORD',
 }

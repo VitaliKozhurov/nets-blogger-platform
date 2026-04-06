@@ -11,6 +11,7 @@ import { getMongooseConfig } from './config/mongoose.config';
 import { CryptoModule } from './modules/crypto/crypto.module';
 import { APP_FILTER } from '@nestjs/core';
 import { DomainHttpExceptionsFilter, GlobalHttpExceptionsFilter } from './core/exceptions';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DomainHttpExceptionsFilter, GlobalHttpExceptionsFilter } from './core/e
     UsersAccountModule,
     BloggersPlatformModule,
     CryptoModule,
+    NotificationsModule,
     TestsModule,
   ],
   controllers: [AppController],

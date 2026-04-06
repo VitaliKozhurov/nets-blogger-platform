@@ -37,7 +37,7 @@ export class AuthController {
   @PasswordRecoverySwaggerDecorator()
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() dto: PasswordRecoveryRequestBodyValidationDto) {
-    return dto;
+    return this.authService.passwordRecovery(dto);
   }
 
   @Post('new-password')

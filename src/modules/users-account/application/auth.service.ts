@@ -5,10 +5,11 @@ import { Nullable } from 'src/core/types';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import { User } from '../domain/users/user.schema';
 
-import { IUserLoginDto } from '../dto/contracts/auth.dto';
+import { IPasswordRecoveryDto, IUserLoginDto } from '../dto/contracts/auth.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { DomainException } from 'src/core/exceptions';
 import { TokenService } from './token.service';
+import { EmailService } from 'src/modules/notifications/email.service';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,8 @@ export class AuthService {
     @InjectModel(User.name)
     private passwordHasherService: PasswordHasherService,
     private userRepository: UsersRepository,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private emailService: EmailService
   ) {}
 
   async login(dto: IUserLoginDto): Promise<Nullable<{ accessToken: string }>> {
@@ -35,6 +37,10 @@ export class AuthService {
     });
 
     return { accessToken };
+  }
+
+  async passwordRecovery(dto: IPasswordRecoveryDto) {
+    return this.emailService.sendConfirmationCode({ email: dto.email, code: '123' });
   }
 
   private async validateUser(dto: { loginOrEmail: string; password: string }) {
