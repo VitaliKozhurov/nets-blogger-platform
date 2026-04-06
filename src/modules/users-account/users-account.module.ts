@@ -12,6 +12,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BearerAuthGuard } from './guards/bearer-auth/bearer-auth.guard';
 import { TokenService } from './application/token.service';
 import { AuthService } from './application/auth.service';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthService } from './application/auth.service';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     CryptoModule,
     JwtModule.register({}),
+    ThrottlerModule.forRoot({ throttlers: [{ ttl: 10000, limit: 5 }] }),
   ],
   controllers: [AuthController, UsersController],
   providers: [
@@ -28,6 +30,11 @@ import { AuthService } from './application/auth.service';
     UsersQueryRepository,
     BearerAuthGuard,
     TokenService,
+
+    // {
+    //   provide: APP_GUARD, // ← ДОБАВИТЬ ЭТО
+    //   useClass: ThrottlerGuard, // ← ДОБАВИТЬ ЭТО
+    // },
   ],
   exports: [],
 })

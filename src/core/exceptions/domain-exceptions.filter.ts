@@ -34,6 +34,9 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
       case DomainExceptionCode.UNAUTHORIZED_ERROR:
         return HttpStatus.UNAUTHORIZED;
 
+      case DomainExceptionCode.TOO_MANY_REQUESTS:
+        return HttpStatus.TOO_MANY_REQUESTS;
+
       case DomainExceptionCode.INTERNAL_SERVER_ERROR:
         return HttpStatus.INTERNAL_SERVER_ERROR;
 

@@ -17,12 +17,16 @@ import { MeSwaggerDecorator } from '../decorators/me-swagger.decorator';
 import { BearerAuthGuard } from '../guards/bearer-auth/bearer-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../application/auth.service';
+import { AppThrottle } from 'src/core/decorators';
+import { SkipThrottle } from '@nestjs/throttler';
 
+@AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
+  @SkipThrottle()
   @UserLoginSwaggerDecorator()
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: UserLoginRequestBodyValidationDto) {
@@ -67,6 +71,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @SkipThrottle()
   @ApiBearerAuth('bearerAuth')
   @UseGuards(BearerAuthGuard)
   @MeSwaggerDecorator()
