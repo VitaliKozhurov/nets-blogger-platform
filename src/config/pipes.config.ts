@@ -40,6 +40,8 @@ export const setupPipesConfig = (app: INestApplication) => {
       forbidNonWhitelisted: true, // throws an error if fields are not in the dto
       stopAtFirstError: true, // only first error for each field
       exceptionFactory: (errors: ValidationError[]) => {
+        console.log('errors: ', errors);
+
         const extensions = transformErrors(errors);
 
         return new DomainException({

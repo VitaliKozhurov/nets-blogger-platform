@@ -58,13 +58,18 @@ export class AuthService {
 
     const passwordHash = await this.passwordHasherService.createHash(dto.password);
 
-    const confirmationCode = await this.UserModel.createUnconfirmedUser({
-      login: dto.email,
+    const createdUser = await this.UserModel.createUnconfirmedUser({
+      login: dto.login,
       email: dto.email,
       passwordHash,
     });
 
-    this.emailService.sendRegistrationConfirmationCode({ email: dto.email, confirmationCode });
+    this.emailService.sendRegistrationConfirmationCode({
+      email: dto.email,
+      confirmationCode: createdUser.emailConfirmation.confirmationCode ?? '',
+    });
+
+    await this.userRepository.save(createdUser);
 
     return true;
   }
@@ -108,9 +113,22 @@ export class AuthService {
       });
     }
 
-    const confirmationCode = user.updateRegistrationConfirmationCode();
+    if (user.emailConfirmation.isConfirmed) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'User is confirmed',
+        extensions: [{ field: 'email', message: 'User is confirmed' }],
+      });
+    }
 
-    this.emailService.sendRegistrationConfirmationCode({ email: dto.email, confirmationCode });
+    const updatedUser = user.updateRegistrationConfirmationCode();
+
+    this.emailService.sendRegistrationConfirmationCode({
+      email: dto.email,
+      confirmationCode: updatedUser.emailConfirmation.confirmationCode ?? '',
+    });
+
+    await this.userRepository.save(updatedUser);
 
     return true;
   }

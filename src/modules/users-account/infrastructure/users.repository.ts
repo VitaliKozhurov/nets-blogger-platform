@@ -38,7 +38,7 @@ export class UsersRepository {
 
   async findByPasswordRecoveryCode(code: string) {
     const user = await this.UserModel.findOne({
-      passwordRecovery: { code },
+      'passwordRecovery.code': code,
       deletedAt: null,
     }).exec();
 
@@ -47,7 +47,7 @@ export class UsersRepository {
 
   async findByRegistrationConfirmationCode(confirmationCode: string) {
     const user = await this.UserModel.findOne({
-      emailConfirmation: { confirmationCode },
+      'emailConfirmation.confirmationCode': confirmationCode,
       deletedAt: null,
     }).exec();
 

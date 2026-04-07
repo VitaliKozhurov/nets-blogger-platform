@@ -1,11 +1,16 @@
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { BaseQueryParamsValidationDto } from 'src/core/dto';
-import { Nullable } from 'src/core/types';
+import { type Nullable } from 'src/core/types';
 import { BlogsSortBy, ICreateBlogDto, IGetBlogsQueryParamsDto } from '../contracts/blog.dto';
 
 export class CreateBlogRequestBodyValidationDto implements ICreateBlogDto {
+  @IsString()
   name: string;
+
+  @IsString()
   description: string;
+
+  @IsString()
   websiteUrl: string;
 }
 
@@ -15,6 +20,7 @@ export class GetBlogsQueryParamsValidationDto
   extends BaseQueryParamsValidationDto
   implements IGetBlogsQueryParamsDto
 {
+  @IsOptional()
   searchNameTerm: Nullable<string>;
 
   @IsEnum(BlogsSortBy)

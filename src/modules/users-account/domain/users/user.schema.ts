@@ -46,6 +46,10 @@ UserSchema.static('createInstance', async function (dto: CreateUserInstanceDto) 
     confirmationCode: null,
     expirationDate: null,
   };
+  user.passwordRecovery = {
+    code: null,
+    expirationDate: null,
+  };
   user.deletedAt = null;
 
   return user;
@@ -58,11 +62,11 @@ UserSchema.static('checkIsUserExist', async function async(dto: { login: string;
   const [userByLogin, userByEmail] = await Promise.all([userByLoginPromise, userByEmailPromise]);
 
   if (userByLogin) {
-    return { isExist: true, byField: 'login' };
+    return { isExist: true, field: 'login' };
   }
 
   if (userByEmail) {
-    return { isExist: true, byField: 'email' };
+    return { isExist: true, field: 'email' };
   }
 
   return { isExist: false };
@@ -82,6 +86,10 @@ UserSchema.static('createUnconfirmedUser', async function (dto: CreateUserInstan
     isConfirmed: false,
     confirmationCode,
     expirationDate,
+  };
+  user.passwordRecovery = {
+    code: null,
+    expirationDate: null,
   };
   user.deletedAt = null;
 
@@ -153,8 +161,12 @@ UserSchema.method('confirmRegistration', function () {
 
 UserSchema.method('updateRegistrationConfirmationCode', function () {
   const confirmationCode = randomUUID();
+  const expirationDate = new Date();
+
+  expirationDate.setHours(expirationDate.getHours() + 1);
 
   this.emailConfirmation.confirmationCode = confirmationCode;
+  this.emailConfirmation.expirationDate = expirationDate;
 
-  return confirmationCode;
+  return this;
 });

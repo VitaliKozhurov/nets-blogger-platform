@@ -34,7 +34,7 @@ export class NewPasswordRequestBodyValidationDto implements INewPasswordDto {
 }
 
 export class RegistrationRequestBodyValidationDto implements IRegistrationDto {
-  @IsStringWithTrim(6, 20)
+  @IsStringWithTrim(3, 10)
   @Matches(LOGIN_REGEX)
   login: string;
 

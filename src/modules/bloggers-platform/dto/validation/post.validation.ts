@@ -22,5 +22,5 @@ export class GetPostsQueryParamsValidationDto
   implements IGetPostsQueryParamsDto
 {
   @IsEnum(PostsSortBy)
-  sortBy: PostsSortBy;
+  sortBy: PostsSortBy = PostsSortBy.CreatedAt;
 }

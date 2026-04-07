@@ -12,7 +12,7 @@ export type UserMethodsType = {
   updatePassword(password: string): UserDocument;
   validateRegistrationConfirmationCode(code: string): boolean;
   confirmRegistration(): UserDocument;
-  updateRegistrationConfirmationCode(): string;
+  updateRegistrationConfirmationCode(): UserDocument;
 };
 
 export type UserStaticMethodsType = {
@@ -21,7 +21,7 @@ export type UserStaticMethodsType = {
     login: string;
     email: string;
   }): Promise<{ isExist: true; field: 'login' | 'email' } | { isExist: false }>;
-  createUnconfirmedUser(dto: CreateUserInstanceDto): Promise<string>;
+  createUnconfirmedUser(dto: CreateUserInstanceDto): Promise<UserDocument>;
 };
 
 export type UserModelType = Model<UserDocument, unknown, UserMethodsType> & UserStaticMethodsType;
