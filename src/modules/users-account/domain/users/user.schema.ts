@@ -128,3 +128,33 @@ UserSchema.method('updatePassword', function (newPasswordHash: string) {
 
   return this;
 });
+
+UserSchema.method('validateRegistrationConfirmationCode', function (code: string) {
+  const { isConfirmed, confirmationCode, expirationDate } = this.emailConfirmation;
+
+  if (isConfirmed || !confirmationCode || confirmationCode !== code) {
+    return false;
+  }
+
+  if (!expirationDate || expirationDate < new Date()) {
+    return false;
+  }
+
+  return true;
+});
+
+UserSchema.method('confirmRegistration', function () {
+  this.emailConfirmation.isConfirmed = true;
+  this.emailConfirmation.confirmationCode = null;
+  this.emailConfirmation.expirationDate = null;
+
+  return this;
+});
+
+UserSchema.method('updateRegistrationConfirmationCode', function () {
+  const confirmationCode = randomUUID();
+
+  this.emailConfirmation.confirmationCode = confirmationCode;
+
+  return confirmationCode;
+});

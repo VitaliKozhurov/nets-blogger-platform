@@ -1,6 +1,6 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { RegistrationEmailResendingDocumentationDto } from '../dto/doc/auth.doc';
+import { RegistrationEmailResendingDocumentationDto } from '../../dto/doc/auth.doc';
 
 export const RegistrationEmailResendingSwaggerDecorator = () => {
   return applyDecorators(

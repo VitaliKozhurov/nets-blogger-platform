@@ -8,7 +8,9 @@ import { User } from '../domain/users/user.schema';
 import {
   INewPasswordDto,
   IPasswordRecoveryDto,
+  IRegistrationConfirmationDto,
   IRegistrationDto,
+  IRegistrationEmailResendingDto,
   IUserLoginDto,
 } from '../dto/contracts/auth.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
@@ -38,15 +40,12 @@ export class AuthService {
       });
     }
 
-    const accessToken = await this.tokenService.createAccessToken({
-      userId: user.userId,
-      login: user.login,
-    });
+    const accessToken = await this.tokenService.createAccessToken(user);
 
     return { accessToken };
   }
 
-  async registration(dto: IRegistrationDto) {
+  async registration(dto: IRegistrationDto): Promise<boolean> {
     const userExistenceCheck = await this.UserModel.checkIsUserExist(dto);
 
     if (userExistenceCheck.isExist) {
@@ -64,6 +63,52 @@ export class AuthService {
       email: dto.email,
       passwordHash,
     });
+
+    this.emailService.sendRegistrationConfirmationCode({ email: dto.email, confirmationCode });
+
+    return true;
+  }
+
+  async registrationConfirmation(dto: IRegistrationConfirmationDto): Promise<boolean> {
+    const user = await this.userRepository.findByRegistrationConfirmationCode(dto.code);
+
+    if (!user) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'Confirmation code is invalid',
+        extensions: [{ field: 'code', message: 'Invalid confirmation code' }],
+      });
+    }
+
+    const isValidCode = user.validateRegistrationConfirmationCode(dto.code);
+
+    if (!isValidCode) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'Confirmation code is invalid',
+        extensions: [{ field: 'code', message: 'Invalid confirmation code' }],
+      });
+    }
+
+    const updatedUser = user.confirmRegistration();
+
+    await this.userRepository.save(updatedUser);
+
+    return true;
+  }
+
+  async registrationEmailResending(dto: IRegistrationEmailResendingDto): Promise<boolean> {
+    const user = await this.userRepository.findByLoginOrEmail(dto.email);
+
+    if (!user) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'Email is invalid',
+        extensions: [{ field: 'email', message: 'Invalid email' }],
+      });
+    }
+
+    const confirmationCode = user.updateRegistrationConfirmationCode();
 
     this.emailService.sendRegistrationConfirmationCode({ email: dto.email, confirmationCode });
 
@@ -97,9 +142,9 @@ export class AuthService {
       });
     }
 
-    const isValid = user.validatePasswordRecoveryCode(dto.recoveryCode);
+    const isValidCode = user.validatePasswordRecoveryCode(dto.recoveryCode);
 
-    if (!isValid) {
+    if (!isValidCode) {
       throw new DomainException({
         code: DomainExceptionCode.BAD_REQUEST_ERROR,
         message: 'Recovery code is expired or invalid',
@@ -108,6 +153,7 @@ export class AuthService {
     }
 
     const passwordHash = await this.passwordHasherService.createHash(dto.newPassword);
+
     const updatedUser = user.updatePassword(passwordHash);
 
     await this.userRepository.save(updatedUser);
@@ -133,6 +179,6 @@ export class AuthService {
       return null;
     }
 
-    return { userId: user.id.toString(), login: user.login };
+    return { userId: user.id.toString(), login: user.login, email: user.email };
   }
 }

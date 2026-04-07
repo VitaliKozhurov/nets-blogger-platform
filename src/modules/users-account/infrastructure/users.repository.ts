@@ -45,6 +45,15 @@ export class UsersRepository {
     return user;
   }
 
+  async findByRegistrationConfirmationCode(confirmationCode: string) {
+    const user = await this.UserModel.findOne({
+      emailConfirmation: { confirmationCode },
+      deletedAt: null,
+    }).exec();
+
+    return user;
+  }
+
   async findByLoginOrEmailOrThrow(loginOrEmail: string) {
     const user = await this.UserModel.findOne({
       $or: [{ login: loginOrEmail }, { email: loginOrEmail }],

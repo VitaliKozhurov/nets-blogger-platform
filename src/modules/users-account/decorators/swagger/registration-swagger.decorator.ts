@@ -1,25 +1,25 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { NewPasswordDocumentationDto } from '../dto/doc/auth.doc';
+import { RegistrationDocumentationDto } from '../../dto/doc/auth.doc';
 
-export const NewPasswordSwaggerDecorator = () => {
+export const RegistrationSwaggerDecorator = () => {
   return applyDecorators(
     ApiOperation({
-      summary: 'Set new password',
-      description: 'Sets a new password for the user using the recovery code sent via email.',
+      summary: 'User registration',
+      description: 'Registers a new user with login, password, and email address.',
     }),
     ApiBody({
-      type: NewPasswordDocumentationDto,
-      description: 'New password and recovery code',
+      type: RegistrationDocumentationDto,
+      description: 'User registration data (login, password, email)',
     }),
     ApiResponse({
       status: HttpStatus.NO_CONTENT,
-      description: 'If code is valid and new password is accepted.',
+      description: 'Returns 204 when user is successfully registered.',
     }),
     // TODO add example with errors
     ApiBadRequestResponse({
       description:
-        'Returns when the request body has invalid values (e.g., password too short, invalid recovery code format)',
+        'Returns when request body has invalid values (e.g., login already exists, invalid email format, weak password).',
     }),
     ApiResponse({
       status: HttpStatus.TOO_MANY_REQUESTS,

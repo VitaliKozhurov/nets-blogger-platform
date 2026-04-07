@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
-import { CreateUserDocumentationDto, UserResponseDocumentationDto } from '../dto/doc/user.doc';
+import { CreateUserDocumentationDto, UserResponseDocumentationDto } from '../../dto/doc/user.doc';
 
 export const CreateUserSwaggerDecorator = () => {
   return applyDecorators(

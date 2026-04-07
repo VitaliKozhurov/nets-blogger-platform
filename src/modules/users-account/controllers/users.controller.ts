@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { ApiBasicAuth } from '@nestjs/swagger';
 import { UsersService } from '../application/users.service';
-import { CreateUserSwaggerDecorator } from '../decorators/create-user-swagger.decorator';
-import { DeleteUserSwaggerDecorator } from '../decorators/delete-user-swagger.decorator';
-import { GetUsersSwaggerDecorator } from '../decorators/get-users-swagger.decorator';
+import { CreateUserSwaggerDecorator } from '../decorators/swagger/create-user-swagger.decorator';
+import { DeleteUserSwaggerDecorator } from '../decorators/swagger/delete-user-swagger.decorator';
+import { GetUsersSwaggerDecorator } from '../decorators/swagger/get-users-swagger.decorator';
 
 import {
   CreateUserRequestBodyValidationDto,

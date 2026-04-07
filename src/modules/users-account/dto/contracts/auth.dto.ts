@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface IUserLoginDto {
   loginOrEmail: string;
   password: string;
@@ -26,7 +27,10 @@ export interface IRegistrationEmailResendingDto {
   email: string;
 }
 
-export interface AccessTokenPayload {
+export interface UserFromRequestData {
   userId: string;
   login: string;
+  email: string;
 }
+
+export interface AccessTokenPayload extends UserFromRequestData {}

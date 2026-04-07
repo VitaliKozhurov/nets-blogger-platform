@@ -4,7 +4,7 @@ import { ApiOkResponsePaginated } from 'src/core/decorators';
 import {
   GetUsersQueryParamsDocumentationDto,
   UserResponseDocumentationDto,
-} from '../dto/doc/user.doc';
+} from '../../dto/doc/user.doc';
 
 export const GetUsersSwaggerDecorator = () => {
   return applyDecorators(

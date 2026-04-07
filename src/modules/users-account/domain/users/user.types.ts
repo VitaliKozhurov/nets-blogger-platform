@@ -10,6 +10,9 @@ export type UserMethodsType = {
   setPasswordRecoverySettings(): string;
   validatePasswordRecoveryCode(recoveryCode: string): boolean;
   updatePassword(password: string): UserDocument;
+  validateRegistrationConfirmationCode(code: string): boolean;
+  confirmRegistration(): UserDocument;
+  updateRegistrationConfirmationCode(): string;
 };
 
 export type UserStaticMethodsType = {

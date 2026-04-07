@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { UserLoginSwaggerDecorator } from '../decorators/user-login-swagger.decorator';
+import { UserLoginSwaggerDecorator } from '../decorators/swagger/user-login-swagger.decorator';
 import {
   NewPasswordRequestBodyValidationDto,
   PasswordRecoveryRequestBodyValidationDto,
@@ -8,17 +8,19 @@ import {
   RegistrationRequestBodyValidationDto,
   UserLoginRequestBodyValidationDto,
 } from '../dto/validation/auth.validation';
-import { PasswordRecoverySwaggerDecorator } from '../decorators/password-recovery-swagger.decorator';
-import { NewPasswordSwaggerDecorator } from '../decorators/new-password-swagger.decorator';
-import { RegistrationConfirmationSwaggerDecorator } from '../decorators/registration-confirmation-swagger.decorator';
-import { RegistrationSwaggerDecorator } from '../decorators/registration-swagger.decorator';
-import { RegistrationEmailResendingSwaggerDecorator } from '../decorators/registration-email-resending-swagger.decorator';
-import { MeSwaggerDecorator } from '../decorators/me-swagger.decorator';
+import { PasswordRecoverySwaggerDecorator } from '../decorators/swagger/password-recovery-swagger.decorator';
+import { NewPasswordSwaggerDecorator } from '../decorators/swagger/new-password-swagger.decorator';
+import { RegistrationConfirmationSwaggerDecorator } from '../decorators/swagger/registration-confirmation-swagger.decorator';
+import { RegistrationSwaggerDecorator } from '../decorators/swagger/registration-swagger.decorator';
+import { RegistrationEmailResendingSwaggerDecorator } from '../decorators/swagger/registration-email-resending-swagger.decorator';
+import { MeSwaggerDecorator } from '../decorators/swagger/me-swagger.decorator';
 import { BearerAuthGuard } from '../guards/bearer-auth/bearer-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../application/auth.service';
 import { AppThrottle } from 'src/core/decorators';
 import { SkipThrottle } from '@nestjs/throttler';
+import { UserFromRequest } from '../decorators/user-from-request.decorator';
+import { type UserFromRequestData } from '../dto/contracts/auth.dto';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
@@ -58,7 +60,7 @@ export class AuthController {
   @RegistrationConfirmationSwaggerDecorator()
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationConfirmation(@Body() dto: RegistrationConfirmationRequestBodyValidationDto) {
-    return dto;
+    return this.authService.registrationConfirmation(dto);
   }
 
   @Post('registration-email-resending')
@@ -67,7 +69,7 @@ export class AuthController {
   async registrationEmailResending(
     @Body() dto: RegistrationEmailResendingRequestBodyValidationDto
   ) {
-    return dto;
+    return this.authService.registrationEmailResending(dto);
   }
 
   @Get('me')
@@ -75,5 +77,7 @@ export class AuthController {
   @ApiBearerAuth('bearerAuth')
   @UseGuards(BearerAuthGuard)
   @MeSwaggerDecorator()
-  async me() {}
+  async me(@UserFromRequest() dto: UserFromRequestData) {
+    return dto;
+  }
 }

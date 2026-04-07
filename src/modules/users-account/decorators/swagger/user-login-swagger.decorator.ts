@@ -6,7 +6,10 @@ import {
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { UserLoginDocumentationDto, UserLoginResponseDocumentationDto } from '../dto/doc/auth.doc';
+import {
+  UserLoginDocumentationDto,
+  UserLoginResponseDocumentationDto,
+} from '../../dto/doc/auth.doc';
 
 export const UserLoginSwaggerDecorator = () => {
   return applyDecorators(
@@ -23,7 +26,6 @@ export const UserLoginSwaggerDecorator = () => {
       type: UserLoginResponseDocumentationDto,
       description: 'Returns the newly created user',
     }),
-    // TODO add example with errors
     ApiBadRequestResponse({
       description: 'If the inputModel has incorrect values',
     }),
