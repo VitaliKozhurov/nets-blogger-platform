@@ -68,6 +68,26 @@ UserSchema.static('checkIsUserExist', async function async(dto: { login: string;
   return { isExist: false };
 });
 
+UserSchema.static('createUnconfirmedUser', async function (dto: CreateUserInstanceDto) {
+  const user = new this();
+  const expirationDate = new Date();
+
+  expirationDate.setHours(expirationDate.getHours() + 1);
+  const confirmationCode = randomUUID();
+
+  user.login = dto.login;
+  user.email = dto.email;
+  user.passwordHash = dto.passwordHash;
+  user.emailConfirmation = {
+    isConfirmed: false,
+    confirmationCode,
+    expirationDate,
+  };
+  user.deletedAt = null;
+
+  return user;
+});
+
 UserSchema.method('softDelete', function () {
   if (!this.deletedAt) {
     this.deletedAt = new Date();
@@ -85,4 +105,26 @@ UserSchema.method('setPasswordRecoverySettings', function () {
   this.passwordRecovery.expirationDate = expirationDate;
 
   return code;
+});
+
+UserSchema.method('validatePasswordRecoveryCode', function (recoveryCode: string) {
+  const { code, expirationDate } = this.passwordRecovery;
+
+  if (!code || code !== recoveryCode) {
+    return false;
+  }
+
+  if (!expirationDate || expirationDate < new Date()) {
+    return false;
+  }
+
+  return true;
+});
+
+UserSchema.method('updatePassword', function (newPasswordHash: string) {
+  this.passwordHash = newPasswordHash;
+  this.passwordRecovery.code = null;
+  this.passwordRecovery.expirationDate = null;
+
+  return this;
 });

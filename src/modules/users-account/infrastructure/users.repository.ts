@@ -36,6 +36,15 @@ export class UsersRepository {
     return user;
   }
 
+  async findByPasswordRecoveryCode(code: string) {
+    const user = await this.UserModel.findOne({
+      passwordRecovery: { code },
+      deletedAt: null,
+    }).exec();
+
+    return user;
+  }
+
   async findByLoginOrEmailOrThrow(loginOrEmail: string) {
     const user = await this.UserModel.findOne({
       $or: [{ login: loginOrEmail }, { email: loginOrEmail }],

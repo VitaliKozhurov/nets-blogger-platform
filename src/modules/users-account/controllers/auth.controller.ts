@@ -44,14 +44,14 @@ export class AuthController {
   @NewPasswordSwaggerDecorator()
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() dto: NewPasswordRequestBodyValidationDto) {
-    return dto;
+    return this.authService.newPassword(dto);
   }
 
   @Post('registration')
   @RegistrationSwaggerDecorator()
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(@Body() dto: RegistrationRequestBodyValidationDto) {
-    return dto;
+    return this.authService.registration(dto);
   }
 
   @Post('registration-confirmation')

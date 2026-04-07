@@ -5,7 +5,12 @@ import { Nullable } from 'src/core/types';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import { User } from '../domain/users/user.schema';
 
-import { IPasswordRecoveryDto, IRegistrationDto, IUserLoginDto } from '../dto/contracts/auth.dto';
+import {
+  INewPasswordDto,
+  IPasswordRecoveryDto,
+  IRegistrationDto,
+  IUserLoginDto,
+} from '../dto/contracts/auth.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { DomainException } from 'src/core/exceptions';
 import { TokenService } from './token.service';
@@ -52,25 +57,62 @@ export class AuthService {
       });
     }
 
-    // TODO add logic for creating user without confirmation !!!
+    const passwordHash = await this.passwordHasherService.createHash(dto.password);
+
+    const confirmationCode = await this.UserModel.createUnconfirmedUser({
+      login: dto.email,
+      email: dto.email,
+      passwordHash,
+    });
+
+    this.emailService.sendRegistrationConfirmationCode({ email: dto.email, confirmationCode });
+
+    return true;
   }
 
   async passwordRecovery(dto: IPasswordRecoveryDto): Promise<boolean> {
     const user = await this.userRepository.findByLoginOrEmail(dto.email);
 
     if (user) {
-      const code = user.setPasswordRecoverySettings();
+      const recoveryCode = user.setPasswordRecoverySettings();
 
       await this.userRepository.save(user);
 
-      this.emailService
-        .sendConfirmationCode({ email: dto.email, code })
-        .catch(err => console.log(err));
+      this.emailService.sendPasswordRecoveryCode({ email: dto.email, recoveryCode });
 
       return true;
     }
 
     return false;
+  }
+
+  async newPassword(dto: INewPasswordDto): Promise<boolean> {
+    const user = await this.userRepository.findByPasswordRecoveryCode(dto.recoveryCode);
+
+    if (!user) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'Recovery code is invalid',
+        extensions: [{ field: 'recoveryCode', message: 'Invalid recovery code' }],
+      });
+    }
+
+    const isValid = user.validatePasswordRecoveryCode(dto.recoveryCode);
+
+    if (!isValid) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'Recovery code is expired or invalid',
+        extensions: [{ field: 'recoveryCode', message: 'Recovery code has expired' }],
+      });
+    }
+
+    const passwordHash = await this.passwordHasherService.createHash(dto.newPassword);
+    const updatedUser = user.updatePassword(passwordHash);
+
+    await this.userRepository.save(updatedUser);
+
+    return true;
   }
 
   private async validateUser(dto: { loginOrEmail: string; password: string }) {

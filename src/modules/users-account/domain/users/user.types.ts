@@ -8,6 +8,8 @@ export type UserDocument = HydratedDocument<User, UserMethodsType>;
 export type UserMethodsType = {
   softDelete(): void;
   setPasswordRecoverySettings(): string;
+  validatePasswordRecoveryCode(recoveryCode: string): boolean;
+  updatePassword(password: string): UserDocument;
 };
 
 export type UserStaticMethodsType = {
@@ -16,6 +18,7 @@ export type UserStaticMethodsType = {
     login: string;
     email: string;
   }): Promise<{ isExist: true; field: 'login' | 'email' } | { isExist: false }>;
+  createUnconfirmedUser(dto: CreateUserInstanceDto): Promise<string>;
 };
 
 export type UserModelType = Model<UserDocument, unknown, UserMethodsType> & UserStaticMethodsType;
