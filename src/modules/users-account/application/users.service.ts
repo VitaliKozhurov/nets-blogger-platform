@@ -8,6 +8,7 @@ import { type UserModelType } from '../domain/users/user.types';
 
 import { ICreateUserDto } from '../dto/contracts/user.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,16 @@ export class UsersService {
 
   async create(dto: ICreateUserDto) {
     const { login, email, password } = dto;
+
+    const userExistenceCheck = await this.UserModel.checkIsUserExist(dto);
+
+    if (userExistenceCheck.isExist) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'User with the given email or login already exists',
+        extensions: [{ field: userExistenceCheck.field, message: 'Incorrect credentials' }],
+      });
+    }
 
     const passwordHash = await this.passwordHasherService.createHash(password);
 
