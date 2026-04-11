@@ -1,8 +1,9 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { PasswordRecoveryDocumentationDto } from '../../dto/doc/auth.doc';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiErrorResponse } from 'src/core/decorators';
+import { PasswordRecoveryRequestDto } from '../../../api/dto/auth/password-recovery.dto';
 
-export const PasswordRecoverySwaggerDecorator = () => {
+export const PasswordRecoverySwagger = () => {
   return applyDecorators(
     ApiOperation({
       summary: 'Password recovery request',
@@ -10,7 +11,7 @@ export const PasswordRecoverySwaggerDecorator = () => {
         'Sends password recovery instruction to the specified email address if it exists in the system.',
     }),
     ApiBody({
-      type: PasswordRecoveryDocumentationDto,
+      type: PasswordRecoveryRequestDto,
       description: 'User email for password recovery',
     }),
     ApiResponse({
@@ -18,11 +19,16 @@ export const PasswordRecoverySwaggerDecorator = () => {
       description:
         'Always returns 204 even if email is not registered (to prevent email enumeration attacks).',
     }),
-    // TODO add example with errors
-    ApiBadRequestResponse({
+    ApiErrorResponse({
+      status: HttpStatus.BAD_REQUEST,
       description: 'Returns when the request body has invalid values (e.g., invalid email format)',
+      example: {
+        code: 'Error code',
+        message: 'Error message',
+        extensions: [{ field: 'email', message: 'Error message' }],
+      },
     }),
-    ApiResponse({
+    ApiErrorResponse({
       status: HttpStatus.TOO_MANY_REQUESTS,
       description:
         'Rate limit exceeded: more than 5 attempts from one IP address within 10 seconds',

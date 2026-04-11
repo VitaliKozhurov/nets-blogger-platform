@@ -4,24 +4,22 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { AppThrottle } from 'src/core/decorators';
 import { AuthService } from '../application/auth.service';
-import { LoginSwagger } from '../decorators/swagger/login-swagger.decorator';
-import { MeSwaggerDecorator } from '../decorators/swagger/me-swagger.decorator';
-import { NewPasswordSwaggerDecorator } from '../decorators/swagger/new-password-swagger.decorator';
-import { PasswordRecoverySwaggerDecorator } from '../decorators/swagger/password-recovery-swagger.decorator';
-import { RegistrationConfirmationSwaggerDecorator } from '../decorators/swagger/registration-confirmation-swagger.decorator';
-import { RegistrationEmailResendingSwaggerDecorator } from '../decorators/swagger/registration-email-resending-swagger.decorator';
+import { LoginSwagger } from '../decorators/swagger/auth/login-swagger.decorator';
+import { MeSwagger } from '../decorators/swagger/auth/me-swagger.decorator';
+import { NewPasswordSwagger } from '../decorators/swagger/auth/new-password-swagger.decorator';
+import { PasswordRecoverySwagger } from '../decorators/swagger/auth/password-recovery-swagger.decorator';
+import { RegistrationConfirmationSwagger } from '../decorators/swagger/auth/registration-confirmation-swagger.decorator';
+import { RegistrationEmailResendingSwagger } from '../decorators/swagger/auth/registration-email-resending-swagger.decorator';
 
-import { RegistrationSwagger } from '../decorators/swagger/registration-swagger.decorator';
+import { RegistrationSwagger } from '../decorators/swagger/auth/registration-swagger.decorator';
 import { UserFromRequest } from '../decorators/user-from-request.decorator';
 import { type UserFromRequestData } from '../dto/contracts/auth.dto';
-import {
-  NewPasswordRequestBodyValidationDto,
-  PasswordRecoveryRequestBodyValidationDto,
-  RegistrationConfirmationRequestBodyValidationDto,
-  RegistrationEmailResendingRequestBodyValidationDto,
-} from '../dto/validation/auth.validation';
 import { BearerAuthGuard } from '../guards/bearer-auth/bearer-auth.guard';
 import { LoginRequestDto } from './dto/auth/login.dto';
+import { NewPasswordRequestDto } from './dto/auth/new-password.dto';
+import { PasswordRecoveryRequestDto } from './dto/auth/password-recovery.dto';
+import { RegistrationConfirmationRequestDto } from './dto/auth/registration-confirmation.dto';
+import { RegistrationEmailResendingRequestDto } from './dto/auth/registration-email-resending.dto';
 import { RegistrationRequestDto } from './dto/auth/registration.dto';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
@@ -37,10 +35,17 @@ export class AuthController {
   }
 
   @Post('registration-confirmation')
-  @RegistrationConfirmationSwaggerDecorator()
+  @RegistrationConfirmationSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async registrationConfirmation(@Body() dto: RegistrationConfirmationRequestBodyValidationDto) {
+  async registrationConfirmation(@Body() dto: RegistrationConfirmationRequestDto) {
     return this.authService.registrationConfirmation(dto);
+  }
+
+  @Post('registration-email-resending')
+  @RegistrationEmailResendingSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async registrationEmailResending(@Body() dto: RegistrationEmailResendingRequestDto) {
+    return this.authService.registrationEmailResending(dto);
   }
 
   @Post('login')
@@ -52,33 +57,24 @@ export class AuthController {
   }
 
   @Post('password-recovery')
-  @PasswordRecoverySwaggerDecorator()
+  @PasswordRecoverySwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async passwordRecovery(@Body() dto: PasswordRecoveryRequestBodyValidationDto) {
+  async passwordRecovery(@Body() dto: PasswordRecoveryRequestDto) {
     return this.authService.passwordRecovery(dto);
   }
 
   @Post('new-password')
-  @NewPasswordSwaggerDecorator()
+  @NewPasswordSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async newPassword(@Body() dto: NewPasswordRequestBodyValidationDto) {
+  async newPassword(@Body() dto: NewPasswordRequestDto) {
     return this.authService.newPassword(dto);
-  }
-
-  @Post('registration-email-resending')
-  @RegistrationEmailResendingSwaggerDecorator()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async registrationEmailResending(
-    @Body() dto: RegistrationEmailResendingRequestBodyValidationDto
-  ) {
-    return this.authService.registrationEmailResending(dto);
   }
 
   @Get('me')
   @SkipThrottle()
   @ApiBearerAuth('bearerAuth')
   @UseGuards(BearerAuthGuard)
-  @MeSwaggerDecorator()
+  @MeSwagger()
   async me(@UserFromRequest() dto: UserFromRequestData) {
     return dto;
   }

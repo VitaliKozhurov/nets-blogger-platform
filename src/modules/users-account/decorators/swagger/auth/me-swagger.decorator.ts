@@ -1,15 +1,15 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import { MeResponseDocumentationDto } from '../../dto/doc/auth.doc';
+import { MeResponseDto } from '../../../api/dto/auth/me.dto';
 
-export const MeSwaggerDecorator = () => {
+export const MeSwagger = () => {
   return applyDecorators(
     ApiOperation({
       summary: 'Get current user information',
       description: 'Returns authenticated user profile data (email, login, userId).',
     }),
     ApiOkResponse({
-      type: MeResponseDocumentationDto,
+      type: MeResponseDto,
       description: 'Returns user data when authentication token is valid.',
     }),
     ApiUnauthorizedResponse({

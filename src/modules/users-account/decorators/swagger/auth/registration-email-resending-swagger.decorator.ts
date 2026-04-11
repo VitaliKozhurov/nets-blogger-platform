@@ -1,8 +1,9 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { RegistrationEmailResendingDocumentationDto } from '../../dto/doc/auth.doc';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiErrorResponse } from 'src/core/decorators';
+import { RegistrationEmailResendingRequestDto } from '../../../api/dto/auth/registration-email-resending.dto';
 
-export const RegistrationEmailResendingSwaggerDecorator = () => {
+export const RegistrationEmailResendingSwagger = () => {
   return applyDecorators(
     ApiOperation({
       summary: 'Resend registration confirmation email',
@@ -10,18 +11,23 @@ export const RegistrationEmailResendingSwaggerDecorator = () => {
         'Resend email confirmation link to the user if the previous one expired or was not received.',
     }),
     ApiBody({
-      type: RegistrationEmailResendingDocumentationDto,
+      type: RegistrationEmailResendingRequestDto,
       description: 'User email address for confirmation resend',
     }),
     ApiResponse({
       status: HttpStatus.NO_CONTENT,
       description: 'Returns 204 when confirmation email is successfully resent.',
     }),
-    // TODO add example with errors
-    ApiBadRequestResponse({
+    ApiErrorResponse({
+      status: HttpStatus.BAD_REQUEST,
       description: 'Returns when email is invalid, already confirmed, or user does not exist.',
+      example: {
+        code: 'Error code',
+        message: 'Error message',
+        extensions: [{ field: 'email', message: 'Error message' }],
+      },
     }),
-    ApiResponse({
+    ApiErrorResponse({
       status: HttpStatus.TOO_MANY_REQUESTS,
       description:
         'Rate limit exceeded: more than 5 attempts from one IP address within 10 seconds',
