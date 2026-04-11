@@ -1,19 +1,23 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { CryptoModule } from '../crypto/crypto.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { AuthController } from './api/auth.controller';
+import { AuthService } from './application/auth.service';
+import { UsersFactory } from './application/factories/users.factory';
+import { TokenService } from './application/token.service';
+import { RegistrationUserUseCase } from './application/use-cases/registration-user.usecase';
 import { UsersService } from './application/users.service';
 import { UsersController } from './controllers/users.controller';
 import { User, UserSchema } from './domain/users/user.schema';
+import { BearerAuthGuard } from './guards/bearer-auth/bearer-auth.guard';
 import { UsersQueryRepository } from './infrastructure/users-query.repository';
 import { UsersRepository } from './infrastructure/users.repository';
-import { CryptoModule } from '../crypto/crypto.module';
-import { AuthController } from './api/auth.controller';
-import { ConfigModule } from '@nestjs/config';
-import { BearerAuthGuard } from './guards/bearer-auth/bearer-auth.guard';
-import { TokenService } from './application/token.service';
-import { AuthService } from './application/auth.service';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { NotificationsModule } from '../notifications/notifications.module';
+
+const commandHandlers = [RegistrationUserUseCase];
 
 @Module({
   imports: [
@@ -26,7 +30,9 @@ import { NotificationsModule } from '../notifications/notifications.module';
   ],
   controllers: [AuthController, UsersController],
   providers: [
+    ...commandHandlers,
     UsersService,
+    UsersFactory,
     AuthService,
     UsersRepository,
     UsersQueryRepository,

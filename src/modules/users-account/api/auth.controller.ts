@@ -11,6 +11,8 @@ import { PasswordRecoverySwagger } from '../decorators/swagger/auth/password-rec
 import { RegistrationConfirmationSwagger } from '../decorators/swagger/auth/registration-confirmation-swagger.decorator';
 import { RegistrationEmailResendingSwagger } from '../decorators/swagger/auth/registration-email-resending-swagger.decorator';
 
+import { CommandBus } from '@nestjs/cqrs';
+import { RegistrationUserCommand } from '../application/use-cases/registration-user.usecase';
 import { RegistrationSwagger } from '../decorators/swagger/auth/registration-swagger.decorator';
 import { UserFromRequest } from '../decorators/user-from-request.decorator';
 import { type UserFromRequestData } from '../dto/contracts/auth.dto';
@@ -25,13 +27,16 @@ import { RegistrationRequestDto } from './dto/auth/registration.dto';
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private commandBus: CommandBus,
+    private authService: AuthService
+  ) {}
 
   @Post('registration')
   @RegistrationSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(@Body() dto: RegistrationRequestDto) {
-    return this.authService.registration(dto);
+    return this.commandBus.execute(new RegistrationUserCommand(dto));
   }
 
   @Post('registration-confirmation')

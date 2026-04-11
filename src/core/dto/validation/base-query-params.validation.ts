@@ -1,5 +1,5 @@
 import { IsEnum } from 'class-validator';
-import { QueryIsNumber } from 'src/core/decorators';
+import { QueryIsNumber } from '../../decorators/utils/query-is-number';
 import { IBaseQueryParamsDto } from '../contracts/base-query-params.dto';
 import { SortDirection } from '../contracts/sort-direction';
 

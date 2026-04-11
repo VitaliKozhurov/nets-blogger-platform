@@ -1,33 +1,28 @@
-import { DomainExceptionCode } from 'src/core/exceptions/exception.type';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { DomainExceptionCode } from 'src/core/exceptions/exception.type';
 import { Nullable } from 'src/core/types';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import { User } from '../domain/users/user.schema';
 
+import { DomainException } from 'src/core/exceptions';
 import {
   INewPasswordDto,
   IPasswordRecoveryDto,
   IRegistrationConfirmationDto,
-  IRegistrationDto,
   IRegistrationEmailResendingDto,
   IUserLoginDto,
 } from '../dto/contracts/auth.dto';
 import { UsersRepository } from '../infrastructure/users.repository';
-import { DomainException } from 'src/core/exceptions';
 import { TokenService } from './token.service';
-import { EmailService } from 'src/modules/notifications/email.service';
-import { type UserModelType } from '../domain/users/user.types';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name)
-    private UserModel: UserModelType,
     private passwordHasherService: PasswordHasherService,
     private userRepository: UsersRepository,
-    private tokenService: TokenService,
-    private emailService: EmailService
+    private tokenService: TokenService
   ) {}
 
   async login(dto: IUserLoginDto): Promise<Nullable<{ accessToken: string }>> {
@@ -43,35 +38,6 @@ export class AuthService {
     const accessToken = await this.tokenService.createAccessToken(user);
 
     return { accessToken };
-  }
-
-  async registration(dto: IRegistrationDto): Promise<boolean> {
-    const userExistenceCheck = await this.UserModel.checkIsUserExist(dto);
-
-    if (userExistenceCheck.isExist) {
-      throw new DomainException({
-        code: DomainExceptionCode.BAD_REQUEST_ERROR,
-        message: 'User with the given email or login already exists',
-        extensions: [{ field: userExistenceCheck.field, message: 'Incorrect credentials' }],
-      });
-    }
-
-    const passwordHash = await this.passwordHasherService.createHash(dto.password);
-
-    const createdUser = await this.UserModel.createUnconfirmedUser({
-      login: dto.login,
-      email: dto.email,
-      passwordHash,
-    });
-
-    this.emailService.sendRegistrationConfirmationCode({
-      email: dto.email,
-      confirmationCode: createdUser.emailConfirmation.confirmationCode ?? '',
-    });
-
-    await this.userRepository.save(createdUser);
-
-    return true;
   }
 
   async registrationConfirmation(dto: IRegistrationConfirmationDto): Promise<boolean> {
@@ -123,10 +89,10 @@ export class AuthService {
 
     const updatedUser = user.updateRegistrationConfirmationCode();
 
-    this.emailService.sendRegistrationConfirmationCode({
-      email: dto.email,
-      confirmationCode: updatedUser.emailConfirmation.confirmationCode ?? '',
-    });
+    // this.emailService.sendRegistrationConfirmationCode({
+    //   email: dto.email,
+    //   confirmationCode: updatedUser.emailConfirmation.confirmationCode ?? '',
+    // });
 
     await this.userRepository.save(updatedUser);
 
@@ -137,11 +103,11 @@ export class AuthService {
     const user = await this.userRepository.findByLoginOrEmail(dto.email);
 
     if (user) {
-      const recoveryCode = user.setPasswordRecoverySettings();
+      // const recoveryCode = user.setPasswordRecoverySettings();
 
       await this.userRepository.save(user);
 
-      this.emailService.sendPasswordRecoveryCode({ email: dto.email, recoveryCode });
+      // this.emailService.sendPasswordRecoveryCode({ email: dto.email, recoveryCode });
 
       return true;
     }
@@ -198,5 +164,25 @@ export class AuthService {
     }
 
     return { userId: user.id.toString(), login: user.login, email: user.email };
+  }
+
+  async checkIsUserExist(dto: {
+    login: string;
+    email: string;
+  }): Promise<{ isExist: true; field: 'login' | 'email' } | { isExist: false }> {
+    const userByLoginPromise = this.userRepository.findByLoginOrEmail(dto.login);
+    const userByEmailPromise = this.userRepository.findByLoginOrEmail(dto.email);
+
+    const [userByLogin, userByEmail] = await Promise.all([userByLoginPromise, userByEmailPromise]);
+
+    if (userByLogin) {
+      return { isExist: true, field: 'login' };
+    }
+
+    if (userByEmail) {
+      return { isExist: true, field: 'email' };
+    }
+
+    return { isExist: false };
   }
 }
