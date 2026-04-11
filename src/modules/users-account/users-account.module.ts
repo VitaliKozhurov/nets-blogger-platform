@@ -7,7 +7,7 @@ import { User, UserSchema } from './domain/users/user.schema';
 import { UsersQueryRepository } from './infrastructure/users-query.repository';
 import { UsersRepository } from './infrastructure/users.repository';
 import { CryptoModule } from '../crypto/crypto.module';
-import { AuthController } from './controllers/auth.controller';
+import { AuthController } from './api/auth.controller';
 import { ConfigModule } from '@nestjs/config';
 import { BearerAuthGuard } from './guards/bearer-auth/bearer-auth.guard';
 import { TokenService } from './application/token.service';
