@@ -35,7 +35,7 @@ UserSchema.virtual('id').get(function () {
   return this._id.toString();
 });
 
-UserSchema.static('createInstance', async function (dto: CreateUserInstanceDto) {
+UserSchema.static('createUserInstance', async function (dto: CreateUserInstanceDto) {
   const user = new this();
 
   user.login = dto.login;
@@ -55,24 +55,7 @@ UserSchema.static('createInstance', async function (dto: CreateUserInstanceDto) 
   return user;
 });
 
-UserSchema.static('checkIsUserExist', async function async(dto: { login: string; email: string }) {
-  const userByLoginPromise = this.findOne({ deletedAt: null, login: dto.login });
-  const userByEmailPromise = this.findOne({ deletedAt: null, email: dto.email });
-
-  const [userByLogin, userByEmail] = await Promise.all([userByLoginPromise, userByEmailPromise]);
-
-  if (userByLogin) {
-    return { isExist: true, field: 'login' };
-  }
-
-  if (userByEmail) {
-    return { isExist: true, field: 'email' };
-  }
-
-  return { isExist: false };
-});
-
-UserSchema.static('createUnconfirmedUser', async function (dto: CreateUserInstanceDto) {
+UserSchema.static('createUnconfirmedUserInstance', async function (dto: CreateUserInstanceDto) {
   const user = new this();
   const expirationDate = new Date();
 
@@ -102,7 +85,7 @@ UserSchema.method('softDelete', function () {
   }
 });
 
-UserSchema.method('setPasswordRecoverySettings', function () {
+UserSchema.method('generatePasswordRecoveryCode', function () {
   const expirationDate = new Date();
 
   expirationDate.setHours(expirationDate.getHours() + 1);

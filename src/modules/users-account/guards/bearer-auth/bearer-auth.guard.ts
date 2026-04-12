@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { EnvVariables } from 'src/config/env.interface';
-import { AccessTokenPayload } from '../../dto/contracts/auth.dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { AccessTokenPayload } from './access-token.payload';
 
 @Injectable()
 export class BearerAuthGuard implements CanActivate {

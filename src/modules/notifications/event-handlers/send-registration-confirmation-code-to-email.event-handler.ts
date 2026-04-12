@@ -6,8 +6,8 @@ import { EmailService } from '../email.service';
 export class SendRegistrationConfirmationCodeToEmailEventHandler implements IEventHandler<UserRegistrationEvent> {
   constructor(private emailService: EmailService) {}
 
-  async handle(event: UserRegistrationEvent) {
-    const { email, confirmationCode } = event;
+  async handle({ eventData }: UserRegistrationEvent) {
+    const { email, confirmationCode } = eventData;
 
     return this.emailService.sendRegistrationConfirmationCode({ email, confirmationCode });
   }

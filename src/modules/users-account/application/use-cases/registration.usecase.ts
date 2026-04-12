@@ -2,24 +2,24 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { UsersRepository } from '../../infrastructure/users.repository';
 import { AuthService } from '../auth.service';
-import { IRegistrationDto } from '../dto/auth/registration';
+import { IRegistrationDto } from '../dto/auth/registration.dto';
 import { UserRegistrationEvent } from '../events/user-registration.event';
 import { UsersFactory } from '../factories/users.factory';
 
-export class RegistrationUserCommand {
+export class RegistrationCommand {
   constructor(public dto: IRegistrationDto) {}
 }
 
-@CommandHandler(RegistrationUserCommand)
-export class RegistrationUserUseCase implements ICommandHandler<RegistrationUserCommand> {
+@CommandHandler(RegistrationCommand)
+export class RegistrationUseCase implements ICommandHandler<RegistrationCommand> {
   constructor(
     private eventBus: EventBus,
     private authService: AuthService,
     private usersFactory: UsersFactory,
-    private userRepository: UsersRepository
+    private usersRepository: UsersRepository
   ) {}
 
-  async execute({ dto }: RegistrationUserCommand): Promise<boolean> {
+  async execute({ dto }: RegistrationCommand): Promise<boolean> {
     const { login, email } = dto;
 
     const checkIsExist = await this.authService.checkIsUserExist({ login, email });
@@ -34,13 +34,13 @@ export class RegistrationUserUseCase implements ICommandHandler<RegistrationUser
 
     const createdUser = await this.usersFactory.createUnconfirmedUser(dto);
 
-    await this.userRepository.save(createdUser);
+    await this.usersRepository.save(createdUser);
 
     this.eventBus.publish(
-      new UserRegistrationEvent(
-        createdUser.email,
-        createdUser.emailConfirmation.confirmationCode ?? ''
-      )
+      new UserRegistrationEvent({
+        email: createdUser.email,
+        confirmationCode: createdUser.emailConfirmation.confirmationCode ?? '',
+      })
     );
 
     return true;
