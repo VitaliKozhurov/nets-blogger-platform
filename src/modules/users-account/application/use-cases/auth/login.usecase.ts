@@ -1,8 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ILoginDto } from '../dto/auth/login.dto';
-import { AuthService } from '../auth.service';
+import { ILoginDto } from '../../dto/auth/login.dto';
+
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { TokenService } from '../token.service';
+import { TokenService } from '../../services/token.service';
+import { UsersService } from '../../services/users.service';
 
 export class LoginCommand {
   constructor(public dto: ILoginDto) {}
@@ -11,12 +12,12 @@ export class LoginCommand {
 @CommandHandler(LoginCommand)
 export class LoginUseCase implements ICommandHandler<LoginCommand> {
   constructor(
-    private authService: AuthService,
+    private usersService: UsersService,
     private tokenService: TokenService
   ) {}
 
   async execute({ dto }: LoginCommand): Promise<{ accessToken: string }> {
-    const user = await this.authService.validateUser(dto);
+    const user = await this.usersService.validateUser(dto);
 
     if (!user) {
       throw new DomainException({

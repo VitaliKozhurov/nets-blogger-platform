@@ -1,8 +1,8 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
-import { IRegistrationEmailResendingDto } from '../dto/auth/registration-email-resending.dto';
-import { UsersRepository } from '../../infrastructure/users.repository';
+import { IRegistrationEmailResendingDto } from '../../dto/auth/registration-email-resending.dto';
+import { UsersRepository } from '../../../infrastructure/users.repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { UserRegistrationEvent } from '../events/user-registration.event';
+import { UserRegistrationEvent } from '../../events/user-registration.event';
 
 export class RegistrationEmailResendingCommand {
   constructor(public dto: IRegistrationEmailResendingDto) {}

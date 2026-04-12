@@ -7,8 +7,8 @@ import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { getPaginationParams } from 'src/core/utils';
 import { User } from '../domain/users/user.schema';
 import { UserDocument, type UserModelType } from '../domain/users/user.types';
-import { IGetUsersQueryParamsDto } from '../dto/contracts/user.dto';
-import { UserResponseMapperDto } from '../api/dto/user/user.mapper';
+import { UserResponseMapperDto } from '../api/dto/users/user.mapper';
+import { IGetUsersQueryParamsDto } from '../api/dto/users/get-users-query.dto';
 
 @Injectable()
 export class UsersQueryRepository {

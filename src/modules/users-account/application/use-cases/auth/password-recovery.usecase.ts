@@ -1,7 +1,7 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
-import { IPasswordRecoveryDto } from '../dto/auth/password-recovery.dto';
-import { UsersRepository } from '../../infrastructure/users.repository';
-import { UserPasswordRecoveryEvent } from '../events/user-password-recovery.event';
+import { IPasswordRecoveryDto } from '../../dto/auth/password-recovery.dto';
+import { UsersRepository } from '../../../infrastructure/users.repository';
+import { UserPasswordRecoveryEvent } from '../../events/user-password-recovery.event';
 
 export class PasswordRecoveryCommand {
   constructor(public dto: IPasswordRecoveryDto) {}

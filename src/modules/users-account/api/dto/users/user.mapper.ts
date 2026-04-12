@@ -1,7 +1,6 @@
 import { UserDocument } from '../../../domain/users/user.types';
-import { IUserResponseDto } from '../../../dto/contracts/user.dto';
 
-export class UserResponseMapperDto implements IUserResponseDto {
+export class UserResponseMapperDto {
   id: string;
   login: string;
   email: string;

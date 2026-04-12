@@ -1,0 +1,42 @@
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { ICreateUserByAdminDto } from '../../dto/users/create-user-by-admin.dto';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { UsersRepository } from '../../../infrastructure/users.repository';
+import { UsersService } from '../../services/users.service';
+import { UsersFactory } from '../../factories/users.factory';
+
+export class CreateUserByAdminCommand {
+  constructor(public dto: ICreateUserByAdminDto) {}
+}
+
+@CommandHandler(CreateUserByAdminCommand)
+export class CreateUserByAdminUseCase implements ICommandHandler<CreateUserByAdminCommand> {
+  constructor(
+    private usersService: UsersService,
+    private userRepository: UsersRepository,
+    private usersFactory: UsersFactory
+  ) {}
+
+  async execute({ dto }: CreateUserByAdminCommand): Promise<string> {
+    const userExistenceCheck = await this.usersService.checkIsUserExist(dto);
+
+    if (userExistenceCheck.isExist) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'User with the given email or login already exists',
+        extensions: [
+          {
+            field: userExistenceCheck.field,
+            message: 'Incorrect credentials',
+          },
+        ],
+      });
+    }
+
+    const createdUser = await this.usersFactory.createUserByAdmin(dto);
+
+    await this.userRepository.save(createdUser);
+
+    return createdUser._id.toString();
+  }
+}

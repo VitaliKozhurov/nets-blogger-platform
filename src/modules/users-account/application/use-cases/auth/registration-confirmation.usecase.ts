@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { IRegistrationConfirmationDto } from '../dto/auth/registration-confirmation.dto';
-import { UsersRepository } from '../../infrastructure/users.repository';
+import { IRegistrationConfirmationDto } from '../../dto/auth/registration-confirmation.dto';
+import { UsersRepository } from '../../../infrastructure/users.repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 export class RegistrationConfirmationCommand {

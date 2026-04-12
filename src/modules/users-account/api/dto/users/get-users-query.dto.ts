@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { IsOptionStringParam } from 'src/core/decorators';
-import { BaseQueryParamsDto } from 'src/core/dto';
+import { BaseQueryParamsDto, IBaseQueryParamsDto } from 'src/core/dto';
 import { type Nullable } from 'src/core/types';
-import { UsersSortBy } from '../../../dto/contracts/user.dto';
+import { UsersSortBy } from './users-sort-by.dto';
 
 export class GetUsersQueryDto extends BaseQueryParamsDto {
   @ApiPropertyOptional({
@@ -32,4 +32,10 @@ export class GetUsersQueryDto extends BaseQueryParamsDto {
   })
   @IsEnum(UsersSortBy)
   sortBy: UsersSortBy = UsersSortBy.CreatedAt;
+}
+
+export interface IGetUsersQueryParamsDto extends IBaseQueryParamsDto {
+  searchLoginTerm: string | null;
+  searchEmailTerm: string | null;
+  sortBy: UsersSortBy;
 }

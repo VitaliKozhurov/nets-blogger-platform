@@ -9,7 +9,7 @@ import { PasswordRecoverySwagger } from '../decorators/swagger/auth/password-rec
 import { RegistrationConfirmationSwagger } from '../decorators/swagger/auth/registration-confirmation-swagger.decorator';
 import { RegistrationEmailResendingSwagger } from '../decorators/swagger/auth/registration-email-resending-swagger.decorator';
 import { CommandBus } from '@nestjs/cqrs';
-import { RegistrationCommand } from '../application/use-cases/registration.usecase';
+import { RegistrationCommand } from '../application/use-cases/auth/registration.usecase';
 import { RegistrationSwagger } from '../decorators/swagger/auth/registration-swagger.decorator';
 import { UserFromRequest } from '../decorators/user-from-request.decorator';
 import { BearerAuthGuard } from '../guards/bearer-auth/bearer-auth.guard';
@@ -19,12 +19,12 @@ import { PasswordRecoveryRequestDto } from './dto/auth/password-recovery.dto';
 import { RegistrationConfirmationRequestDto } from './dto/auth/registration-confirmation.dto';
 import { RegistrationEmailResendingRequestDto } from './dto/auth/registration-email-resending.dto';
 import { RegistrationRequestDto } from './dto/auth/registration.dto';
-import { RegistrationConfirmationCommand } from '../application/use-cases/registration-confirmation.usecase';
-import { RegistrationEmailResendingCommand } from '../application/use-cases/registration-email-resending.usecase';
-import { LoginCommand } from '../application/use-cases/login.usecase';
-import { PasswordRecoveryCommand } from '../application/use-cases/password-recovery.usecase';
-import { NewUserPasswordCommand } from '../application/use-cases/new-user-password.usecase';
-import { type RequestUserDto } from '../application/dto/auth/request-user.dto';
+import { RegistrationConfirmationCommand } from '../application/use-cases/auth/registration-confirmation.usecase';
+import { RegistrationEmailResendingCommand } from '../application/use-cases/auth/registration-email-resending.usecase';
+import { LoginCommand } from '../application/use-cases/auth/login.usecase';
+import { PasswordRecoveryCommand } from '../application/use-cases/auth/password-recovery.usecase';
+import { NewUserPasswordCommand } from '../application/use-cases/auth/new-user-password.usecase';
+import { type RequestUserDto } from '../application/dto/request-user.dto';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')

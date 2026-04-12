@@ -4,6 +4,7 @@ import { PasswordHasherService } from 'src/modules/crypto/password-hasher.servic
 import { User } from '../../domain/users/user.schema';
 import { type UserModelType } from '../../domain/users/user.types';
 import { IRegistrationDto } from '../dto/auth/registration.dto';
+import { ICreateUserByAdminDto } from '../dto/users/create-user-by-admin.dto';
 
 @Injectable()
 export class UsersFactory {
@@ -17,6 +18,18 @@ export class UsersFactory {
     const passwordHash = await this.passwordHasherService.createHash(dto.password);
 
     const createdUser = await this.UserModel.createUnconfirmedUserInstance({
+      login: dto.login,
+      email: dto.email,
+      passwordHash,
+    });
+
+    return createdUser;
+  }
+
+  async createUserByAdmin(dto: ICreateUserByAdminDto) {
+    const passwordHash = await this.passwordHasherService.createHash(dto.password);
+
+    const createdUser = await this.UserModel.createUserInstance({
       login: dto.login,
       email: dto.email,
       passwordHash,

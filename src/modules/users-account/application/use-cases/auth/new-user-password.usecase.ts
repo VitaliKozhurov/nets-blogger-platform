@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../infrastructure/users.repository';
-import { INewPasswordDto } from '../dto/auth/new-password';
+import { UsersRepository } from '../../../infrastructure/users.repository';
+import { INewPasswordDto } from '../../dto/auth/new-password';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 
