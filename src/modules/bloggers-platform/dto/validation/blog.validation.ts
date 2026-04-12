@@ -1,5 +1,5 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { BaseQueryParamsValidationDto } from 'src/core/dto';
+import { BaseQueryParamsDto } from 'src/core/dto';
 import { type Nullable } from 'src/core/types';
 import { BlogsSortBy, ICreateBlogDto, IGetBlogsQueryParamsDto } from '../contracts/blog.dto';
 
@@ -17,7 +17,7 @@ export class CreateBlogRequestBodyValidationDto implements ICreateBlogDto {
 export class UpdateBlogRequestBodyValidationDto extends CreateBlogRequestBodyValidationDto {}
 
 export class GetBlogsQueryParamsValidationDto
-  extends BaseQueryParamsValidationDto
+  extends BaseQueryParamsDto
   implements IGetBlogsQueryParamsDto
 {
   @IsOptional()

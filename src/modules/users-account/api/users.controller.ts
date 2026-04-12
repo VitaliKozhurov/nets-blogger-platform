@@ -12,17 +12,15 @@ import {
 } from '@nestjs/common';
 import { ApiBasicAuth } from '@nestjs/swagger';
 import { UsersService } from '../application/users.service';
-import { CreateUserSwaggerDecorator } from '../decorators/swagger/create-user-swagger.decorator';
-import { DeleteUserSwaggerDecorator } from '../decorators/swagger/delete-user-swagger.decorator';
-import { GetUsersSwaggerDecorator } from '../decorators/swagger/get-users-swagger.decorator';
+import { DeleteUserSwagger } from '../decorators/swagger/user/delete-user-swagger.decorator';
+import { GetUsersSwagger } from '../decorators/swagger/user/get-users-swagger.decorator';
 
-import {
-  CreateUserRequestBodyValidationDto,
-  GetUsersQueryParamsValidationDto,
-} from '../dto/validation/user.validation';
+import { ObjectIdValidationPipe } from 'src/core/pipes';
+import { CreateUserByAdminSwagger } from '../decorators/swagger/user/create-user-swagger.decorator';
 import { BasicAuthGuard } from '../guards/basic-auth/basic-auth.guard';
 import { UsersQueryRepository } from '../infrastructure/users-query.repository';
-import { ObjectIdValidationPipe } from 'src/core/pipes';
+import { CreateUserByAdminRequestDto } from './dto/user/create-user-by-admin.dto';
+import { GetUsersQueryDto } from './dto/user/get-users-query.dto';
 
 @Controller('users')
 @UseGuards(BasicAuthGuard)
@@ -34,21 +32,21 @@ export class UsersController {
   ) {}
 
   @Get()
-  @GetUsersSwaggerDecorator()
-  async findAll(@Query() query: GetUsersQueryParamsValidationDto) {
+  @GetUsersSwagger()
+  async findAll(@Query() query: GetUsersQueryDto) {
     return this.usersQueryRepository.findAll(query);
   }
 
   @Post()
-  @CreateUserSwaggerDecorator()
-  async create(@Body() dto: CreateUserRequestBodyValidationDto) {
+  @CreateUserByAdminSwagger()
+  async create(@Body() dto: CreateUserByAdminRequestDto) {
     const userId = await this.usersService.create(dto);
 
     return this.usersQueryRepository.findByIdOrThrow(userId);
   }
 
   @Delete(':id')
-  @DeleteUserSwaggerDecorator()
+  @DeleteUserSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.usersService.delete(id);

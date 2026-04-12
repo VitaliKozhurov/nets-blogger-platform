@@ -1,7 +1,7 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
-export const DeleteUserSwaggerDecorator = () => {
+export const DeleteUserSwagger = () => {
   return applyDecorators(
     ApiOperation({
       summary: 'Delete a user',

@@ -1,6 +1,6 @@
 import { OmitType } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
-import { BaseQueryParamsValidationDto } from 'src/core/dto/validation/base-query-params.validation';
+import { BaseQueryParamsDto } from 'src/core/dto/validation/base-query-params.validation';
 import { ICreatePostDto, IGetPostsQueryParamsDto, PostsSortBy } from '../contracts/post.dto';
 
 export class CreatePostRequestBodyValidationDto implements ICreatePostDto {
@@ -18,7 +18,7 @@ export class CreatePostByBlogIdRequestBodyValidationDto extends OmitType(
 export class UpdatePostRequestBodyValidationDto extends CreatePostRequestBodyValidationDto {}
 
 export class GetPostsQueryParamsValidationDto
-  extends BaseQueryParamsValidationDto
+  extends BaseQueryParamsDto
   implements IGetPostsQueryParamsDto
 {
   @IsEnum(PostsSortBy)

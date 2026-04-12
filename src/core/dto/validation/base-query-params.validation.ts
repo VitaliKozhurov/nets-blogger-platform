@@ -3,7 +3,7 @@ import { QueryIsNumber } from '../../decorators/utils/query-is-number';
 import { IBaseQueryParamsDto } from '../contracts/base-query-params.dto';
 import { SortDirection } from '../contracts/sort-direction';
 
-export class BaseQueryParamsValidationDto implements IBaseQueryParamsDto {
+export class BaseQueryParamsDto implements IBaseQueryParamsDto {
   @QueryIsNumber()
   pageNumber: number = 1;
 

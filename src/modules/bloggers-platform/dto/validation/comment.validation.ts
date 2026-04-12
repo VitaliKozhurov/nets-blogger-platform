@@ -1,9 +1,9 @@
-import { BaseQueryParamsValidationDto } from 'src/core/dto';
-import { CommentsSortBy, IGetCommentsByPostIdQueryParamsDto } from '../contracts/comment.dto';
 import { IsEnum } from 'class-validator';
+import { BaseQueryParamsDto } from 'src/core/dto';
+import { CommentsSortBy, IGetCommentsByPostIdQueryParamsDto } from '../contracts/comment.dto';
 
 export class GetCommentsByPostIdQueryParamsValidationDto
-  extends BaseQueryParamsValidationDto
+  extends BaseQueryParamsDto
   implements IGetCommentsByPostIdQueryParamsDto
 {
   @IsEnum(CommentsSortBy)

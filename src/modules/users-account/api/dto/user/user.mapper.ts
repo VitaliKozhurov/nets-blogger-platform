@@ -1,5 +1,5 @@
-import { UserDocument } from '../../domain/users/user.types';
-import { IUserResponseDto } from '../contracts/user.dto';
+import { UserDocument } from '../../../domain/users/user.types';
+import { IUserResponseDto } from '../../../dto/contracts/user.dto';
 
 export class UserResponseMapperDto implements IUserResponseDto {
   id: string;

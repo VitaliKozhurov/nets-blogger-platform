@@ -1,19 +1,17 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ApiOkResponsePaginated } from 'src/core/decorators';
-import {
-  GetUsersQueryParamsDocumentationDto,
-  UserResponseDocumentationDto,
-} from '../../dto/doc/user.doc';
+import { GetUsersQueryDto } from '../../../api/dto/user/get-users-query.dto';
+import { UserResponseDto } from '../../../api/dto/user/user-response.dto';
 
-export const GetUsersSwaggerDecorator = () => {
+export const GetUsersSwagger = () => {
   return applyDecorators(
     ApiOperation({
       summary: 'Retrieve users list',
       description:
         'Fetches a paginated list of users with support for filtering, sorting, and searching. Returns users based on the provided query parameters.',
     }),
-    ApiQuery({ type: GetUsersQueryParamsDocumentationDto }),
-    ApiOkResponsePaginated(UserResponseDocumentationDto)
+    ApiQuery({ type: GetUsersQueryDto }),
+    ApiOkResponsePaginated(UserResponseDto)
   );
 };

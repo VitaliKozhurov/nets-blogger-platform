@@ -8,7 +8,7 @@ import { getPaginationParams } from 'src/core/utils';
 import { User } from '../domain/users/user.schema';
 import { UserDocument, type UserModelType } from '../domain/users/user.types';
 import { IGetUsersQueryParamsDto } from '../dto/contracts/user.dto';
-import { UserResponseMapperDto } from '../dto/mappers/user.mapper';
+import { UserResponseMapperDto } from '../api/dto/user/user.mapper';
 
 @Injectable()
 export class UsersQueryRepository {
