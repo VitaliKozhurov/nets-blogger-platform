@@ -1,7 +1,6 @@
-import { BlogDocument } from '../../domain/blogs/blog.types';
-import { IBlogResponseDto } from '../contracts/blog.dto';
+import { BlogDocument } from 'src/modules/bloggers-platform/domain/blogs/blog.types';
 
-export class BlogResponseMapperDto implements IBlogResponseDto {
+export class BlogResponseMapperDto {
   id: string;
   name: string;
   description: string;
@@ -9,7 +8,7 @@ export class BlogResponseMapperDto implements IBlogResponseDto {
   createdAt: string;
   isMembership: boolean;
 
-  static mapToView(blogDocument: BlogDocument): IBlogResponseDto {
+  static mapToView(blogDocument: BlogDocument): BlogResponseMapperDto {
     const dto = new BlogResponseMapperDto();
 
     dto.id = blogDocument._id.toString();

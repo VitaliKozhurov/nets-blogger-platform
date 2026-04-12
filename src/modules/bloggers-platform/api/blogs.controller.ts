@@ -10,13 +10,8 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { BlogsService } from '../application/blogs.service';
 import { PostsService } from '../application/posts.service';
 
-import {
-  GetBlogsQueryParamsValidationDto,
-  UpdateBlogRequestBodyValidationDto,
-} from '../dto/validation/blog.validation';
 import {
   CreatePostByBlogIdRequestBodyValidationDto,
   GetPostsQueryParamsValidationDto,
@@ -31,6 +26,12 @@ import { UpdateBlogCommand } from '../application/use-cases/blogs/update-blog.us
 import { DeleteBlogCommand } from '../application/use-cases/blogs/delete-blog.usecase.dto';
 import { CreateBlogRequestDto } from './dto/blogs/create-blog.dto';
 import { CreateBlogSwagger } from '../decorators/swagger/blogs/create-blog-swagger.decorator';
+import { UpdateBlogRequestDto } from './dto/blogs/update-blog.dto';
+import { UpdateBlogSwagger } from '../decorators/swagger/blogs/update-blog-swagger.dto';
+import { DeleteBlogSwagger } from '../decorators/swagger/blogs/delete-blog-swagger.decorator';
+import { GetBlogsQueryDto } from './dto/blogs/get-blogs-query.dto';
+import { GetBlogsSwagger } from '../decorators/swagger/blogs/get-blogs-swagger.decorator';
+import { GetBlogSwagger } from '../decorators/swagger/blogs/get-blog-swagger.decorator';
 
 @Controller('blogs')
 export class BlogsController {
@@ -39,16 +40,17 @@ export class BlogsController {
     private blogsQueryRepository: BlogsQueryRepository,
     private blogsRepository: BlogsRepository,
     private postsQueryRepository: PostsQueryRepository,
-    private blogsService: BlogsService,
     private postsService: PostsService
   ) {}
 
   @Get()
-  async findAll(@Query() query: GetBlogsQueryParamsValidationDto) {
+  @GetBlogsSwagger()
+  async findAll(@Query() query: GetBlogsQueryDto) {
     return this.blogsQueryRepository.findAll(query);
   }
 
   @Get(':id')
+  @GetBlogSwagger()
   async getById(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.blogsQueryRepository.findByIdOrThrow(id);
   }
@@ -64,11 +66,9 @@ export class BlogsController {
   }
 
   @Put(':id')
+  @UpdateBlogSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async update(
-    @Param('id', ObjectIdValidationPipe) id: string,
-    @Body() dto: UpdateBlogRequestBodyValidationDto
-  ) {
+  async update(@Param('id', ObjectIdValidationPipe) id: string, @Body() dto: UpdateBlogRequestDto) {
     return this.commandBus.execute(
       new UpdateBlogCommand({
         blogId: id,
@@ -78,11 +78,13 @@ export class BlogsController {
   }
 
   @Delete(':id')
+  @DeleteBlogSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.commandBus.execute(new DeleteBlogCommand(id));
   }
 
+  // TODO add use cases
   @Get(':id/posts')
   async getPostsForBlog(
     @Param('id', ObjectIdValidationPipe) id: string,

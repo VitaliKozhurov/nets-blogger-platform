@@ -7,8 +7,8 @@ import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { getPaginationParams } from 'src/core/utils';
 import { Blog } from '../../domain/blogs/blog.schema';
 import { BlogDocument, type BlogModelType } from '../../domain/blogs/blog.types';
-import { IGetBlogsQueryParamsDto } from '../../dto/contracts/blog.dto';
-import { BlogResponseMapperDto } from '../../dto/mappers/blog.mapper';
+import { BlogResponseMapperDto } from '../../api/dto/blogs/blog.mapper';
+import { IGetBlogsQueryParamsDto } from '../../api/dto/blogs/get-blogs-query.dto';
 
 @Injectable()
 export class BlogsQueryRepository {

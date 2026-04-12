@@ -1,26 +1,28 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/core/decorators';
+import { BlogResponseDto } from '../../../api/dto/blogs/blog-response.dto';
 
-export const DeleteUserSwagger = () => {
+export const GetBlogSwagger = () => {
   return applyDecorators(
     ApiOperation({
-      summary: 'Delete a user',
-      description: 'Permanently deletes a user account by ID.',
+      summary: 'Get a blog',
+      description: 'Retrieves a blog by its ID.',
     }),
     ApiParam({
       name: 'id',
-      description: 'Unique identifier of the user to delete',
+      description: 'Unique identifier of the blog to retrieve',
       example: '507f1f77bcf86cd799439011',
       required: true,
     }),
     ApiResponse({
-      status: HttpStatus.NO_CONTENT,
-      description: 'User successfully deleted. No content returned.',
+      status: HttpStatus.OK,
+      type: BlogResponseDto,
+      description: 'Blog successfully retrieved.',
     }),
     ApiErrorResponse({
       status: HttpStatus.NOT_FOUND,
-      description: 'User with the specified ID was not found.',
+      description: 'Blog with the specified ID was not found.',
     })
   );
 };
