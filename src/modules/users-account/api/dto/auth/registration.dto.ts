@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Matches } from 'class-validator';
 import { IsStringWithTrim } from 'src/core/decorators';
-import { EMAIL_REGEX, LOGIN_REGEX } from 'src/modules/users-account/constants/regex';
+import { EMAIL_REGEX, LOGIN_REGEX } from 'src/modules/users-account/constants/regExp';
 
 export class RegistrationRequestDto {
   @ApiProperty({
