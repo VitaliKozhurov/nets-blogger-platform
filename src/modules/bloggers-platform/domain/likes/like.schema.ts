@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { LikeStatus } from '../../dto/contracts/like.dto';
+import { CreateLikeDto } from './like.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Like {
@@ -27,3 +28,16 @@ export class Like {
 }
 
 export const LikeSchema = SchemaFactory.createForClass(Like);
+
+LikeSchema.static('createInstance', async function (dto: CreateLikeDto) {
+  const like = new this();
+
+  like.authorId = dto.authorId;
+  like.login = dto.login;
+  like.parentId = dto.parentId;
+  like.status = dto.likeStatus;
+  like.addedLikeDate = new Date();
+  like.deletedAt = null;
+
+  return like;
+});

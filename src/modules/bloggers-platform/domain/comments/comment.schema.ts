@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { LikesCountInfo, LikesCountInfoSchema } from '../likes/likes-count-info.schema';
 import { CommentatorInfo, CommentatorInfoSchema } from './commentator-info.schema';
+import { LikeStatus } from '../../dto/contracts/like.dto';
+import { LikeDocument } from '../likes/like.types';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Comment {
@@ -25,3 +27,52 @@ export class Comment {
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
+
+CommentSchema.method('softDelete', function () {
+  if (!this.deletedAt) {
+    this.deletedAt = new Date();
+  }
+});
+
+CommentSchema.method('updateContent', function (content: string) {
+  this.content = content;
+});
+
+CommentSchema.method(
+  'updateLikesInfo',
+  function (args: { currentLike: LikeDocument; nextLikeStatus: LikeStatus }) {
+    const { currentLike, nextLikeStatus } = args;
+
+    if (currentLike.status === nextLikeStatus) {
+      return;
+    }
+
+    if (currentLike.status === LikeStatus.Like) {
+      this.likesInfo.likesCount -= 1;
+    }
+
+    if (currentLike.status === LikeStatus.Dislike) {
+      this.likesInfo.dislikesCount -= 1;
+    }
+
+    if (nextLikeStatus === LikeStatus.Like) {
+      this.likesInfo.likesCount += 1;
+    }
+
+    if (nextLikeStatus === LikeStatus.Dislike) {
+      this.likesInfo.dislikesCount += 1;
+    }
+
+    this.likesInfo.likesCount = Math.max(0, this.likesInfo.likesCount);
+    this.likesInfo.dislikesCount = Math.max(0, this.likesInfo.dislikesCount);
+  }
+);
+
+CommentSchema.method('applyIncomingLikeStatus', function (likeStatus: LikeStatus) {
+  if (likeStatus === LikeStatus.Like) {
+    this.likesInfo.likesCount += 1;
+  }
+  if (likeStatus === LikeStatus.Dislike) {
+    this.likesInfo.dislikesCount += 1;
+  }
+});

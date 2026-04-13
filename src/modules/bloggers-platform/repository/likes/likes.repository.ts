@@ -20,6 +20,12 @@ export class LikesRepository {
     private LikeModel: LikeModelType
   ) {}
 
+  async getLikeByAuthorId(args: { authorId: string; parentId: string }) {
+    const { authorId, parentId } = args;
+
+    return this.LikeModel.find({ parentId, authorId }).lean().exec();
+  }
+
   async getLikesForUser(args: { authorId: string; parentIds: string[] }) {
     const { authorId, parentIds } = args;
 
