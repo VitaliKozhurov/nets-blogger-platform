@@ -1,21 +1,11 @@
 import { IBaseQueryParamsDto } from 'src/core/dto';
 import { LikeStatus } from './like.dto';
 
-/* eslint-disable @typescript-eslint/no-empty-object-type */
 export enum PostsSortBy {
   BlogName = 'blogName',
   Title = 'title',
   CreatedAt = 'createdAt',
 }
-
-export interface ICreatePostDto {
-  title: string;
-  shortDescription: string;
-  content: string;
-  blogId: string;
-}
-
-export interface IUpdatePostDto extends ICreatePostDto {}
 
 type NewestLike = {
   addedAt: string;

@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { IUpdatePostDto } from '../../dto/contracts/post.dto';
 import { LikesCountInfo, LikesCountInfoSchema } from '../likes/likes-count-info.schema';
-import { ICreatePostDto, IUpdatePostDto } from '../../dto/contracts/post.dto';
+import { CreatePostInstanceDto } from './post.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Post {
@@ -32,14 +33,14 @@ export class Post {
 
 export const PostSchema = SchemaFactory.createForClass(Post);
 
-PostSchema.static('createInstance', async function (blogName: string, dto: ICreatePostDto) {
+PostSchema.static('createInstance', async function (dto: CreatePostInstanceDto) {
   const post = new this();
 
   post.title = dto.title;
   post.shortDescription = dto.shortDescription;
   post.content = dto.content;
   post.blogId = dto.blogId;
-  post.blogName = blogName;
+  post.blogName = dto.blogName;
   post.likesInfo = { likesCount: 0, dislikesCount: 0 };
   post.deletedAt = null;
 

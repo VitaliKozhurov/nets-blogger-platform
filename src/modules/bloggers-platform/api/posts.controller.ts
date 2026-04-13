@@ -10,16 +10,14 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { PostsService } from '../application/posts.service';
-import {
-  CreatePostRequestBodyValidationDto,
-  GetPostsQueryParamsValidationDto,
-  UpdatePostRequestBodyValidationDto,
-} from '../dto/validation/post.validation';
+import { CreatePostSwagger } from '../decorators/swagger/posts/create-post-swagger.decorator';
+import { GetCommentsByPostIdQueryParamsValidationDto } from '../dto/validation/comment.validation';
+import { GetPostsQueryParamsValidationDto } from '../dto/validation/post.validation';
 import { CommentsQueryRepository } from '../repository/comments/comments-query.repository';
 import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
-import { ObjectIdValidationPipe } from 'src/core/pipes';
-import { GetCommentsByPostIdQueryParamsValidationDto } from '../dto/validation/comment.validation';
+import { CreatePostRequestDto } from './dto/posts/create-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -40,7 +38,8 @@ export class PostsController {
   }
 
   @Post()
-  async create(@Body() dto: CreatePostRequestBodyValidationDto) {
+  @CreatePostSwagger()
+  async create(@Body() dto: CreatePostRequestDto) {
     const postId = await this.postsService.create(dto);
 
     return this.postsQueryRepository.findByIdOrThrow({ postId });
