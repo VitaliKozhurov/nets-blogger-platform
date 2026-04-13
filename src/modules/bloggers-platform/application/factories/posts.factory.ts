@@ -11,7 +11,7 @@ export class PostsFactory {
     private PostModel: PostModelType
   ) {}
 
-  async createPost(dto: ICreatePostDto) {
+  async createPost(dto: ICreatePostDto & { blogName: string }) {
     const newPost = await this.PostModel.createInstance(dto);
 
     return newPost;

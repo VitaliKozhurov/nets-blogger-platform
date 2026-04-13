@@ -5,7 +5,6 @@ import { CommentsController } from './api/comments.controller';
 import { PostsController } from './api/posts.controller';
 import { BlogsFactory } from './application/factories/blogs.factory';
 import { PostsFactory } from './application/factories/posts.factory';
-import { PostsService } from './application/posts.service';
 import { CreateBlogUseCase } from './application/use-cases/blogs/create-blog.usecase';
 import { DeleteBlogUseCase } from './application/use-cases/blogs/delete-blog.usecase.dto';
 import { UpdateBlogUseCase } from './application/use-cases/blogs/update-blog.usecase';
@@ -20,12 +19,16 @@ import { CommentsQueryRepository } from './repository/comments/comments-query.re
 import { LikesRepository } from './repository/likes/likes.repository';
 import { PostsQueryRepository } from './repository/posts/posts-query.repository';
 import { PostsRepository } from './repository/posts/posts.repository';
+import { UpdatePostUseCase } from './application/use-cases/posts/update-post.usecase';
+import { DeletePostCommand } from './application/use-cases/posts/delete-post.usecase';
 
 const commandHandlers = [
   CreateBlogUseCase,
   UpdateBlogUseCase,
   DeleteBlogUseCase,
   CreatePostUseCase,
+  UpdatePostUseCase,
+  DeletePostCommand,
 ];
 
 @Module({

@@ -7,14 +7,14 @@ export class DeleteBlogCommand {
 
 @CommandHandler(DeleteBlogCommand)
 export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
-  constructor(private blogRepository: BlogsRepository) {}
+  constructor(private blogsRepository: BlogsRepository) {}
 
   async execute({ id }: DeleteBlogCommand): Promise<boolean> {
-    const blog = await this.blogRepository.getByIdOrFail(id);
+    const blog = await this.blogsRepository.getByIdOrFail(id);
 
     blog.softDelete();
 
-    await this.blogRepository.save(blog);
+    await this.blogsRepository.save(blog);
 
     return true;
   }

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IUpdatePostDto } from '../../dto/contracts/post.dto';
+
 import { LikesCountInfo, LikesCountInfoSchema } from '../likes/likes-count-info.schema';
-import { CreatePostInstanceDto } from './post.dto';
+import { CreatePostInstanceDto, UpdatePostDto } from './post.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Post {
@@ -53,7 +53,7 @@ PostSchema.method('softDelete', function () {
   }
 });
 
-PostSchema.method('update', function (dto: IUpdatePostDto) {
+PostSchema.method('update', function (dto: UpdatePostDto) {
   this.title = dto.title;
   this.shortDescription = dto.shortDescription;
   this.content = dto.content;

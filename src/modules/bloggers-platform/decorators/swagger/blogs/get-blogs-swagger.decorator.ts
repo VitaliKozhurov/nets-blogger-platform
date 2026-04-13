@@ -9,7 +9,7 @@ export const GetBlogsSwagger = () => {
     ApiOperation({
       summary: 'Retrieve blogs list',
       description:
-        'Fetches a paginated list of users with support for filtering, sorting, and searching. Returns users based on the provided query parameters.',
+        'Fetches a paginated list of blogs with support for filtering, sorting, and searching. Returns blogs based on the provided query parameters.',
     }),
     ApiQuery({ type: GetBlogsQueryDto }),
     ApiOkResponsePaginated(BlogResponseDto)

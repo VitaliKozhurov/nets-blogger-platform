@@ -1,11 +1,4 @@
-import { IBaseQueryParamsDto } from 'src/core/dto';
 import { LikeStatus } from './like.dto';
-
-export enum PostsSortBy {
-  BlogName = 'blogName',
-  Title = 'title',
-  CreatedAt = 'createdAt',
-}
 
 type NewestLike = {
   addedAt: string;
@@ -27,8 +20,4 @@ export interface IPostResponseDto {
     myStatus: LikeStatus;
     newestLikes: NewestLike[];
   };
-}
-
-export interface IGetPostsQueryParamsDto extends IBaseQueryParamsDto {
-  sortBy: PostsSortBy;
 }

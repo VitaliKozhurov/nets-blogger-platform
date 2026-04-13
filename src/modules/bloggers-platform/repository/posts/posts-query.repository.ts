@@ -6,11 +6,11 @@ import { Post } from '../../domain/posts/post.schema';
 import { PostDocument, type PostModelType } from '../../domain/posts/post.types';
 
 import { LikesRepository } from '../likes/likes.repository';
-import { IGetPostsQueryParamsDto } from '../../dto/contracts/post.dto';
 import { getPaginationParams } from 'src/core/utils';
 import { PaginationResponseMapperDto } from 'src/core/dto';
 import { PostResponseMapperDto } from '../../dto/mappers/post.mapper';
 import { LikeStatus } from '../../dto/contracts/like.dto';
+import { IGetPostsQueryParamsDto } from '../../api/dto/posts/get-posts-query.dto';
 
 @Injectable()
 export class PostsQueryRepository {
