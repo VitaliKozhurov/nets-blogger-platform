@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 import { IsStringWithTrim } from 'src/core/decorators';
 
@@ -41,3 +41,5 @@ export class CreatePostRequestDto {
   @IsString()
   blogId: string;
 }
+
+export class CreatePostByBlogIdRequestDto extends OmitType(CreatePostRequestDto, ['blogId']) {}

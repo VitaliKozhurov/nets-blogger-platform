@@ -1,5 +1,5 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { UpdateBlogRequestDto } from '../../../api/dto/blogs/update-blog.dto';
 import { ApiErrorResponse } from 'src/core/decorators';
 
@@ -12,6 +12,12 @@ export const UpdateBlogSwagger = () => {
     ApiBody({
       type: UpdateBlogRequestDto,
       description: 'Blog update data including name, description, and website URL',
+    }),
+    ApiParam({
+      name: 'id',
+      description: 'Unique identifier of the blog',
+      example: '507f1f77bcf86cd799439011',
+      required: true,
     }),
     ApiResponse({
       status: HttpStatus.NO_CONTENT,
