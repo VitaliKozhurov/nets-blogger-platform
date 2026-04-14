@@ -1,4 +1,4 @@
-import { RequestUserDto } from '../../../../users-account/application/dto/request-user.dto';
+import { RequestUserDto } from 'src/modules/users-account/contracts';
 
 export interface IUpdateCommentContentDto extends RequestUserDto {
   id: string;

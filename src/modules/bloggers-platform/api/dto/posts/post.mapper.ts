@@ -1,6 +1,5 @@
 import { PostDocument } from '../../../domain/posts/post.types';
-import { LikeStatus } from '../../../dto/contracts/like.dto';
-import { LikeDocument } from '../../../domain/likes/like.types';
+import { LikeDocument, LikeStatus } from '../../../domain/likes';
 
 export class PostResponseMapperDto {
   id: string;

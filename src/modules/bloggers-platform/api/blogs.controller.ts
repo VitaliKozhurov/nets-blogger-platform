@@ -13,25 +13,29 @@ import {
 
 import { CommandBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
-import { CreateBlogCommand } from '../application/use-cases/blogs/create-blog.usecase';
-import { DeleteBlogCommand } from '../application/use-cases/blogs/delete-blog.usecase.dto';
-import { UpdateBlogCommand } from '../application/use-cases/blogs/update-blog.usecase';
-import { CreateBlogSwagger } from '../decorators/swagger/blogs/create-blog-swagger.decorator';
-import { DeleteBlogSwagger } from '../decorators/swagger/blogs/delete-blog-swagger.decorator';
-import { GetBlogSwagger } from '../decorators/swagger/blogs/get-blog-swagger.decorator';
-import { GetBlogsSwagger } from '../decorators/swagger/blogs/get-blogs-swagger.decorator';
-import { UpdateBlogSwagger } from '../decorators/swagger/blogs/update-blog-swagger.dto';
-import { BlogsQueryRepository } from '../repository/blogs/blogs-query.repository';
-import { BlogsRepository } from '../repository/blogs/blogs.repository';
-import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
-import { CreateBlogRequestDto } from './dto/blogs/create-blog.dto';
-import { GetBlogsQueryDto } from './dto/blogs/get-blogs-query.dto';
-import { UpdateBlogRequestDto } from './dto/blogs/update-blog.dto';
-import { GetPostsQueryDto } from './dto/posts/get-posts-query.dto';
-import { GetPostsByBlogIdSwagger } from '../decorators/swagger/blogs/get-posts-by-blog-id-swagger.decorator';
-import { CreatePostCommand } from '../application/use-cases/posts/create-post.usecase';
-import { CreatePostByBlogIdRequestDto } from './dto/posts/create-post.dto';
-import { CreatePostByBlogIdSwagger } from '../decorators/swagger/posts/create-post-by-blog-id-swagger.decorator';
+import {
+  CreateBlogCommand,
+  CreatePostCommand,
+  DeleteBlogCommand,
+  UpdateBlogCommand,
+} from '../application/use-cases';
+import {
+  CreateBlogSwagger,
+  CreatePostByBlogIdSwagger,
+  DeleteBlogSwagger,
+  GetBlogSwagger,
+  GetBlogsSwagger,
+  GetPostsByBlogIdSwagger,
+  UpdateBlogSwagger,
+} from '../decorators/swagger';
+import { BlogsQueryRepository, BlogsRepository, PostsQueryRepository } from '../repository';
+import {
+  CreateBlogRequestDto,
+  CreatePostByBlogIdRequestDto,
+  GetBlogsQueryDto,
+  GetPostsQueryDto,
+  UpdateBlogRequestDto,
+} from './dto';
 
 @Controller('blogs')
 export class BlogsController {

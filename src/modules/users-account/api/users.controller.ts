@@ -10,19 +10,21 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBasicAuth } from '@nestjs/swagger';
-import { DeleteUserSwagger } from '../decorators/swagger/user/delete-user-swagger.decorator';
-import { GetUsersSwagger } from '../decorators/swagger/user/get-users-swagger.decorator';
-
-import { ObjectIdValidationPipe } from 'src/core/pipes';
-import { CreateUserByAdminSwagger } from '../decorators/swagger/user/create-user-swagger.decorator';
-import { BasicAuthGuard } from '../guards/basic-auth/basic-auth.guard';
-import { UsersQueryRepository } from '../infrastructure/users-query.repository';
-import { CreateUserByAdminRequestDto } from './dto/users/create-user-by-admin.dto';
-import { GetUsersQueryDto } from './dto/users/get-users-query.dto';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreateUserByAdminCommand } from '../application/use-cases/users/create-user-by-admin.usecase';
-import { DeleteUserByAdminCommand } from '../application/use-cases/users/delete-user-by-admin.usecase';
+import { ApiBasicAuth } from '@nestjs/swagger';
+import { ObjectIdValidationPipe } from 'src/core/pipes';
+import {
+  CreateUserByAdminCommand,
+  DeleteUserByAdminCommand,
+} from '../application/use-cases';
+import {
+  CreateUserByAdminSwagger,
+  DeleteUserSwagger,
+  GetUsersSwagger,
+} from '../decorators/swagger';
+import { BasicAuthGuard } from '../guards/basic-auth/basic-auth.guard';
+import { UsersQueryRepository } from '../infrastructure';
+import { CreateUserByAdminRequestDto, GetUsersQueryDto } from './dto';
 
 @Controller('users')
 @UseGuards(BasicAuthGuard)

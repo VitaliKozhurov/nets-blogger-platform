@@ -10,31 +10,36 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { ObjectIdValidationPipe } from 'src/core/pipes';
-import { CreatePostSwagger } from '../decorators/swagger/posts/create-post-swagger.decorator';
-import { CommentsQueryRepository } from '../repository/comments/comments-query.repository';
-import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
-import { CreatePostRequestDto } from './dto/posts/create-post.dto';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreatePostCommand } from '../application/use-cases/posts/create-post.usecase';
-import { UpdatePostRequestDto } from './dto/posts/update-post.dto';
-import { UpdatePostCommand } from '../application/use-cases/posts/update-post.usecase';
-import { UpdatePostSwagger } from '../decorators/swagger/posts/update-post-swagger.decorator';
-import { DeletePostCommand } from '../application/use-cases/posts/delete-post.usecase';
-import { DeletePostSwagger } from '../decorators/swagger/posts/delete-post-swagger.decorator';
-import { GetPostsQueryDto } from './dto/posts/get-posts-query.dto';
-import { GetPostsSwagger } from '../decorators/swagger/posts/get-posts-swagger.decorator';
-import { GetPostSwagger } from '../decorators/swagger/posts/get-post-swagger.decorator';
-import { GetCommentsByPostIdQueryDto } from './dto/comments/get-comments-by-post-id-query.dto';
-import { GetCommentsByPostIdSwagger } from '../decorators/swagger/comments/get-comments-by-post-id-swagger.decorator';
-import { CreateCommentRequestDto } from './dto/comments/create-comment.dto';
-import { CreateCommentCommand } from '../application/use-cases/comments/create-comment.usecase';
-import { UserFromRequest } from 'src/modules/users-account/decorators/user-from-request.decorator';
-import { type RequestUserDto } from 'src/modules/users-account/application/dto/request-user.dto';
-import { CreateCommentByPostIdSwagger } from '../decorators/swagger/comments/create-comment-by-post-id-swagger.decorator';
-import { UpdatePostLikeStatusRequestDto } from './dto/posts/update-post-like-status.dto';
-import { UpdatePostLikeStatusSwagger } from '../decorators/swagger/posts/update-post-like-status-swagger.dto';
-import { UpdatePostLikeStatusCommand } from '../application/use-cases/posts/update-post-like-status.usecase';
+import { ObjectIdValidationPipe } from 'src/core/pipes';
+import { type RequestUserDto } from 'src/modules/users-account/contracts';
+import { UserFromRequest } from 'src/modules/users-account/decorators';
+import {
+  CreateCommentCommand,
+  CreatePostCommand,
+  DeletePostCommand,
+  UpdatePostCommand,
+  UpdatePostLikeStatusCommand,
+} from '../application/use-cases';
+import {
+  CreateCommentByPostIdSwagger,
+  GetCommentsByPostIdSwagger,
+  CreatePostSwagger,
+  DeletePostSwagger,
+  GetPostSwagger,
+  GetPostsSwagger,
+  UpdatePostSwagger,
+  UpdatePostLikeStatusSwagger,
+} from '../decorators/swagger';
+import { CommentsQueryRepository, PostsQueryRepository } from '../repository';
+import {
+  CreateCommentRequestDto,
+  CreatePostRequestDto,
+  GetCommentsByPostIdQueryDto,
+  GetPostsQueryDto,
+  UpdatePostLikeStatusRequestDto,
+  UpdatePostRequestDto,
+} from './dto';
 
 @Controller('posts')
 export class PostsController {

@@ -9,19 +9,20 @@ import { AuthController } from './api/auth.controller';
 import { UsersController } from './api/users.controller';
 import { UsersFactory } from './application/factories/users.factory';
 import { TokenService } from './application/services/token.service';
-import { RegistrationUseCase } from './application/use-cases/auth/registration.usecase';
+import {
+  CreateUserByAdminUseCase,
+  DeleteUserByAdminUseCase,
+  LoginUseCase,
+  NewUserPasswordUseCase,
+  PasswordRecoveryUseCase,
+  RegistrationConfirmationUseCase,
+  RegistrationEmailResendingUseCase,
+  RegistrationUseCase,
+} from './application/use-cases';
 import { User, UserSchema } from './domain/users/user.schema';
-import { BearerAuthGuard } from './guards/bearer-auth/bearer-auth.guard';
-import { UsersQueryRepository } from './infrastructure/users-query.repository';
-import { UsersRepository } from './infrastructure/users.repository';
-import { RegistrationConfirmationUseCase } from './application/use-cases/auth/registration-confirmation.usecase';
-import { RegistrationEmailResendingUseCase } from './application/use-cases/auth/registration-email-resending.usecase';
-import { LoginUseCase } from './application/use-cases/auth/login.usecase';
-import { PasswordRecoveryUseCase } from './application/use-cases/auth/password-recovery.usecase';
-import { NewUserPasswordUseCase } from './application/use-cases/auth/new-user-password.usecase';
-import { CreateUserByAdminUseCase } from './application/use-cases/users/create-user-by-admin.usecase';
+import { BearerAuthGuard } from './guards';
+import { UsersQueryRepository, UsersRepository } from './infrastructure';
 import { UsersService } from './application/services/users.service';
-import { DeleteUserByAdminUseCase } from './application/use-cases/users/delete-user-by-admin.usecase';
 
 const commandHandlers = [
   RegistrationUseCase,

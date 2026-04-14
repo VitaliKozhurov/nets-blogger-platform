@@ -1,16 +1,13 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { PaginationResponseMapperDto } from 'src/core/dto';
+import { getPaginationParams } from 'src/core/utils';
 
-import { LikeDocument } from '../../domain/likes/like.types';
 import { Post } from '../../domain/posts/post.schema';
 import { PostDocument, type PostModelType } from '../../domain/posts/post.types';
-
+import { LikeDocument, LikeStatus } from '../../domain/likes';
+import { IGetPostsQueryParamsDto, PostResponseMapperDto } from '../../api/dto/posts';
 import { LikesRepository } from '../likes/likes.repository';
-import { getPaginationParams } from 'src/core/utils';
-import { PaginationResponseMapperDto } from 'src/core/dto';
-import { PostResponseMapperDto } from '../../dto/mappers/post.mapper';
-import { LikeStatus } from '../../dto/contracts/like.dto';
-import { IGetPostsQueryParamsDto } from '../../api/dto/posts/get-posts-query.dto';
 
 @Injectable()
 export class PostsQueryRepository {
