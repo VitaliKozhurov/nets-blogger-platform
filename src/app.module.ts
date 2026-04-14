@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
 import { TestsModule } from './modules/tests/tests.module';
 import { UsersAccountModule } from './modules/users-account/users-account.module';
-
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
