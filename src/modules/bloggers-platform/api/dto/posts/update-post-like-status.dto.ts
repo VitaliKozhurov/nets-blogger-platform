@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { LikeStatus } from '../../../domain/likes/like.dto';
 
-export class UpdateCommentLikeStatusRequestDto {
+export class UpdatePostLikeStatusRequestDto {
   @ApiProperty({
     enum: LikeStatus,
     description: 'Like status',

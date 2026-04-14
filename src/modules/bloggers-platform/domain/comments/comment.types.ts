@@ -2,6 +2,7 @@ import { HydratedDocument, Model } from 'mongoose';
 import { Comment } from './comment.schema';
 import { LikeDocument } from '../likes/like.types';
 import { LikeStatus } from '../likes/like.dto';
+import { CreateCommentInstanceDto } from './comment.dto';
 
 export type CommentDocument = HydratedDocument<Comment, CommentMethodsType>;
 
@@ -13,7 +14,7 @@ export type CommentMethodsType = {
 };
 
 export type CommentStaticMethodsType = {
-  someMethod(): void;
+  createInstance(dto: CreateCommentInstanceDto): CommentDocument;
 };
 
 export type CommentModelType = Model<CommentDocument, unknown, CommentMethodsType> &

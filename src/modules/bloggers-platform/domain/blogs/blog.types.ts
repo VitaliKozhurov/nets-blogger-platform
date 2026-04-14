@@ -1,16 +1,16 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { ICreateBlogDto, IUpdateBlogDto } from '../../dto/contracts/blog.dto';
 import { Blog } from './blog.schema';
+import { CreateBlogInstanceDto, UpdateBlogDto } from './blog.dto';
 
 export type BlogDocument = HydratedDocument<Blog, BlogMethodsType>;
 
 export type BlogMethodsType = {
   softDelete(): void;
-  update(dto: IUpdateBlogDto): BlogDocument;
+  update(dto: UpdateBlogDto): BlogDocument;
 };
 
 export type BlogStaticMethodsType = {
-  createInstance(dto: ICreateBlogDto): Promise<BlogDocument>;
+  createInstance(dto: CreateBlogInstanceDto): Promise<BlogDocument>;
 };
 
 export type BlogModelType = Model<BlogDocument, unknown, BlogMethodsType> & BlogStaticMethodsType;

@@ -25,6 +25,9 @@ import { CommentsRepository } from './repository/comments/comments.repository';
 import { DeleteCommentUseCase } from './application/use-cases/comments/delete-comment.usecase';
 import { UpdateCommentContentUseCase } from './application/use-cases/comments/update-comment-content.usecase';
 import { LikesFactory } from './application/factories/likes.factory';
+import { CommentsFactory } from './application/factories/comments.factory';
+import { CreateCommentUseCase } from './application/use-cases/comments/create-comment.usecase';
+import { UpdatePostLikeStatusUseCase } from './application/use-cases/posts/update-post-like-status.usecase';
 
 const commandHandlers = [
   CreateBlogUseCase,
@@ -35,6 +38,8 @@ const commandHandlers = [
   DeletePostCommand,
   UpdateCommentContentUseCase,
   DeleteCommentUseCase,
+  CreateCommentUseCase,
+  UpdatePostLikeStatusUseCase,
 ];
 
 @Module({
@@ -56,7 +61,8 @@ const commandHandlers = [
     LikesRepository,
     BlogsFactory,
     PostsFactory,
-    LikesFactory
+    CommentsFactory,
+    LikesFactory,
   ],
   exports: [],
 })

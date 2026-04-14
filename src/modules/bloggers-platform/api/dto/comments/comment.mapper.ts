@@ -1,8 +1,7 @@
-import { CommentDocument } from '../../domain/comments/comment.types';
-import { ICommentResponseDto } from '../contracts/comment.dto';
-import { LikeStatus } from '../contracts/like.dto';
+import { CommentDocument } from '../../../domain/comments/comment.types';
+import { LikeStatus } from '../../../domain/likes/like.dto';
 
-export class CommentResponseMapperDto implements ICommentResponseDto {
+export class CommentResponseMapperDto {
   id: string;
   content: string;
   commentatorInfo: { userId: string; userLogin: string };
@@ -12,7 +11,11 @@ export class CommentResponseMapperDto implements ICommentResponseDto {
     dislikesCount: number;
     myStatus: LikeStatus;
   };
-  static mapToView(commentDocument: CommentDocument, myStatus: LikeStatus): ICommentResponseDto {
+
+  static mapToView(
+    commentDocument: CommentDocument,
+    myStatus: LikeStatus
+  ): CommentResponseMapperDto {
     const dto = new CommentResponseMapperDto();
 
     dto.id = commentDocument._id.toString();

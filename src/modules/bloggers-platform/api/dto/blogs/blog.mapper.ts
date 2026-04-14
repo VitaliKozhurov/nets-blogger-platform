@@ -1,4 +1,4 @@
-import { BlogDocument } from 'src/modules/bloggers-platform/domain/blogs/blog.types';
+import { BlogDocument } from '../../../domain/blogs/blog.types';
 
 export class BlogResponseMapperDto {
   id: string;

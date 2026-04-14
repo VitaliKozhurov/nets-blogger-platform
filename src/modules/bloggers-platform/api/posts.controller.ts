@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { CreatePostSwagger } from '../decorators/swagger/posts/create-post-swagger.decorator';
-import { GetCommentsByPostIdQueryParamsValidationDto } from '../dto/validation/comment.validation';
 import { CommentsQueryRepository } from '../repository/comments/comments-query.repository';
 import { PostsQueryRepository } from '../repository/posts/posts-query.repository';
 import { CreatePostRequestDto } from './dto/posts/create-post.dto';
@@ -26,6 +25,16 @@ import { DeletePostSwagger } from '../decorators/swagger/posts/delete-post-swagg
 import { GetPostsQueryDto } from './dto/posts/get-posts-query.dto';
 import { GetPostsSwagger } from '../decorators/swagger/posts/get-posts-swagger.decorator';
 import { GetPostSwagger } from '../decorators/swagger/posts/get-post-swagger.decorator';
+import { GetCommentsByPostIdQueryDto } from './dto/comments/get-comments-by-post-id-query.dto';
+import { GetCommentsByPostIdSwagger } from '../decorators/swagger/comments/get-comments-by-post-id-swagger.decorator';
+import { CreateCommentRequestDto } from './dto/comments/create-comment.dto';
+import { CreateCommentCommand } from '../application/use-cases/comments/create-comment.usecase';
+import { UserFromRequest } from 'src/modules/users-account/decorators/user-from-request.decorator';
+import { type RequestUserDto } from 'src/modules/users-account/application/dto/request-user.dto';
+import { CreateCommentByPostIdSwagger } from '../decorators/swagger/comments/create-comment-by-post-id-swagger.decorator';
+import { UpdatePostLikeStatusRequestDto } from './dto/posts/update-post-like-status.dto';
+import { UpdatePostLikeStatusSwagger } from '../decorators/swagger/posts/update-post-like-status-swagger.dto';
+import { UpdatePostLikeStatusCommand } from '../application/use-cases/posts/update-post-like-status.usecase';
 
 @Controller('posts')
 export class PostsController {
@@ -77,10 +86,45 @@ export class PostsController {
   }
 
   @Get(':id/comments')
+  @GetCommentsByPostIdSwagger()
   async getPostComments(
     @Param('id', ObjectIdValidationPipe) id: string,
-    @Query() query: GetCommentsByPostIdQueryParamsValidationDto
+    @Query() query: GetCommentsByPostIdQueryDto
   ) {
     return this.commentsQueryRepository.getAllByPostId({ postId: id, query });
+  }
+
+  @Post(':id/comments')
+  @CreateCommentByPostIdSwagger()
+  async createCommentForPost(
+    @Param('id', ObjectIdValidationPipe) id: string,
+    @Body() dto: CreateCommentRequestDto,
+    @UserFromRequest() userDto: RequestUserDto
+  ) {
+    const commentId = await this.commandBus.execute<CreateCommentCommand, string>(
+      new CreateCommentCommand({
+        id,
+        ...dto,
+        ...userDto,
+      })
+    );
+
+    return this.commentsQueryRepository.findByIdOrThrow({ commentId });
+  }
+
+  @Put(':id/like-status')
+  @UpdatePostLikeStatusSwagger()
+  async updateLikeStatusForPost(
+    @Param('id', ObjectIdValidationPipe) id: string,
+    @Body() dto: UpdatePostLikeStatusRequestDto,
+    @UserFromRequest() userDto: RequestUserDto
+  ) {
+    return this.commandBus.execute(
+      new UpdatePostLikeStatusCommand({
+        id,
+        ...dto,
+        ...userDto,
+      })
+    );
   }
 }

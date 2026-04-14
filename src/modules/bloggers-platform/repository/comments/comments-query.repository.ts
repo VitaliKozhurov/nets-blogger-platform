@@ -3,11 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from '../../domain/comments/comment.schema';
 import { type CommentModelType } from '../../domain/comments/comment.types';
 import { LikesRepository } from '../likes/likes.repository';
-import { IGetCommentsByPostIdQueryParamsDto } from '../../dto/contracts/comment.dto';
+
 import { PaginationResponseMapperDto } from 'src/core/dto';
 import { getPaginationParams } from 'src/core/utils';
-import { CommentResponseMapperDto } from '../../dto/mappers/comment.mapper';
-import { LikeStatus } from '../../dto/contracts/like.dto';
+import { LikeStatus } from '../../domain/likes/like.dto';
+import { CommentResponseMapperDto } from '../../api/dto/comments/comment.mapper';
+import { IGetCommentsByPostIdQueryDto } from '../../api/dto/comments/get-comments-by-post-id-query.dto';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -19,7 +20,7 @@ export class CommentsQueryRepository {
   async getAllByPostId(args: {
     postId: string;
     userId?: string;
-    query: IGetCommentsByPostIdQueryParamsDto;
+    query: IGetCommentsByPostIdQueryDto;
   }): Promise<PaginationResponseMapperDto<CommentResponseMapperDto[]>> {
     const { postId, userId, query } = args;
     const { sort, skip, limit } = getPaginationParams(query);

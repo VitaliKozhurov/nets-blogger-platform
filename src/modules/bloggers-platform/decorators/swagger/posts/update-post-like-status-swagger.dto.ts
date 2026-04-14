@@ -1,13 +1,13 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/core/decorators';
-import { UpdateCommentLikeStatusRequestDto } from '../../../api/dto/comments/update-comment-like-status.dto';
+import { UpdatePostLikeStatusRequestDto } from '../../../api/dto/posts/update-post-like-status.dto';
 
-export const UpdateCommentLikeStatusSwagger = () => {
+export const UpdatePostLikeStatusSwagger = () => {
   return applyDecorators(
     ApiOperation({
-      summary: 'Update a comment like status',
-      description: 'Update a comment like status by ID.',
+      summary: 'Update a post like status',
+      description: 'Update a post like status by ID.',
     }),
     ApiParam({
       name: 'id',
@@ -16,12 +16,12 @@ export const UpdateCommentLikeStatusSwagger = () => {
       required: true,
     }),
     ApiBody({
-      type: UpdateCommentLikeStatusRequestDto,
-      description: 'Comment update data including like status',
+      type: UpdatePostLikeStatusRequestDto,
+      description: 'Post update data including like status',
     }),
     ApiResponse({
       status: HttpStatus.NO_CONTENT,
-      description: 'Comment successfully updated. No content returned.',
+      description: 'Post successfully updated. No content returned.',
     }),
     ApiErrorResponse({
       status: HttpStatus.BAD_REQUEST,
@@ -38,7 +38,7 @@ export const UpdateCommentLikeStatusSwagger = () => {
     }),
     ApiErrorResponse({
       status: HttpStatus.NOT_FOUND,
-      description: 'Comment with the specified ID was not found.',
+      description: 'Post with the specified ID was not found.',
     })
   );
 };

@@ -3,6 +3,7 @@ import { LikesCountInfo, LikesCountInfoSchema } from '../likes/likes-count-info.
 import { CommentatorInfo, CommentatorInfoSchema } from './commentator-info.schema';
 import { LikeDocument } from '../likes/like.types';
 import { LikeStatus } from '../likes/like.dto';
+import { CreateCommentInstanceDto } from './comment.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Comment {
@@ -27,6 +28,22 @@ export class Comment {
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
+
+CommentSchema.static('createInstance', function (dto: CreateCommentInstanceDto) {
+  const comment = new this();
+
+  comment.content = dto.content;
+
+  const commentatorInfo = {
+    userId: dto.userId,
+    userLogin: dto.login,
+  };
+
+  comment.commentatorInfo = commentatorInfo;
+  comment.likesInfo = { likesCount: 0, dislikesCount: 0 };
+
+  return comment;
+});
 
 CommentSchema.method('softDelete', function () {
   if (!this.deletedAt) {

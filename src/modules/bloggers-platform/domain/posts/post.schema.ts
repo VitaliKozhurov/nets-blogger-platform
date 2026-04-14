@@ -2,6 +2,8 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { LikesCountInfo, LikesCountInfoSchema } from '../likes/likes-count-info.schema';
 import { CreatePostInstanceDto, UpdatePostDto } from './post.dto';
+import { LikeStatus } from '../likes/like.dto';
+import { LikeDocument } from '../likes/like.types';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Post {
@@ -60,4 +62,43 @@ PostSchema.method('update', function (dto: UpdatePostDto) {
   this.blogId = dto.blogId;
 
   return this;
+});
+
+PostSchema.method(
+  'updateLikesInfo',
+  function (args: { currentLike: LikeDocument; nextLikeStatus: LikeStatus }) {
+    const { currentLike, nextLikeStatus } = args;
+
+    if (currentLike.status === nextLikeStatus) {
+      return;
+    }
+
+    if (currentLike.status === LikeStatus.Like) {
+      this.likesInfo.likesCount -= 1;
+    }
+
+    if (currentLike.status === LikeStatus.Dislike) {
+      this.likesInfo.dislikesCount -= 1;
+    }
+
+    if (nextLikeStatus === LikeStatus.Like) {
+      this.likesInfo.likesCount += 1;
+    }
+
+    if (nextLikeStatus === LikeStatus.Dislike) {
+      this.likesInfo.dislikesCount += 1;
+    }
+
+    this.likesInfo.likesCount = Math.max(0, this.likesInfo.likesCount);
+    this.likesInfo.dislikesCount = Math.max(0, this.likesInfo.dislikesCount);
+  }
+);
+
+PostSchema.method('applyIncomingLikeStatus', function (likeStatus: LikeStatus) {
+  if (likeStatus === LikeStatus.Like) {
+    this.likesInfo.likesCount += 1;
+  }
+  if (likeStatus === LikeStatus.Dislike) {
+    this.likesInfo.dislikesCount += 1;
+  }
 });
