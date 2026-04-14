@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { LikeStatus } from 'src/modules/bloggers-platform/dto/contracts/like.dto';
 import { IPostResponseDto } from '../../../application/dto/posts/post-response.dto';
+import { LikeStatus } from '../../../domain/likes/like.dto';
 
 class NewestLike {
   @ApiProperty({

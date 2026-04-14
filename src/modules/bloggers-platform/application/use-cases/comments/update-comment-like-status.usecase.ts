@@ -3,8 +3,8 @@ import { CommentsRepository } from '../../../repository/comments/comments.reposi
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { IUpdateCommentLikeStatusDto } from '../../dto/comments/update-comment-like-status.dto';
 import { LikesRepository } from '../../../repository/likes/likes.repository';
-import { LikeStatus } from '../../../dto/contracts/like.dto';
 import { LikesFactory } from '../../factories/likes.factory';
+import { LikeStatus } from '../../../domain/likes/like.dto';
 
 export class UpdateCommentLikeStatusCommand {
   constructor(public dto: IUpdateCommentLikeStatusDto) {}
@@ -51,15 +51,20 @@ export class UpdateCommentLikeStatusUseCase implements ICommandHandler<UpdateCom
 
       comment.applyIncomingLikeStatus(likeStatus);
 
-      await this.likesRepository.
-      await this.commentsRepository.save(comment)
+      await this.likesRepository.save(currentLike);
+      await this.commentsRepository.save(comment);
+
+      return true;
     }
 
     comment.updateLikesInfo({
-      currentLike,
+      currentLike: like,
       nextLikeStatus: likeStatus,
     });
 
+    like.updateLikeStatus(likeStatus);
+
+    await this.likesRepository.save(like);
     await this.commentsRepository.save(comment);
 
     return true;

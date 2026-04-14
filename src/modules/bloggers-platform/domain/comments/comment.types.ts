@@ -1,9 +1,9 @@
 import { HydratedDocument, Model } from 'mongoose';
 import { Comment } from './comment.schema';
-import { LikeStatus } from '../../dto/contracts/like.dto';
 import { LikeDocument } from '../likes/like.types';
+import { LikeStatus } from '../likes/like.dto';
 
-export type CommentDocument = HydratedDocument<Comment>;
+export type CommentDocument = HydratedDocument<Comment, CommentMethodsType>;
 
 export type CommentMethodsType = {
   softDelete(): void;

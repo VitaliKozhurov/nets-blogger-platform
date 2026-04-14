@@ -1,11 +1,11 @@
 import { HydratedDocument, Model } from 'mongoose';
 import { Like } from './like.schema';
-import { CreateLikeDto } from './like.dto';
+import { CreateLikeDto, LikeStatus } from './like.dto';
 
-export type LikeDocument = HydratedDocument<Like>;
+export type LikeDocument = HydratedDocument<Like, LikeMethodsType>;
 
 export type LikeMethodsType = {
-  someMethod(): void;
+  updateLikeStatus(likeStatus: LikeStatus): void;
 };
 
 export type LikeStaticMethodsType = {

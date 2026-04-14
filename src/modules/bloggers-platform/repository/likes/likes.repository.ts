@@ -4,7 +4,7 @@ import { Like } from '../../domain/likes/like.schema';
 import { LikeDocument, type LikeModelType } from '../../domain/likes/like.types';
 
 import { Types } from 'mongoose';
-import { LikeStatus } from '../../dto/contracts/like.dto';
+import { LikeStatus } from '../../domain/likes/like.dto';
 
 const LIKES_LIMIT_COUNT = 3;
 
@@ -23,7 +23,7 @@ export class LikesRepository {
   async getLikeByAuthorId(args: { authorId: string; parentId: string }) {
     const { authorId, parentId } = args;
 
-    return this.LikeModel.find({ parentId, authorId }).lean().exec();
+    return this.LikeModel.findOne({ parentId, authorId }).lean().exec();
   }
 
   async getLikesForUser(args: { authorId: string; parentIds: string[] }) {
@@ -78,5 +78,9 @@ export class LikesRepository {
         },
       },
     ]);
+  }
+
+  async save(likeDocument: LikeDocument) {
+    await likeDocument.save();
   }
 }

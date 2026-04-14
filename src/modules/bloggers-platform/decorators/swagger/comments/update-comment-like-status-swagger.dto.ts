@@ -1,13 +1,13 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/core/decorators';
-import { UpdateCommentContentRequestDto } from '../../../api/dto/comments/update-comment-content.dto';
+import { UpdateCommentLikeStatusRequestDto } from '../../../api/dto/comments/update-comment-like-status.dto';
 
-export const UpdateCommentContentSwagger = () => {
+export const UpdateCommentLikeStatusSwagger = () => {
   return applyDecorators(
     ApiOperation({
-      summary: 'Update a comment content',
-      description: 'Update a comment content by ID.',
+      summary: 'Update a comment like status',
+      description: 'Update a comment like status by ID.',
     }),
     ApiParam({
       name: 'id',
@@ -16,7 +16,7 @@ export const UpdateCommentContentSwagger = () => {
       required: true,
     }),
     ApiBody({
-      type: UpdateCommentContentRequestDto,
+      type: UpdateCommentLikeStatusRequestDto,
       description: 'Comment update data including content',
     }),
     ApiResponse({
@@ -29,16 +29,12 @@ export const UpdateCommentContentSwagger = () => {
       example: {
         code: 'Error code',
         message: 'Error message',
-        extensions: [{ field: 'content', message: 'Content too large' }],
+        extensions: [{ field: 'likeStatus', message: 'Incorrect like status' }],
       },
     }),
     ApiErrorResponse({
       status: HttpStatus.UNAUTHORIZED,
       description: 'Unauthorized error.',
-    }),
-    ApiErrorResponse({
-      status: HttpStatus.FORBIDDEN,
-      description: 'Try delete the comment that is not your own.',
     }),
     ApiErrorResponse({
       status: HttpStatus.NOT_FOUND,

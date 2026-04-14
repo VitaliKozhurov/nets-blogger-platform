@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
-import { LikeStatus } from 'src/modules/bloggers-platform/dto/contracts/like.dto';
+import { LikeStatus } from '../../../domain/likes/like.dto';
 
 export class UpdateCommentLikeStatusRequestDto {
   @ApiProperty({

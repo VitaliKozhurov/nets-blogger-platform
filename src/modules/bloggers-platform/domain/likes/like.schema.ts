@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { LikeStatus } from '../../dto/contracts/like.dto';
-import { CreateLikeDto } from './like.dto';
+
+import { CreateLikeDto, LikeStatus } from './like.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Like {
@@ -40,4 +40,8 @@ LikeSchema.static('createInstance', async function (dto: CreateLikeDto) {
   like.deletedAt = null;
 
   return like;
+});
+
+LikeSchema.method('updateLikeStatus', function updateLikeStatus(likeStatus: LikeStatus) {
+  this.status = likeStatus;
 });

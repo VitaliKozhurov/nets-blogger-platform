@@ -23,6 +23,8 @@ import { UpdateCommentContentCommand } from '../application/use-cases/comments/u
 import { UpdateCommentContentSwagger } from '../decorators/swagger/comments/update-comment-content-swagger.dto';
 import { UpdateCommentLikeStatusRequestDto } from './dto/comments/update-comment-like-status.dto';
 import { UpdateCommentLikeStatusCommand } from '../application/use-cases/comments/update-comment-like-status.usecase';
+import { UpdateCommentLikeStatusSwagger } from '../decorators/swagger/comments/update-comment-like-status-swagger.dto';
+import { GetCommentSwagger } from '../decorators/swagger/comments/get-comment-swagger.decorator';
 
 @UseGuards(BearerAuthGuard)
 @Controller('comments')
@@ -33,22 +35,25 @@ export class CommentsController {
   ) {}
 
   @Get(':id')
+  @GetCommentSwagger()
   @Public()
   async getById(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.commentsQueryRepository.findByIdOrThrow({ commentId: id });
   }
 
   @Put(':id')
-  // @UpdateCommentContentSwagger()
+  @UpdateCommentLikeStatusSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikeStatus(
     @Param('id', ObjectIdValidationPipe) id: string,
-    @Body() dto: UpdateCommentLikeStatusRequestDto
+    @Body() dto: UpdateCommentLikeStatusRequestDto,
+    @UserFromRequest() userDto: RequestUserDto
   ) {
     return this.commandBus.execute(
       new UpdateCommentLikeStatusCommand({
         id,
         ...dto,
+        ...userDto,
       })
     );
   }

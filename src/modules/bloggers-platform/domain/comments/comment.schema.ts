@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { LikesCountInfo, LikesCountInfoSchema } from '../likes/likes-count-info.schema';
 import { CommentatorInfo, CommentatorInfoSchema } from './commentator-info.schema';
-import { LikeStatus } from '../../dto/contracts/like.dto';
 import { LikeDocument } from '../likes/like.types';
+import { LikeStatus } from '../likes/like.dto';
 
 @Schema({ timestamps: true, versionKey: false })
 export class Comment {

@@ -1,4 +1,4 @@
-import { LikeStatus } from 'src/modules/bloggers-platform/dto/contracts/like.dto';
+import { LikeStatus } from '../../../domain/likes/like.dto';
 
 export interface IPostResponseDto {
   id: string;
