@@ -36,6 +36,7 @@ import {
   GetPostsQueryDto,
   UpdateBlogRequestDto,
 } from './dto';
+import { UseBasicGuard } from 'src/modules/users-account/decorators';
 
 @Controller('blogs')
 export class BlogsController {
@@ -59,6 +60,7 @@ export class BlogsController {
   }
 
   @Post()
+  @UseBasicGuard()
   @CreateBlogSwagger()
   async create(@Body() dto: CreateBlogRequestDto) {
     const blogId = await this.commandBus.execute<CreateBlogCommand, string>(
@@ -69,6 +71,7 @@ export class BlogsController {
   }
 
   @Put(':id')
+  @UseBasicGuard()
   @UpdateBlogSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async update(@Param('id', ObjectIdValidationPipe) id: string, @Body() dto: UpdateBlogRequestDto) {
@@ -81,6 +84,7 @@ export class BlogsController {
   }
 
   @Delete(':id')
+  @UseBasicGuard()
   @DeleteBlogSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ObjectIdValidationPipe) id: string) {
@@ -99,6 +103,7 @@ export class BlogsController {
   }
 
   @Post(':id/posts')
+  @UseBasicGuard()
   @CreatePostByBlogIdSwagger()
   async createPost(
     @Param('id', ObjectIdValidationPipe) id: string,

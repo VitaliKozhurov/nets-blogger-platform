@@ -32,6 +32,8 @@ import {
   PostsQueryRepository,
   PostsRepository,
 } from './repository';
+import { UsersAccountModule } from '../users-account/users-account.module';
+import { JwtModule } from '@nestjs/jwt';
 
 const commandHandlers = [
   CreateBlogUseCase,
@@ -52,6 +54,8 @@ const commandHandlers = [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     MongooseModule.forFeature([{ name: Like.name, schema: LikeSchema }]),
+    JwtModule,
+    UsersAccountModule,
   ],
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [

@@ -8,26 +8,23 @@ import {
   Param,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiBasicAuth } from '@nestjs/swagger';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
-import {
-  CreateUserByAdminCommand,
-  DeleteUserByAdminCommand,
-} from '../application/use-cases';
+import { CreateUserByAdminCommand, DeleteUserByAdminCommand } from '../application/use-cases';
 import {
   CreateUserByAdminSwagger,
   DeleteUserSwagger,
   GetUsersSwagger,
 } from '../decorators/swagger';
-import { BasicAuthGuard } from '../guards/basic-auth/basic-auth.guard';
 import { UsersQueryRepository } from '../infrastructure';
 import { CreateUserByAdminRequestDto, GetUsersQueryDto } from './dto';
+import { UseBasicGuard } from '../decorators';
 
+// @UseGuards(BasicAuthGuard)
 @Controller('users')
-@UseGuards(BasicAuthGuard)
+@UseBasicGuard()
 @ApiBasicAuth('basicAuth')
 export class UsersController {
   constructor(

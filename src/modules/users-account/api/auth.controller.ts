@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
@@ -22,7 +22,6 @@ import {
 } from '../decorators/swagger';
 import { type RequestUserDto } from '../contracts';
 import { UserFromRequest } from '../decorators';
-import { BearerAuthGuard } from '../guards';
 import {
   LoginRequestDto,
   NewPasswordRequestDto,
@@ -31,6 +30,7 @@ import {
   RegistrationEmailResendingRequestDto,
   RegistrationRequestDto,
 } from './dto';
+import { UseBearerGuard } from '../decorators/use-bearer-guard.decorator';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
@@ -83,7 +83,8 @@ export class AuthController {
   @Get('me')
   @SkipThrottle()
   @ApiBearerAuth('bearerAuth')
-  @UseGuards(BearerAuthGuard)
+  // @UseGuards(BearerAuthGuard)
+  @UseBearerGuard()
   @MeSwagger()
   async me(@UserFromRequest() dto: RequestUserDto) {
     return dto;

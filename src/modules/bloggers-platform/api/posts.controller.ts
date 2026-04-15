@@ -13,7 +13,7 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { type RequestUserDto } from 'src/modules/users-account/contracts';
-import { UserFromRequest } from 'src/modules/users-account/decorators';
+import { UseBasicGuard, UserFromRequest } from 'src/modules/users-account/decorators';
 import {
   CreateCommentCommand,
   CreatePostCommand,
@@ -40,8 +40,10 @@ import {
   UpdatePostLikeStatusRequestDto,
   UpdatePostRequestDto,
 } from './dto';
+import { Public } from 'src/modules/users-account/guards';
 
 @Controller('posts')
+@UseBasicGuard()
 export class PostsController {
   constructor(
     private commandBus: CommandBus,
@@ -50,12 +52,14 @@ export class PostsController {
   ) {}
 
   @Get()
+  @Public()
   @GetPostsSwagger()
   async findAll(@Query() query: GetPostsQueryDto) {
     return this.postsQueryRepository.findAll({ query });
   }
 
   @Get(':id')
+  @Public()
   @GetPostSwagger()
   async getById(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.postsQueryRepository.findByIdOrThrow({ postId: id });
@@ -91,6 +95,7 @@ export class PostsController {
   }
 
   @Get(':id/comments')
+  @Public()
   @GetCommentsByPostIdSwagger()
   async getPostComments(
     @Param('id', ObjectIdValidationPipe) id: string,

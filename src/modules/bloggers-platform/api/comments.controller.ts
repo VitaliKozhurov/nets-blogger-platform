@@ -1,19 +1,9 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Put } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { type RequestUserDto } from 'src/modules/users-account/contracts';
-import { UserFromRequest } from 'src/modules/users-account/decorators';
-import { BearerAuthGuard, Public } from 'src/modules/users-account/guards';
+import { UseBearerGuard, UserFromRequest } from 'src/modules/users-account/decorators';
+import { Public } from 'src/modules/users-account/guards';
 import {
   DeleteCommentCommand,
   UpdateCommentContentCommand,
@@ -28,8 +18,9 @@ import {
 import { CommentsQueryRepository } from '../repository';
 import { UpdateCommentContentRequestDto, UpdateCommentLikeStatusRequestDto } from './dto';
 
-@UseGuards(BearerAuthGuard)
+// @UseGuards(BearerAuthGuard)
 @Controller('comments')
+@UseBearerGuard()
 export class CommentsController {
   constructor(
     private commandBus: CommandBus,

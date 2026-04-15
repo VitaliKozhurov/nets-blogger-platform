@@ -1,20 +1,19 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { EnvVariables } from 'src/config/env.interface';
 
 @Injectable()
 export class TokenService {
   constructor(
-    private jwtService: JwtService,
-    private readonly configService: ConfigService
+    @Inject('ACCESS_TOKEN_STRATEGY_INJECT_TOKEN')
+    private jwtService: JwtService
+    // private readonly configService: ConfigService
   ) {}
 
   async createAccessToken(dto: { userId: string; login: string }) {
-    const secret = this.configService.getOrThrow<string>(EnvVariables.JWT_ACCESS_TOKEN_SECRET);
-    const expiresIn = this.configService.getOrThrow<number>(EnvVariables.JWT_ACCESS_TOKEN_TTL);
+    // const secret = this.configService.getOrThrow<string>(EnvVariables.JWT_ACCESS_TOKEN_SECRET);
+    // const expiresIn = this.configService.getOrThrow<number>(EnvVariables.JWT_ACCESS_TOKEN_TTL);
 
-    const accessToken = await this.jwtService.signAsync(dto, { secret, expiresIn });
+    const accessToken = await this.jwtService.signAsync(dto);
 
     return accessToken;
   }

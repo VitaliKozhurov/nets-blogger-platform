@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CryptoModule } from '../crypto/crypto.module';
@@ -23,6 +23,7 @@ import { User, UserSchema } from './domain/users/user.schema';
 import { BearerAuthGuard } from './guards';
 import { UsersQueryRepository, UsersRepository } from './infrastructure';
 import { UsersService } from './application/services/users.service';
+import { EnvVariables } from 'src/config/env.interface';
 
 const commandHandlers = [
   RegistrationUseCase,
@@ -40,7 +41,7 @@ const commandHandlers = [
     ConfigModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     CryptoModule,
-    JwtModule.register({}),
+    JwtModule,
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 10000, limit: 5 }] }),
     NotificationsModule,
   ],
@@ -53,7 +54,34 @@ const commandHandlers = [
     UsersQueryRepository,
     BearerAuthGuard,
     TokenService,
+    {
+      provide: 'ACCESS_TOKEN_STRATEGY_INJECT_TOKEN',
+      useFactory: (configService: ConfigService): JwtService => {
+        const secret = configService.getOrThrow<string>(EnvVariables.JWT_ACCESS_TOKEN_SECRET);
+
+        const expiresIn = configService.getOrThrow<number>(EnvVariables.JWT_ACCESS_TOKEN_TTL);
+
+        return new JwtService({
+          secret,
+          signOptions: { expiresIn },
+        });
+      },
+      inject: [ConfigService],
+    },
   ],
-  exports: [],
+  exports: [BearerAuthGuard],
 })
 export class UsersAccountModule {}
+
+//  {
+// provide: ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
+// useFactory: (): JwtService => {
+//   return new JwtService({
+//     secret: 'access-token-secret', //TODO: move to env. will be in the following lessons
+//     signOptions: { expiresIn: '5m' },
+//   });
+// },
+// inject: [
+//   /*TODO: inject configService. will be in the following lessons*/
+// ],
+//     },
