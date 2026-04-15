@@ -37,10 +37,11 @@ export const setupPipesConfig = (app: INestApplication) => {
     new ValidationPipe({
       transform: true,
       whitelist: true, // cuts out fields that are not in the dto
-      forbidNonWhitelisted: true, // throws an error if fields are not in the dto
+      // forbidNonWhitelisted: true, // выбрасываем ошибку если переданы лишние ключи в dto
       stopAtFirstError: true, // only first error for each field
       exceptionFactory: (errors: ValidationError[]) => {
-        console.log('errors: ', errors);
+        // TODO!!! REMOVE
+        // console.log('errors: ', errors);
 
         const extensions = transformErrors(errors);
 

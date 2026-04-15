@@ -1,8 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { EnvVariables } from 'src/config/env.interface';
+import { ACCESS_TOKEN_STRATEGY_INJECT_TOKEN } from 'src/core/tokens';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { AccessTokenPayload } from './access-token.payload';
 import { Reflector } from '@nestjs/core';
@@ -11,8 +12,9 @@ import { IS_PUBLIC_KEY } from '../public/public.guard';
 @Injectable()
 export class BearerAuthGuard implements CanActivate {
   constructor(
-    private reflector: Reflector,
+    @Inject(ACCESS_TOKEN_STRATEGY_INJECT_TOKEN)
     private readonly jwtService: JwtService,
+    private readonly reflector: Reflector,
     private readonly configService: ConfigService
   ) {}
 

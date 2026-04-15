@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
@@ -31,6 +31,7 @@ import {
   RegistrationRequestDto,
 } from './dto';
 import { UseBearerGuard } from '../decorators/use-bearer-guard.decorator';
+import { type Response } from 'express';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
@@ -62,8 +63,17 @@ export class AuthController {
   @SkipThrottle()
   @LoginSwagger()
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginRequestDto) {
-    return this.commandBus.execute(new LoginCommand(dto));
+  async login(@Body() dto: LoginRequestDto, @Res() response: Response) {
+    const { accessToken, refreshToken } = await this.commandBus.execute<
+      LoginCommand,
+      {
+        accessToken: string;
+        refreshToken: string;
+      }
+    >(new LoginCommand(dto));
+
+    response.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+    response.send({ accessToken });
   }
 
   @Post('password-recovery')

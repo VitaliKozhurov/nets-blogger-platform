@@ -10,6 +10,7 @@ export class ObjectIdValidationPipe implements PipeTransform {
       throw new DomainException({
         code: DomainExceptionCode.BAD_REQUEST_ERROR,
         message: `Invalid ObjectId: ${value}`,
+        extensions: [{ field: 'uri param', message: 'Incorrect uri' }],
       });
     }
 

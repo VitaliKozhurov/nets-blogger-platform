@@ -13,7 +13,11 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { type RequestUserDto } from 'src/modules/users-account/contracts';
-import { UseBasicGuard, UserFromRequest } from 'src/modules/users-account/decorators';
+import {
+  UseBasicGuard,
+  UseBearerGuard,
+  UserFromRequest,
+} from 'src/modules/users-account/decorators';
 import {
   CreateCommentCommand,
   CreatePostCommand,
@@ -43,7 +47,6 @@ import {
 import { Public } from 'src/modules/users-account/guards';
 
 @Controller('posts')
-@UseBasicGuard()
 export class PostsController {
   constructor(
     private commandBus: CommandBus,
@@ -52,20 +55,19 @@ export class PostsController {
   ) {}
 
   @Get()
-  @Public()
   @GetPostsSwagger()
   async findAll(@Query() query: GetPostsQueryDto) {
     return this.postsQueryRepository.findAll({ query });
   }
 
   @Get(':id')
-  @Public()
   @GetPostSwagger()
   async getById(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.postsQueryRepository.findByIdOrThrow({ postId: id });
   }
 
   @Post()
+  @UseBasicGuard()
   @CreatePostSwagger()
   async create(@Body() dto: CreatePostRequestDto) {
     const postId = await this.commandBus.execute<CreatePostCommand, string>(
@@ -76,6 +78,7 @@ export class PostsController {
   }
 
   @Put(':id')
+  @UseBasicGuard()
   @UpdatePostSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async update(@Param('id', ObjectIdValidationPipe) id: string, @Body() dto: UpdatePostRequestDto) {
@@ -88,6 +91,7 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @UseBasicGuard()
   @DeletePostSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ObjectIdValidationPipe) id: string) {
@@ -105,6 +109,7 @@ export class PostsController {
   }
 
   @Post(':id/comments')
+  @UseBearerGuard()
   @CreateCommentByPostIdSwagger()
   async createCommentForPost(
     @Param('id', ObjectIdValidationPipe) id: string,
@@ -123,12 +128,15 @@ export class PostsController {
   }
 
   @Put(':id/like-status')
+  @UseBearerGuard()
   @UpdatePostLikeStatusSwagger()
   async updateLikeStatusForPost(
     @Param('id', ObjectIdValidationPipe) id: string,
     @Body() dto: UpdatePostLikeStatusRequestDto,
     @UserFromRequest() userDto: RequestUserDto
   ) {
+    console.log('HERE');
+
     return this.commandBus.execute(
       new UpdatePostLikeStatusCommand({
         id,

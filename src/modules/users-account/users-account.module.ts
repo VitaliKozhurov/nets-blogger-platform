@@ -5,6 +5,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CryptoModule } from '../crypto/crypto.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import {
+  ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
+  REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
+} from 'src/core/tokens';
 import { AuthController } from './api/auth.controller';
 import { UsersController } from './api/users.controller';
 import { UsersFactory } from './application/factories/users.factory';
@@ -55,7 +59,7 @@ const commandHandlers = [
     BearerAuthGuard,
     TokenService,
     {
-      provide: 'ACCESS_TOKEN_STRATEGY_INJECT_TOKEN',
+      provide: ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
       useFactory: (configService: ConfigService): JwtService => {
         const secret = configService.getOrThrow<string>(EnvVariables.JWT_ACCESS_TOKEN_SECRET);
 
@@ -68,20 +72,25 @@ const commandHandlers = [
       },
       inject: [ConfigService],
     },
+    {
+      provide: REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
+      useFactory: (configService: ConfigService): JwtService => {
+        const secret = configService.getOrThrow<string>(EnvVariables.JWT_REFRESH_TOKEN_SECRET);
+
+        const expiresIn = configService.getOrThrow<number>(EnvVariables.JWT_REFRESH_TOKEN_TTL);
+
+        return new JwtService({
+          secret,
+          signOptions: { expiresIn },
+        });
+      },
+      inject: [ConfigService],
+    },
   ],
-  exports: [BearerAuthGuard],
+  exports: [
+    BearerAuthGuard,
+    ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
+    REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
+  ],
 })
 export class UsersAccountModule {}
-
-//  {
-// provide: ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
-// useFactory: (): JwtService => {
-//   return new JwtService({
-//     secret: 'access-token-secret', //TODO: move to env. will be in the following lessons
-//     signOptions: { expiresIn: '5m' },
-//   });
-// },
-// inject: [
-//   /*TODO: inject configService. will be in the following lessons*/
-// ],
-//     },

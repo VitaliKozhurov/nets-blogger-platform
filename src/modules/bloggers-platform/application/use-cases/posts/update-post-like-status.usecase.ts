@@ -21,7 +21,7 @@ export class UpdatePostLikeStatusUseCase implements ICommandHandler<UpdatePostLi
   async execute({ dto }: UpdatePostLikeStatusCommand): Promise<boolean> {
     const { id, likeStatus, userId: authorId, login } = dto;
 
-    const post = await this.postsRepository.getByIdOrFail(id);
+    const post = await this.postsRepository.getById(id);
 
     if (!post) {
       throw new DomainException({

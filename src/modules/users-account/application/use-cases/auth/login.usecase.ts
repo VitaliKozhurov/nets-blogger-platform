@@ -16,7 +16,10 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
     private tokenService: TokenService
   ) {}
 
-  async execute({ dto }: LoginCommand): Promise<{ accessToken: string }> {
+  async execute({ dto }: LoginCommand): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const user = await this.usersService.validateUser(dto);
 
     if (!user) {
@@ -26,7 +29,8 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
       });
     }
     const accessToken = await this.tokenService.createAccessToken(user);
+    const refreshToken = await this.tokenService.createRefreshToken(user);
 
-    return { accessToken };
+    return { accessToken, refreshToken };
   }
 }
