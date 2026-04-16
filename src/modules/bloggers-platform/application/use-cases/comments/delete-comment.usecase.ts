@@ -14,7 +14,9 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
   async execute({ dto }: DeleteCommentCommand): Promise<boolean> {
     const { id, userId } = dto;
 
-    const comment = await this.commentsRepository.getByIdOrFail(id);
+    const comment = await this.commentsRepository.getById(id);
+
+   
 
     if (!comment) {
       throw new DomainException({
@@ -24,6 +26,8 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
     }
 
     const isDeniedPermissions = comment.commentatorInfo.userId !== userId;
+
+    
 
     if (isDeniedPermissions) {
       throw new DomainException({

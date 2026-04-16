@@ -21,7 +21,7 @@ export class UpdateCommentLikeStatusUseCase implements ICommandHandler<UpdateCom
   async execute({ dto }: UpdateCommentLikeStatusCommand): Promise<boolean> {
     const { id, likeStatus, userId: authorId, login } = dto;
 
-    const comment = await this.commentsRepository.getByIdOrFail(id);
+    const comment = await this.commentsRepository.getById(id);
 
     if (!comment) {
       throw new DomainException({

@@ -14,7 +14,7 @@ export class UpdateCommentContentUseCase implements ICommandHandler<UpdateCommen
   async execute({ dto }: UpdateCommentContentCommand): Promise<boolean> {
     const { id, content, userId } = dto;
 
-    const comment = await this.commentsRepository.getByIdOrFail(id);
+    const comment = await this.commentsRepository.getById(id);
 
     if (!comment) {
       throw new DomainException({

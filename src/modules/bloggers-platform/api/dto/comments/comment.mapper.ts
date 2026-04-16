@@ -20,12 +20,22 @@ export class CommentResponseMapperDto {
 
     dto.id = commentDocument._id.toString();
     dto.content = commentDocument.content;
-    dto.commentatorInfo.userId = commentDocument.commentatorInfo.userId;
-    dto.commentatorInfo.userLogin = commentDocument.commentatorInfo.userLogin;
+    const commentatorInfo = {
+      userId: commentDocument.commentatorInfo.userId,
+      userLogin: commentDocument.commentatorInfo.userLogin,
+    };
+
+    dto.commentatorInfo = commentatorInfo;
+
     dto.createdAt = commentDocument.createdAt.toISOString();
-    dto.likesInfo.likesCount = commentDocument.likesInfo.likesCount;
-    dto.likesInfo.dislikesCount = commentDocument.likesInfo.dislikesCount;
-    dto.likesInfo.myStatus = myStatus;
+
+    const likesInfo = {
+      likesCount: commentDocument.likesInfo.likesCount,
+      dislikesCount: commentDocument.likesInfo.dislikesCount,
+      myStatus: myStatus,
+    };
+
+    dto.likesInfo = likesInfo;
 
     return dto;
   }

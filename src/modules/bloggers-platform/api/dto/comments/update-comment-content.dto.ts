@@ -9,6 +9,6 @@ export class UpdateCommentContentRequestDto {
     minLength: 20,
     maxLength: 300,
   })
-  @IsStringWithTrim(2, 300)
+  @IsStringWithTrim(20, 300)
   content: string;
 }

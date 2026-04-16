@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment } from '../../domain/comments/comment.schema';
 import { type CommentModelType } from '../../domain/comments/comment.types';
@@ -9,6 +9,7 @@ import { getPaginationParams } from 'src/core/utils';
 import { LikeStatus } from '../../domain/likes/like.dto';
 import { CommentResponseMapperDto } from '../../api/dto/comments/comment.mapper';
 import { IGetCommentsByPostIdQueryDto } from '../../api/dto/comments/get-comments-by-post-id-query.dto';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -79,7 +80,10 @@ export class CommentsQueryRepository {
       .exec();
 
     if (!comment) {
-      throw new NotFoundException('Comment not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'Comment not found',
+      });
     }
 
     const myStatus = userId

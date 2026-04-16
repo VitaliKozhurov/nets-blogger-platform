@@ -4,7 +4,7 @@ import { CommentsSortBy } from './comment-sort-by.dto';
 
 export class GetCommentsByPostIdQueryDto extends BaseQueryParamsDto {
   @IsEnum(CommentsSortBy)
-  sortBy: CommentsSortBy;
+  sortBy: CommentsSortBy = CommentsSortBy.CreatedAt;
 }
 
 export interface IGetCommentsByPostIdQueryDto extends IBaseQueryParamsDto {

@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PaginationResponseMapperDto } from 'src/core/dto';
 import { getPaginationParams } from 'src/core/utils';
@@ -8,6 +8,7 @@ import { PostDocument, type PostModelType } from '../../domain/posts/post.types'
 import { LikeDocument, LikeStatus } from '../../domain/likes';
 import { IGetPostsQueryParamsDto, PostResponseMapperDto } from '../../api/dto/posts';
 import { LikesRepository } from '../likes/likes.repository';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -86,7 +87,10 @@ export class PostsQueryRepository {
     const post = await this.PostModel.findOne({ _id: postId, deletedAt: null }).lean().exec();
 
     if (!post) {
-      throw new NotFoundException('Post not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'Post not found',
+      });
     }
 
     const myStatusPromise = userId

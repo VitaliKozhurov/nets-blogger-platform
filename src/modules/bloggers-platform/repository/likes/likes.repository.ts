@@ -23,7 +23,7 @@ export class LikesRepository {
   async getLikeByAuthorId(args: { authorId: string; parentId: string }) {
     const { authorId, parentId } = args;
 
-    return this.LikeModel.findOne({ parentId, authorId }).lean().exec();
+    return this.LikeModel.findOne({ parentId, authorId }).exec();
   }
 
   async getLikesForUser(args: { authorId: string; parentIds: string[] }) {
@@ -32,15 +32,13 @@ export class LikesRepository {
     return this.LikeModel.find({
       parentId: { $in: parentIds },
       authorId,
-    })
-      .lean()
-      .exec();
+    }).exec();
   }
 
   async getMyStatus(args: { parentId: string; authorId: string }) {
     const { parentId, authorId } = args;
 
-    const like = await this.LikeModel.findOne({ parentId, authorId }).lean().exec();
+    const like = await this.LikeModel.findOne({ parentId, authorId }).exec();
 
     return like?.status ?? LikeStatus.None;
   }
@@ -51,7 +49,6 @@ export class LikesRepository {
     return this.LikeModel.find({ parentId, status: LikeStatus.Like })
       .sort({ addedLikeDate: -1 })
       .limit(limit)
-      .lean()
       .exec();
   }
 

@@ -13,9 +13,10 @@ import {
   CreatePostUseCase,
   DeleteBlogUseCase,
   DeleteCommentUseCase,
-  DeletePostCommand,
+  DeletePostUseCase,
   UpdateBlogUseCase,
   UpdateCommentContentUseCase,
+  UpdateCommentLikeStatusUseCase,
   UpdatePostLikeStatusUseCase,
   UpdatePostUseCase,
 } from './application/use-cases';
@@ -41,11 +42,12 @@ const commandHandlers = [
   DeleteBlogUseCase,
   CreatePostUseCase,
   UpdatePostUseCase,
-  DeletePostCommand,
+  DeletePostUseCase,
   UpdateCommentContentUseCase,
   DeleteCommentUseCase,
   CreateCommentUseCase,
   UpdatePostLikeStatusUseCase,
+  UpdateCommentLikeStatusUseCase,
 ];
 
 @Module({

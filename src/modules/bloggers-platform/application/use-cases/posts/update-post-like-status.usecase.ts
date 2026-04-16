@@ -4,7 +4,7 @@ import { LikesRepository } from '../../../repository/likes/likes.repository';
 import { LikesFactory } from '../../factories/likes.factory';
 import { LikeStatus } from '../../../domain/likes/like.dto';
 import { IUpdatePostLikeStatusDto } from '../../dto/posts/update-post-like-status.dto';
-import { PostsRepository } from 'src/modules/bloggers-platform/repository/posts/posts.repository';
+import { PostsRepository } from '../../../repository/posts/posts.repository';
 
 export class UpdatePostLikeStatusCommand {
   constructor(public dto: IUpdatePostLikeStatusDto) {}

@@ -2,7 +2,12 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Put } from 
 import { CommandBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { type RequestUserDto } from 'src/modules/users-account/contracts';
-import { UseBearerGuard, UserFromRequest } from 'src/modules/users-account/decorators';
+import {
+  OptionalUserFromRequest,
+  UseBearerGuard,
+  UseOptionalBearerGuard,
+  UserFromRequest,
+} from 'src/modules/users-account/decorators';
 import { Public } from 'src/modules/users-account/guards';
 import {
   DeleteCommentCommand,
@@ -18,7 +23,6 @@ import {
 import { CommentsQueryRepository } from '../repository';
 import { UpdateCommentContentRequestDto, UpdateCommentLikeStatusRequestDto } from './dto';
 
-// @UseGuards(BearerAuthGuard)
 @Controller('comments')
 @UseBearerGuard()
 export class CommentsController {
@@ -29,12 +33,19 @@ export class CommentsController {
 
   @Get(':id')
   @GetCommentSwagger()
+  @UseOptionalBearerGuard()
   @Public()
-  async getById(@Param('id', ObjectIdValidationPipe) id: string) {
-    return this.commentsQueryRepository.findByIdOrThrow({ commentId: id });
+  async getById(
+    @Param('id', ObjectIdValidationPipe) id: string,
+    @OptionalUserFromRequest() userDto: RequestUserDto | null
+  ) {
+    return this.commentsQueryRepository.findByIdOrThrow({
+      commentId: id,
+      userId: userDto?.userId ?? undefined,
+    });
   }
 
-  @Put(':id')
+  @Put(':id/like-status')
   @UpdateCommentLikeStatusSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikeStatus(

@@ -14,8 +14,10 @@ import { CommandBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { type RequestUserDto } from 'src/modules/users-account/contracts';
 import {
+  OptionalUserFromRequest,
   UseBasicGuard,
   UseBearerGuard,
+  UseOptionalBearerGuard,
   UserFromRequest,
 } from 'src/modules/users-account/decorators';
 import {
@@ -35,7 +37,7 @@ import {
   UpdatePostSwagger,
   UpdatePostLikeStatusSwagger,
 } from '../decorators/swagger';
-import { CommentsQueryRepository, PostsQueryRepository } from '../repository';
+import { CommentsQueryRepository, PostsQueryRepository, PostsRepository } from '../repository';
 import {
   CreateCommentRequestDto,
   CreatePostRequestDto,
@@ -45,25 +47,38 @@ import {
   UpdatePostRequestDto,
 } from './dto';
 import { Public } from 'src/modules/users-account/guards';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     private commandBus: CommandBus,
+    private postsRepository: PostsRepository,
     private postsQueryRepository: PostsQueryRepository,
     private commentsQueryRepository: CommentsQueryRepository
   ) {}
 
   @Get()
   @GetPostsSwagger()
-  async findAll(@Query() query: GetPostsQueryDto) {
-    return this.postsQueryRepository.findAll({ query });
+  @UseOptionalBearerGuard()
+  async findAll(
+    @Query() query: GetPostsQueryDto,
+    @OptionalUserFromRequest() userDto: RequestUserDto | null
+  ) {
+    return this.postsQueryRepository.findAll({ query, userId: userDto?.userId ?? undefined });
   }
 
   @Get(':id')
   @GetPostSwagger()
-  async getById(@Param('id', ObjectIdValidationPipe) id: string) {
-    return this.postsQueryRepository.findByIdOrThrow({ postId: id });
+  @UseOptionalBearerGuard()
+  async getById(
+    @Param('id', ObjectIdValidationPipe) id: string,
+    @OptionalUserFromRequest() userDto: RequestUserDto | null
+  ) {
+    return this.postsQueryRepository.findByIdOrThrow({
+      postId: id,
+      userId: userDto?.userId ?? undefined,
+    });
   }
 
   @Post()
@@ -100,12 +115,27 @@ export class PostsController {
 
   @Get(':id/comments')
   @Public()
+  @UseOptionalBearerGuard()
   @GetCommentsByPostIdSwagger()
   async getPostComments(
     @Param('id', ObjectIdValidationPipe) id: string,
-    @Query() query: GetCommentsByPostIdQueryDto
+    @Query() query: GetCommentsByPostIdQueryDto,
+    @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    return this.commentsQueryRepository.getAllByPostId({ postId: id, query });
+    const post = await this.postsRepository.getById(id);
+
+    if (!post) {
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'Post not found',
+      });
+    }
+
+    return this.commentsQueryRepository.getAllByPostId({
+      postId: id,
+      query,
+      userId: userDto?.userId ?? undefined,
+    });
   }
 
   @Post(':id/comments')
@@ -130,13 +160,12 @@ export class PostsController {
   @Put(':id/like-status')
   @UseBearerGuard()
   @UpdatePostLikeStatusSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikeStatusForPost(
     @Param('id', ObjectIdValidationPipe) id: string,
     @Body() dto: UpdatePostLikeStatusRequestDto,
     @UserFromRequest() userDto: RequestUserDto
   ) {
-    console.log('HERE');
-
     return this.commandBus.execute(
       new UpdatePostLikeStatusCommand({
         id,

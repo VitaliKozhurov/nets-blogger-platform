@@ -36,7 +36,12 @@ import {
   GetPostsQueryDto,
   UpdateBlogRequestDto,
 } from './dto';
-import { UseBasicGuard } from 'src/modules/users-account/decorators';
+import {
+  OptionalUserFromRequest,
+  UseBasicGuard,
+  UseOptionalBearerGuard,
+} from 'src/modules/users-account/decorators';
+import { RequestUserDto } from 'src/modules/users-account/contracts';
 
 @Controller('blogs')
 export class BlogsController {
@@ -93,13 +98,19 @@ export class BlogsController {
 
   @Get(':id/posts')
   @GetPostsByBlogIdSwagger()
+  @UseOptionalBearerGuard()
   async getPostsForBlog(
     @Param('id', ObjectIdValidationPipe) id: string,
-    @Query() query: GetPostsQueryDto
+    @Query() query: GetPostsQueryDto,
+    @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
     await this.blogsRepository.getByIdOrFail(id);
 
-    return this.postsQueryRepository.findAllForBlogId({ blogId: id, query });
+    return this.postsQueryRepository.findAllForBlogId({
+      blogId: id,
+      query,
+      userId: userDto?.userId ?? undefined,
+    });
   }
 
   @Post(':id/posts')

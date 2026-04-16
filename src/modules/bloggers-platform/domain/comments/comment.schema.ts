@@ -32,6 +32,7 @@ export const CommentSchema = SchemaFactory.createForClass(Comment);
 CommentSchema.static('createInstance', function (dto: CreateCommentInstanceDto) {
   const comment = new this();
 
+  comment.postId = dto.id;
   comment.content = dto.content;
 
   const commentatorInfo = {
