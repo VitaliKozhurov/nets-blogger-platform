@@ -12,14 +12,6 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
-import { type RequestUserDto } from 'src/modules/users-account/contracts';
-import {
-  OptionalUserFromRequest,
-  UseBasicGuard,
-  UseBearerGuard,
-  UseOptionalBearerGuard,
-  UserFromRequest,
-} from 'src/modules/users-account/decorators';
 import {
   CreatePostCommand,
   DeletePostCommand,
@@ -51,8 +43,16 @@ import {
   CreateCommentRequestDto,
   GetCommentsByPostIdQueryDto,
 } from '@modules/bloggers-platform/comments/api/dto';
-import { Public } from 'src/modules/users-account/guards';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import {
+  OptionalUserFromRequest,
+  Public,
+  type RequestUserDto,
+  UseBasicGuard,
+  UseBearerGuard,
+  UseOptionalBearerGuard,
+  UserFromRequest,
+} from 'src/modules/users-account/auth';
 
 @Controller('posts')
 export class PostsController {

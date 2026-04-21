@@ -37,14 +37,10 @@ import {
   CreatePostByBlogIdRequestDto,
   GetPostsQueryDto,
 } from '@modules/bloggers-platform/posts/api/dto';
-import {
-  OptionalUserFromRequest,
-  UseBasicGuard,
-  UseOptionalBearerGuard,
-} from 'src/modules/users-account/decorators';
-import { RequestUserDto } from 'src/modules/users-account/contracts';
+
 import { BlogsQueryRepository } from '../repository/blogs-query.repository';
 import { BlogsRepository } from '../repository/blogs.repository';
+import { OptionalUserFromRequest, RequestUserDto, UseBasicGuard, UseOptionalBearerGuard } from 'src/modules/users-account/auth';
 
 @Controller('blogs')
 export class BlogsController {

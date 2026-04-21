@@ -1,1 +1,4 @@
-export type { RequestUserDto } from 'src/modules/users-account/contracts';
+export interface RequestUserDto {
+  userId: string;
+  login: string;
+}

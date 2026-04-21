@@ -1,14 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Put } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
-import { type RequestUserDto } from 'src/modules/users-account/contracts';
-import {
-  OptionalUserFromRequest,
-  UseBearerGuard,
-  UseOptionalBearerGuard,
-  UserFromRequest,
-} from 'src/modules/users-account/decorators';
-import { Public } from 'src/modules/users-account/guards';
 import {
   DeleteCommentCommand,
   UpdateCommentContentCommand,
@@ -25,6 +17,14 @@ import {
   UpdateCommentContentRequestDto,
   UpdateCommentLikeStatusRequestDto,
 } from '@modules/bloggers-platform/comments/api/dto';
+import {
+  OptionalUserFromRequest,
+  Public,
+  type RequestUserDto,
+  UseBearerGuard,
+  UseOptionalBearerGuard,
+  UserFromRequest,
+} from 'src/modules/users-account/auth';
 
 @Controller('comments')
 @UseBearerGuard()

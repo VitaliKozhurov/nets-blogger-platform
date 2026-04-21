@@ -20,8 +20,7 @@ import {
   RegistrationEmailResendingSwagger,
   RegistrationSwagger,
 } from '../decorators/swagger';
-import { type RequestUserDto } from '../../contracts';
-import { UserFromRequest } from '../../decorators';
+
 import {
   LoginRequestDto,
   NewPasswordRequestDto,
@@ -32,6 +31,8 @@ import {
 } from './dto';
 import { UseBearerGuard } from '../decorators/bearer-auth/use-bearer-guard.decorator';
 import { type Response } from 'express';
+import { UserFromRequest } from '../decorators';
+import { type RequestUserDto } from '../application';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
@@ -93,7 +94,6 @@ export class AuthController {
   @Get('me')
   @SkipThrottle()
   @ApiBearerAuth('bearerAuth')
-  // @UseGuards(BearerAuthGuard)
   @UseBearerGuard()
   @MeSwagger()
   async me(@UserFromRequest() dto: RequestUserDto) {

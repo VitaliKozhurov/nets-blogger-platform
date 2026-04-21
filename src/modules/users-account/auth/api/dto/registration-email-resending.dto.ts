@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Matches } from 'class-validator';
-import { EMAIL_REGEX } from '@modules/users-account/constants';
+import { EMAIL_REGEX } from 'src/core/constants/regExp';
 
 export class RegistrationEmailResendingRequestDto {
   @ApiProperty({

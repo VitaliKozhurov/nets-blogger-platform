@@ -20,9 +20,8 @@ import {
 } from '../decorators/swagger';
 import { UsersQueryRepository } from '../repository';
 import { CreateUserByAdminRequestDto, GetUsersQueryDto } from './dto';
-import { UseBasicGuard } from '../../decorators';
+import { UseBasicGuard } from '../../auth';
 
-// @UseGuards(BasicAuthGuard)
 @Controller('users')
 @UseBasicGuard()
 @ApiBasicAuth('basicAuth')
