@@ -2,7 +2,7 @@ import { MongooseModuleFactoryOptions } from '@nestjs/mongoose';
 
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EnvVariables, EnvVariablesType } from './env.interface';
+import { EnvVariables, EnvVariablesType } from '../core/types/env.interface';
 
 export const getMongooseConfig = (configService: ConfigService): MongooseModuleFactoryOptions => {
   return {

@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { EnvVariables } from 'src/config/env.interface';
+import { EnvVariables } from 'src/core/types/env.interface';
 import { ACCESS_TOKEN_STRATEGY_INJECT_TOKEN } from 'src/core/tokens';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { AccessTokenPayload } from './access-token.payload';

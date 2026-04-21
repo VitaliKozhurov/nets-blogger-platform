@@ -40,9 +40,6 @@ export const setupPipesConfig = (app: INestApplication) => {
       // forbidNonWhitelisted: true, // выбрасываем ошибку если переданы лишние ключи в dto
       stopAtFirstError: true, // only first error for each field
       exceptionFactory: (errors: ValidationError[]) => {
-        // TODO!!! REMOVE
-        // console.log('errors: ', errors);
-
         const extensions = transformErrors(errors);
 
         return new DomainException({

@@ -3,7 +3,7 @@ import { DomainException } from './domain-exception';
 import { Request, Response } from 'express';
 import { DomainExceptionCode } from './exception.type';
 import { ConfigService } from '@nestjs/config';
-import { EnvVariables, EnvVariablesType } from 'src/config/env.interface';
+import { EnvVariables, EnvVariablesType } from 'src/core/types/env.interface';
 
 @Catch(DomainException)
 export class DomainHttpExceptionsFilter implements ExceptionFilter {

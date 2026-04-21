@@ -25,7 +25,7 @@ import { CreateUserByAdminUseCase, DeleteUserByAdminUseCase } from './users/appl
 import { User, UserSchema } from './users/domain';
 import { UsersQueryRepository, UsersRepository } from './users/repository';
 import { UsersService } from './users/application/services';
-import { EnvVariables } from 'src/config/env.interface';
+import { EnvVariables } from 'src/core/types/env.interface';
 import { BearerAuthGuard } from './auth';
 
 const commandHandlers = [

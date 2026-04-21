@@ -1,5 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { EnvVariables } from '../../../config/env.interface';
+import { EnvVariables } from '../../../core/types/env.interface';
 import { MailerOptions } from '@nestjs-modules/mailer';
 
 export const getMailerConfig = (configService: ConfigService): MailerOptions => {

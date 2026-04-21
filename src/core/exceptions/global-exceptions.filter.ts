@@ -2,7 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from
 import { Request, Response } from 'express';
 import { DomainExceptionCode, ErrorExceptionResponseBody } from './exception.type';
 
-import { EnvVariables, EnvVariablesType } from 'src/config/env.interface';
+import { EnvVariables, EnvVariablesType } from 'src/core/types/env.interface';
 import { ConfigService } from '@nestjs/config';
 
 @Catch()
