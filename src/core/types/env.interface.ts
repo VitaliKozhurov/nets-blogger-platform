@@ -12,7 +12,7 @@ export enum EnvVariables {
 }
 
 export type EnvVariablesType = {
-  [EnvVariables.NODE_ENV]: 'development' | 'production' | 'test' | 'staging';
+  [EnvVariables.NODE_ENV]: 'development' | 'production' | 'testing' | 'staging';
   [EnvVariables.PORT]: number;
   [EnvVariables.MONGO_DB_URL]: string;
   [EnvVariables.JWT_ACCESS_TOKEN_SECRET]: string;

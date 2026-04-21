@@ -33,13 +33,13 @@ export class CoreConfig {
   port: number;
 
   @IsNotEmpty({
-    message: 'Set Env variable MONGO_URI, example: mongodb://localhost:27017/my-app-local-db',
+    message: `Set Env variable ${EnvVariables.MONGO_DB_URL}, example: mongodb://localhost:27017/my-app-local-db`,
   })
   mongoURI: string;
 
   @IsEnum(Environments, {
     message:
-      'Ser correct NODE_ENV value, available values: ' +
+      'Set correct NODE_ENV value, available values: ' +
       configValidationUtility.getEnumValues(Environments).join(', '),
   })
   env: Environments;

@@ -54,7 +54,7 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
       EnvVariables.NODE_ENV
     );
 
-    if (nodeEnv === 'test') {
+    if (nodeEnv === 'testing') {
       return {
         errorsMessages: exception.extensions,
       };

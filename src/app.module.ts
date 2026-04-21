@@ -1,9 +1,8 @@
-import { configModule } from './config/config.module';
+import { appConfigModule } from './config/app-config-module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
-import { TestsModule } from './modules/tests/tests.module';
 import { UsersAccountModule } from './modules/users-account/users-account.module';
 import { ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
@@ -13,10 +12,14 @@ import { DomainHttpExceptionsFilter, GlobalHttpExceptionsFilter } from './core/e
 import { CryptoModule } from './modules/crypto/crypto.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { CoreModule } from './core/core.module';
+import { TestsModule } from './modules/tests/tests.module';
+
+const nodeEnv = process.env.NODE_ENV ?? 'development';
+const shouldImportTestsModule = nodeEnv !== 'production';
 
 @Module({
   imports: [
-    configModule,
+    appConfigModule,
     CoreModule,
     MongooseModule.forRootAsync({
       useFactory: getMongooseConfig,
@@ -26,7 +29,7 @@ import { CoreModule } from './core/core.module';
     BloggersPlatformModule,
     CryptoModule,
     NotificationsModule,
-    TestsModule,
+    ...(shouldImportTestsModule ? [TestsModule] : []),
   ],
   controllers: [AppController],
   providers: [
