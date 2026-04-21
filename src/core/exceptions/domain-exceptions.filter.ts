@@ -2,12 +2,11 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/commo
 import { DomainException } from './domain-exception';
 import { Request, Response } from 'express';
 import { DomainExceptionCode } from './exception.type';
-import { ConfigService } from '@nestjs/config';
-import { EnvVariables, EnvVariablesType } from 'src/core/types/env.interface';
+import { CoreConfig } from '../core.config';
 
 @Catch(DomainException)
 export class DomainHttpExceptionsFilter implements ExceptionFilter {
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: CoreConfig) {}
 
   catch(exception: DomainException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -50,9 +49,7 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
   }
 
   private buildExceptionResponse(exception: DomainException, requestUrl: string) {
-    const nodeEnv = this.configService.getOrThrow<EnvVariablesType['NODE_ENV']>(
-      EnvVariables.NODE_ENV
-    );
+    const nodeEnv = this.configService.env;
 
     if (nodeEnv === 'testing') {
       return {

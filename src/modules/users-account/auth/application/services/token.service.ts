@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
-} from 'src/core/tokens';
+} from '../../../constants/injection-tokens';
 
 @Injectable()
 export class TokenService {

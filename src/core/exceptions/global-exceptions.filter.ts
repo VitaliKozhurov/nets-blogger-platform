@@ -2,12 +2,11 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from
 import { Request, Response } from 'express';
 import { DomainExceptionCode, ErrorExceptionResponseBody } from './exception.type';
 
-import { EnvVariables, EnvVariablesType } from 'src/core/types/env.interface';
-import { ConfigService } from '@nestjs/config';
+import { CoreConfig } from '../core.config';
 
 @Catch()
 export class GlobalHttpExceptionsFilter implements ExceptionFilter {
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: CoreConfig) {}
 
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -21,9 +20,7 @@ export class GlobalHttpExceptionsFilter implements ExceptionFilter {
   }
 
   private buildResponseBody(requestUrl: string, message: string): ErrorExceptionResponseBody {
-    const nodeEnv = this.configService.getOrThrow<EnvVariablesType['NODE_ENV']>(
-      EnvVariables.NODE_ENV
-    );
+    const nodeEnv = this.configService.env;
 
     const isProduction = nodeEnv === 'production';
 

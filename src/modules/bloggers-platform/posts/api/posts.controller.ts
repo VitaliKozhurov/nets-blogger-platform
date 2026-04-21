@@ -46,13 +46,13 @@ import {
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import {
   OptionalUserFromRequest,
-  Public,
   type RequestUserDto,
   UseBasicGuard,
   UseBearerGuard,
   UseOptionalBearerGuard,
   UserFromRequest,
 } from 'src/modules/users-account/auth';
+import { Public } from 'src/core/guards';
 
 @Controller('posts')
 export class PostsController {

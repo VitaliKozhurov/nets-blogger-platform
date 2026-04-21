@@ -1,13 +1,12 @@
 import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { EnvVariables } from 'src/core/types/env.interface';
-import { ACCESS_TOKEN_STRATEGY_INJECT_TOKEN } from 'src/core/tokens';
+import { ACCESS_TOKEN_STRATEGY_INJECT_TOKEN } from '../../../constants/injection-tokens';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { AccessTokenPayload } from './access-token.payload';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from '../public/public.guard';
+import { IS_PUBLIC_KEY } from 'src/core/guards';
+import { UsersAccountConfig } from '../../../config/users-account-config';
 
 @Injectable()
 export class BearerAuthGuard implements CanActivate {
@@ -15,7 +14,7 @@ export class BearerAuthGuard implements CanActivate {
     @Inject(ACCESS_TOKEN_STRATEGY_INJECT_TOKEN)
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
-    private readonly configService: ConfigService
+    private readonly configService: UsersAccountConfig
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -40,7 +39,7 @@ export class BearerAuthGuard implements CanActivate {
     }
 
     try {
-      const secret = this.configService.getOrThrow<string>(EnvVariables.JWT_ACCESS_TOKEN_SECRET);
+      const secret = this.configService.jwtAccessTokenSecret;
 
       const payload = await this.jwtService.verifyAsync<AccessTokenPayload>(token, { secret });
 

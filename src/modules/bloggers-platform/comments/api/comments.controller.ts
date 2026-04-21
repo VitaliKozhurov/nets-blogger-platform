@@ -19,12 +19,12 @@ import {
 } from '@modules/bloggers-platform/comments/api/dto';
 import {
   OptionalUserFromRequest,
-  Public,
   type RequestUserDto,
   UseBearerGuard,
   UseOptionalBearerGuard,
   UserFromRequest,
 } from 'src/modules/users-account/auth';
+import { Public } from 'src/core/guards';
 
 @Controller('comments')
 @UseBearerGuard()
