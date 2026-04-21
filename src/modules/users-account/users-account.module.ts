@@ -9,25 +9,24 @@ import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from 'src/core/tokens';
-import { AuthController } from './api/auth.controller';
-import { UsersController } from './api/users.controller';
-import { UsersFactory } from './application/factories/users.factory';
-import { TokenService } from './application/services/token.service';
+import { AuthController } from './auth/api';
+import { UsersController } from './users/api';
+import { UsersFactory } from './users/application/factories';
+import { TokenService } from './auth/application/services';
 import {
-  CreateUserByAdminUseCase,
-  DeleteUserByAdminUseCase,
   LoginUseCase,
   NewUserPasswordUseCase,
   PasswordRecoveryUseCase,
   RegistrationConfirmationUseCase,
   RegistrationEmailResendingUseCase,
   RegistrationUseCase,
-} from './application/use-cases';
-import { User, UserSchema } from './domain/users/user.schema';
-import { BearerAuthGuard } from './guards';
-import { UsersQueryRepository, UsersRepository } from './infrastructure';
-import { UsersService } from './application/services/users.service';
+} from './auth/application/use-cases';
+import { CreateUserByAdminUseCase, DeleteUserByAdminUseCase } from './users/application/use-cases';
+import { User, UserSchema } from './users/domain';
+import { UsersQueryRepository, UsersRepository } from './users/repository';
+import { UsersService } from './users/application/services';
 import { EnvVariables } from 'src/config/env.interface';
+import { BearerAuthGuard } from './auth';
 
 const commandHandlers = [
   RegistrationUseCase,

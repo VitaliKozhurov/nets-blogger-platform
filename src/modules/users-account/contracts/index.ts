@@ -1,1 +1,4 @@
-export type { RequestUserDto } from '../application/dto/request-user.dto';
+export interface RequestUserDto {
+  userId: string;
+  login: string;
+}

@@ -13,10 +13,15 @@ import { DomainHttpExceptionsFilter, GlobalHttpExceptionsFilter } from './core/e
 import { CryptoModule } from './modules/crypto/crypto.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 
+const nodeEnv = process.env.NODE_ENV ?? 'development';
+
 @Module({
   imports: [
     CqrsModule.forRoot(),
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: [`.env.${nodeEnv}.local`, `.env.${nodeEnv}`, '.env'],
+    }),
     MongooseModule.forRootAsync({
       useFactory: getMongooseConfig,
       inject: [ConfigService],

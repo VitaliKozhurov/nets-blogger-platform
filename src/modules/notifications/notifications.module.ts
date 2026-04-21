@@ -1,9 +1,9 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { getMailConfig } from 'src/config/mail.config';
 import { EmailService } from './email.service';
 import { SendRegistrationConfirmationCodeToEmailEventHandler } from './event-handlers/send-registration-confirmation-code-to-email.event-handler';
+import { getMailerConfig } from './config/mail.config';
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import { SendRegistrationConfirmationCodeToEmailEventHandler } from './event-han
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: getMailConfig,
+      useFactory: getMailerConfig,
     }),
   ],
   providers: [EmailService, SendRegistrationConfirmationCodeToEmailEventHandler],

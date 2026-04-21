@@ -1,2 +1,3 @@
-export { BearerAuthGuard } from './bearer-auth/bearer-auth.guard';
-export { IS_PUBLIC_KEY, Public } from './public/public.guard';
+export * from '../auth/guards/basic-auth';
+export * from '../auth/guards/bearer-auth';
+export * from '../auth/guards/public';

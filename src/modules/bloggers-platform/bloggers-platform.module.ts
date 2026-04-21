@@ -1,38 +1,41 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BlogsController } from './api/blogs.controller';
-import { CommentsController } from './api/comments.controller';
-import { PostsController } from './api/posts.controller';
-import { BlogsFactory } from './application/factories/blogs.factory';
-import { CommentsFactory } from './application/factories/comments.factory';
-import { LikesFactory } from './application/factories/likes.factory';
-import { PostsFactory } from './application/factories/posts.factory';
 import {
-  CreateBlogUseCase,
-  CreateCommentUseCase,
-  CreatePostUseCase,
-  DeleteBlogUseCase,
-  DeleteCommentUseCase,
-  DeletePostUseCase,
-  UpdateBlogUseCase,
-  UpdateCommentContentUseCase,
-  UpdateCommentLikeStatusUseCase,
-  UpdatePostLikeStatusUseCase,
-  UpdatePostUseCase,
-} from './application/use-cases';
-import { Blog, BlogSchema } from './domain/blogs/blog.schema';
-import { Comment, CommentSchema } from './domain/comments/comment.schema';
-import { Like, LikeSchema } from './domain/likes/like.schema';
-import { Post, PostSchema } from './domain/posts/post.schema';
-import {
+  Blog,
+  BlogSchema,
+  BlogsController,
+  BlogsFactory,
   BlogsQueryRepository,
   BlogsRepository,
+  CreateBlogUseCase,
+  DeleteBlogUseCase,
+  UpdateBlogUseCase,
+} from './blogs';
+import {
+  Comment,
+  CommentSchema,
+  CommentsController,
+  CommentsFactory,
   CommentsQueryRepository,
   CommentsRepository,
-  LikesRepository,
+  CreateCommentUseCase,
+  DeleteCommentUseCase,
+  UpdateCommentContentUseCase,
+  UpdateCommentLikeStatusUseCase,
+} from './comments';
+import { Like, LikeSchema, LikesFactory, LikesRepository } from './likes';
+import {
+  CreatePostUseCase,
+  DeletePostUseCase,
+  Post,
+  PostSchema,
+  PostsController,
+  PostsFactory,
   PostsQueryRepository,
   PostsRepository,
-} from './repository';
+  UpdatePostLikeStatusUseCase,
+  UpdatePostUseCase,
+} from './posts';
 import { UsersAccountModule } from '../users-account/users-account.module';
 import { JwtModule } from '@nestjs/jwt';
 
