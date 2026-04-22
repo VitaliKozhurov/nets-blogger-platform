@@ -10,7 +10,7 @@ export const jwtConfigProviders = [
     provide: ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
     useFactory: (configService: UsersAccountConfig): JwtService => {
       const secret = configService.jwtAccessTokenSecret;
-      const expiresIn = configService.jwtRefreshTokenExpiration as JwtSignOptions['expiresIn'];
+      const expiresIn = configService.jwtAccessTokenExpiration as JwtSignOptions['expiresIn'];
 
       return new JwtService({
         secret,

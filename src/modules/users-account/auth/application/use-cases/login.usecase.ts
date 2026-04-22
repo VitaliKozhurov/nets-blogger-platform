@@ -1,25 +1,34 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ILoginDto } from '../dto';
 
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { TokenService } from '../services';
 import { UsersService } from '../../../users/application/services';
+import { InjectModel } from '@nestjs/mongoose';
+import { DeviceSession, type DeviceSessionModelType } from '../../../device-session';
+import { randomUUID } from 'crypto';
 
-export class LoginCommand {
-  constructor(public dto: ILoginDto) {}
+type LoginResult = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+export class LoginCommand extends Command<LoginResult> {
+  constructor(public dto: ILoginDto) {
+    super();
+  }
 }
 
 @CommandHandler(LoginCommand)
 export class LoginUseCase implements ICommandHandler<LoginCommand> {
   constructor(
+    @InjectModel(DeviceSession.name)
+    private DeviceSessionModel: DeviceSessionModelType,
     private usersService: UsersService,
     private tokenService: TokenService
   ) {}
 
-  async execute({ dto }: LoginCommand): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
+  async execute({ dto }: LoginCommand): Promise<LoginResult> {
     const user = await this.usersService.validateUser(dto);
 
     if (!user) {
@@ -28,9 +37,34 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
         message: 'Unauthorized',
       });
     }
-    const accessToken = await this.tokenService.createAccessToken(user);
-    const refreshToken = await this.tokenService.createRefreshToken(user);
 
-    return { accessToken, refreshToken };
+    const deviceId = randomUUID();
+
+    const accessToken = await this.tokenService.createAccessToken(user);
+    const refreshTokenWithMeta = await this.tokenService.createRefreshTokenWithMeta({
+      ...user,
+      deviceId,
+    });
+
+    if (!refreshTokenWithMeta) {
+      throw new DomainException({
+        code: DomainExceptionCode.INTERNAL_SERVER_ERROR,
+        message: 'Cannot create refresh token',
+      });
+    }
+
+    // TODO add save
+    const deviceSession = await this.DeviceSessionModel.createDeviceSessionInstance({
+      userId: user.userId,
+      deviceId,
+      ip: dto.ip,
+      deviceName: dto.deviceName,
+      iat: refreshTokenWithMeta.iat,
+      expirationAt: refreshTokenWithMeta.expirationAt,
+    });
+
+    console.log('SESSION: ', deviceSession);
+
+    return { accessToken, refreshToken: refreshTokenWithMeta.refreshToken };
   }
 }

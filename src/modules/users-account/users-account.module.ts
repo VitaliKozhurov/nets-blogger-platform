@@ -27,6 +27,7 @@ import { UsersService } from './users/application/services';
 import { CreateUserByAdminUseCase, DeleteUserByAdminUseCase } from './users/application/use-cases';
 import { User, UserSchema } from './users/domain';
 import { UsersQueryRepository, UsersRepository } from './users/repository';
+import { DeviceSession, DeviceSessionSchema } from './device-session';
 
 const commandHandlers = [
   RegistrationUseCase,
@@ -42,6 +43,7 @@ const commandHandlers = [
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: DeviceSession.name, schema: DeviceSessionSchema }]),
     CryptoModule,
     JwtModule,
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 10000, limit: 5 }] }),

@@ -6,15 +6,13 @@ import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { AccessTokenPayload } from './access-token.payload';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/core/guards';
-import { UsersAccountConfig } from '../../../config/users-account-config';
 
 @Injectable()
 export class BearerAuthGuard implements CanActivate {
   constructor(
     @Inject(ACCESS_TOKEN_STRATEGY_INJECT_TOKEN)
     private readonly jwtService: JwtService,
-    private readonly reflector: Reflector,
-    private readonly configService: UsersAccountConfig
+    private readonly reflector: Reflector
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -39,9 +37,7 @@ export class BearerAuthGuard implements CanActivate {
     }
 
     try {
-      const secret = this.configService.jwtAccessTokenSecret;
-
-      const payload = await this.jwtService.verifyAsync<AccessTokenPayload>(token, { secret });
+      const payload = await this.jwtService.verifyAsync<AccessTokenPayload>(token);
 
       request.user = payload;
     } catch {

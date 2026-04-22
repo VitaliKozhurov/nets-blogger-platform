@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
-import { AppThrottle } from 'src/core/decorators';
+import { AppThrottle, ClientMeta, type ClientMetaDto } from 'src/core/decorators';
 import {
   LoginCommand,
   NewUserPasswordCommand,
@@ -64,14 +64,14 @@ export class AuthController {
   @SkipThrottle()
   @LoginSwagger()
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginRequestDto, @Res() response: Response) {
-    const { accessToken, refreshToken } = await this.commandBus.execute<
-      LoginCommand,
-      {
-        accessToken: string;
-        refreshToken: string;
-      }
-    >(new LoginCommand(dto));
+  async login(
+    @Body() dto: LoginRequestDto,
+    @ClientMeta() clientMeta: ClientMetaDto,
+    @Res() response: Response
+  ) {
+    const { accessToken, refreshToken } = await this.commandBus.execute(
+      new LoginCommand({ ...dto, ...clientMeta })
+    );
 
     response.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     response.send({ accessToken });

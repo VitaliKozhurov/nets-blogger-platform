@@ -1,6 +1,5 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
-import { createMailerOptions } from './config/mailer-options.factory';
 import { MailerConfig } from './config/mailer.config';
 import { EmailService } from './email.service';
 import { SendRegistrationConfirmationCodeToEmailEventHandler } from './event-handlers/send-registration-confirmation-code-to-email.event-handler';
@@ -8,10 +7,9 @@ import { SendRegistrationConfirmationCodeToEmailEventHandler } from './event-han
 @Module({
   imports: [
     MailerModule.forRootAsync({
-      inject: [MailerConfig],
-      useFactory: createMailerOptions,
+      useClass: MailerConfig,
     }),
   ],
-  providers: [EmailService, MailerConfig, SendRegistrationConfirmationCodeToEmailEventHandler],
+  providers: [EmailService, SendRegistrationConfirmationCodeToEmailEventHandler],
 })
 export class NotificationsModule {}
