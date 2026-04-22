@@ -16,6 +16,15 @@ export const LoginSwagger = () => {
     ApiOkResponse({
       type: LoginResponseDto,
       description: 'Returns JWT access token.',
+      headers: {
+        'Set-Cookie': {
+          description: 'HttpOnly refresh token cookie',
+          schema: {
+            type: 'string',
+            example: 'refreshToken=eyJ...; Path=/; HttpOnly; Secure; SameSite=Strict',
+          },
+        },
+      },
     }),
     ApiErrorResponse({
       status: HttpStatus.BAD_REQUEST,
@@ -24,6 +33,10 @@ export const LoginSwagger = () => {
     ApiErrorResponse({
       status: HttpStatus.UNAUTHORIZED,
       description: 'If login/email or password is incorrect.',
+    }),
+    ApiErrorResponse({
+      status: HttpStatus.TOO_MANY_REQUESTS,
+      description: 'To many requests.',
     })
   );
 };

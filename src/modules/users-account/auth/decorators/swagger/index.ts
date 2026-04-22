@@ -5,3 +5,4 @@ export { PasswordRecoverySwagger } from './password-recovery-swagger.decorator';
 export { RegistrationConfirmationSwagger } from './registration-confirmation-swagger.decorator';
 export { RegistrationEmailResendingSwagger } from './registration-email-resending-swagger.decorator';
 export { RegistrationSwagger } from './registration-swagger.decorator';
+export { RefreshTokenSwagger } from './refresh-token-swagger.decorator';

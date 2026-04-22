@@ -16,6 +16,7 @@ import {
   MeSwagger,
   NewPasswordSwagger,
   PasswordRecoverySwagger,
+  RefreshTokenSwagger,
   RegistrationConfirmationSwagger,
   RegistrationEmailResendingSwagger,
   RegistrationSwagger,
@@ -61,7 +62,6 @@ export class AuthController {
   }
 
   @Post('login')
-  @SkipThrottle()
   @LoginSwagger()
   @HttpCode(HttpStatus.OK)
   async login(
@@ -73,8 +73,33 @@ export class AuthController {
       new LoginCommand({ ...dto, ...clientMeta })
     );
 
-    response.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
     response.send({ accessToken });
+  }
+
+  @Post('refresh-token')
+  @RefreshTokenSwagger()
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(
+    @Body() dto: LoginRequestDto,
+    @ClientMeta() clientMeta: ClientMetaDto,
+    @Res() response: Response
+  ) {
+    // TODO add logic
+    // const { accessToken, refreshToken } = await this.commandBus.execute(
+    //   new LoginCommand({ ...dto, ...clientMeta })
+    // );
+
+    // response.cookie('refreshToken', refreshToken, {
+    //   httpOnly: true,
+    //   secure: true,
+    // });
+    // response.send({ accessToken });
+
+    return true;
   }
 
   @Post('password-recovery')
