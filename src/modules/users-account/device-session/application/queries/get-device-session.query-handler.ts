@@ -1,0 +1,33 @@
+import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { DeviceSessionsQueryRepository } from '../../repository';
+import { TokenService } from 'src/modules/users-account/auth';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { DeviceSessionResponseDto } from '../../api/dto';
+
+export class GetDeviceSessionsQuery {
+  constructor(public refreshToken: string) {}
+}
+
+@QueryHandler(GetDeviceSessionsQuery)
+export class GetDeviceSessionsHandler implements IQueryHandler<
+  GetDeviceSessionsQuery,
+  DeviceSessionResponseDto[]
+> {
+  constructor(
+    private tokenService: TokenService,
+    private readonly deviceSessionsQueryRepository: DeviceSessionsQueryRepository
+  ) {}
+
+  async execute({ refreshToken }: GetDeviceSessionsQuery): Promise<DeviceSessionResponseDto[]> {
+    const tokenData = await this.tokenService.verifyRefreshToken(refreshToken);
+
+    if (!tokenData) {
+      throw new DomainException({
+        code: DomainExceptionCode.UNAUTHORIZED_ERROR,
+        message: 'Unauthorized',
+      });
+    }
+
+    return this.deviceSessionsQueryRepository.findAll();
+  }
+}

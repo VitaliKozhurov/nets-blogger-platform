@@ -6,3 +6,4 @@ export { RegistrationConfirmationSwagger } from './registration-confirmation-swa
 export { RegistrationEmailResendingSwagger } from './registration-email-resending-swagger.decorator';
 export { RegistrationSwagger } from './registration-swagger.decorator';
 export { RefreshTokenSwagger } from './refresh-token-swagger.decorator';
+export { LogoutSwagger } from './logout-swagger.decorator';

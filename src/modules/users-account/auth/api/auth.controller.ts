@@ -13,6 +13,7 @@ import {
 } from '../application/use-cases';
 import {
   LoginSwagger,
+  LogoutSwagger,
   MeSwagger,
   NewPasswordSwagger,
   PasswordRecoverySwagger,
@@ -81,7 +82,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @LoginSwagger()
+  @LogoutSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Cookies('refreshToken') refreshToken: string, @Res() response: Response) {
     await this.commandBus.execute(new LogoutCommand(refreshToken));

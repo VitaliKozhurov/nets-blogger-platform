@@ -29,7 +29,17 @@ import { UsersService } from './users/application/services';
 import { CreateUserByAdminUseCase, DeleteUserByAdminUseCase } from './users/application/use-cases';
 import { User, UserSchema } from './users/domain';
 import { UsersQueryRepository, UsersRepository } from './users/repository';
-import { DeviceSession, DeviceSessionSchema, DeviceSessionsRepository } from './device-session';
+import {
+  DeviceSession,
+  DeviceSessionSchema,
+  DeviceSessionsQueryRepository,
+  DeviceSessionsRepository,
+} from './device-session';
+import {
+  DeleteAllMyDeviceSessionWithoutCurrentUseCase,
+  DeleteMyDeviceSessionUseCase,
+} from './device-session/application/use-cases';
+import { GetDeviceSessionsHandler } from './device-session/application/queries';
 
 const commandHandlers = [
   RegistrationUseCase,
@@ -42,7 +52,11 @@ const commandHandlers = [
   RefreshTokenUseCase,
   LoginUseCase,
   LogoutUseCase,
+  DeleteMyDeviceSessionUseCase,
+  DeleteAllMyDeviceSessionWithoutCurrentUseCase,
 ];
+
+const queryHandlers = [GetDeviceSessionsHandler];
 
 @Module({
   imports: [
@@ -56,6 +70,7 @@ const commandHandlers = [
   controllers: [AuthController, UsersController],
   providers: [
     ...commandHandlers,
+    ...queryHandlers,
     ...jwtConfigProviders,
     UsersService,
     UsersFactory,
@@ -65,6 +80,7 @@ const commandHandlers = [
     TokenService,
     UsersAccountConfig,
     DeviceSessionsRepository,
+    DeviceSessionsQueryRepository,
   ],
   exports: [
     BearerAuthGuard,

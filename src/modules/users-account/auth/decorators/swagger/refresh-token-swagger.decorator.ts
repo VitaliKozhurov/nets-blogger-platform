@@ -1,5 +1,5 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/core/decorators';
 import { RefreshTokenResponseDto } from '../../api/dto';
 
@@ -9,6 +9,7 @@ export const RefreshTokenSwagger = () => {
       summary: 'User update tokens',
       description: 'Update access and refresh tokens.',
     }),
+    ApiCookieAuth('refreshToken'),
     ApiOkResponse({
       type: RefreshTokenResponseDto,
       description: 'Returns JWT access token.',
