@@ -11,3 +11,4 @@ export {
 } from './registration-email-resending.usecase';
 export { RegistrationCommand, RegistrationUseCase } from './registration.usecase';
 export { RefreshTokenUseCase, RefreshTokenCommand } from './refresh-token.usecase';
+export { LogoutCommand, LogoutUseCase } from './logout.usecase';

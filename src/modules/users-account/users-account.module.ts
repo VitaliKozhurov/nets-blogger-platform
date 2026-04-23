@@ -9,6 +9,7 @@ import { AuthController } from './auth/api';
 import { TokenService } from './auth/application/services';
 import {
   LoginUseCase,
+  LogoutUseCase,
   NewUserPasswordUseCase,
   PasswordRecoveryUseCase,
   RefreshTokenUseCase,
@@ -34,12 +35,13 @@ const commandHandlers = [
   RegistrationUseCase,
   RegistrationConfirmationUseCase,
   RegistrationEmailResendingUseCase,
-  LoginUseCase,
   PasswordRecoveryUseCase,
   NewUserPasswordUseCase,
   CreateUserByAdminUseCase,
   DeleteUserByAdminUseCase,
   RefreshTokenUseCase,
+  LoginUseCase,
+  LogoutUseCase,
 ];
 
 @Module({

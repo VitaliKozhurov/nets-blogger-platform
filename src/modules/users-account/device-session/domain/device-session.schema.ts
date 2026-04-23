@@ -48,3 +48,7 @@ DeviceSessionSchema.method('updateSession', function (dto: { iat: number; expira
   this.iat = dto.iat;
   this.expirationAt = dto.expirationAt;
 });
+
+DeviceSessionSchema.method('deleteSession', async function () {
+  await this.deleteOne();
+});

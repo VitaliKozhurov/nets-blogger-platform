@@ -6,6 +6,7 @@ export type DeviceSessionDocument = HydratedDocument<DeviceSession>;
 
 export type DeviceSessionMethodsType = {
   updateSession(args: { iat: number; expirationAt: number }): void;
+  deleteSession(): Promise<void>;
 };
 
 export type DeviceSessionStaticMethodsType = {

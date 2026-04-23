@@ -33,7 +33,7 @@ import {
 import { UseBearerGuard } from '../decorators/bearer-auth/use-bearer-guard.decorator';
 import { type Response } from 'express';
 import { UserFromRequest } from '../decorators';
-import { RefreshTokenCommand, type RequestUserDto } from '../application';
+import { LogoutCommand, RefreshTokenCommand, type RequestUserDto } from '../application';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
@@ -78,6 +78,15 @@ export class AuthController {
       secure: true,
     });
     response.send({ accessToken });
+  }
+
+  @Post('logout')
+  @LoginSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@Cookies('refreshToken') refreshToken: string, @Res() response: Response) {
+    await this.commandBus.execute(new LogoutCommand(refreshToken));
+
+    response.clearCookie('refreshToken');
   }
 
   @Post('refresh-token')
