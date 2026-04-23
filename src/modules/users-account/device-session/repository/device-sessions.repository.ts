@@ -9,6 +9,16 @@ export class DeviceSessionsRepository {
     private DeviceSessionModel: DeviceSessionModelType
   ) {}
 
+  async findSession({ userId, deviceId, iat }: { userId: string; deviceId: string; iat: number }) {
+    const currentSession = await this.DeviceSessionModel.findOne({
+      userId,
+      deviceId,
+      iat,
+    });
+
+    return currentSession;
+  }
+
   async save(deviceSessionDocument: DeviceSessionDocument) {
     await deviceSessionDocument.save();
   }

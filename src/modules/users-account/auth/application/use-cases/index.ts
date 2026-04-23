@@ -10,3 +10,4 @@ export {
   RegistrationEmailResendingUseCase,
 } from './registration-email-resending.usecase';
 export { RegistrationCommand, RegistrationUseCase } from './registration.usecase';
+export { RefreshTokenUseCase, RefreshTokenCommand } from './refresh-token.usecase';

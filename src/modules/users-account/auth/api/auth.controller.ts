@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
-import { AppThrottle, ClientMeta, type ClientMetaDto } from 'src/core/decorators';
+import { AppThrottle, ClientMeta, Cookies, type ClientMetaDto } from 'src/core/decorators';
 import {
   LoginCommand,
   NewUserPasswordCommand,
@@ -33,7 +33,7 @@ import {
 import { UseBearerGuard } from '../decorators/bearer-auth/use-bearer-guard.decorator';
 import { type Response } from 'express';
 import { UserFromRequest } from '../decorators';
-import { type RequestUserDto } from '../application';
+import { RefreshTokenCommand, type RequestUserDto } from '../application';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
@@ -83,23 +83,14 @@ export class AuthController {
   @Post('refresh-token')
   @RefreshTokenSwagger()
   @HttpCode(HttpStatus.OK)
-  async refreshToken(
-    @Body() dto: LoginRequestDto,
-    @ClientMeta() clientMeta: ClientMetaDto,
-    @Res() response: Response
-  ) {
-    // TODO add logic
-    // const { accessToken, refreshToken } = await this.commandBus.execute(
-    //   new LoginCommand({ ...dto, ...clientMeta })
-    // );
+  async refreshToken(@Cookies('refreshToken') refreshToken: string, @Res() response: Response) {
+    const result = await this.commandBus.execute(new RefreshTokenCommand(refreshToken));
 
-    // response.cookie('refreshToken', refreshToken, {
-    //   httpOnly: true,
-    //   secure: true,
-    // });
-    // response.send({ accessToken });
-
-    return true;
+    response.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    response.send({ accessToken: result.accessToken });
   }
 
   @Post('password-recovery')

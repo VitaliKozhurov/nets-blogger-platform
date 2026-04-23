@@ -11,6 +11,7 @@ import {
   LoginUseCase,
   NewUserPasswordUseCase,
   PasswordRecoveryUseCase,
+  RefreshTokenUseCase,
   RegistrationConfirmationUseCase,
   RegistrationEmailResendingUseCase,
   RegistrationUseCase,
@@ -20,7 +21,7 @@ import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from './constants/injection-tokens';
-import { jwtConfigProviders } from './providers/jwt-config.provider';
+import { jwtConfigProviders } from './config/jwt-config.provider';
 import { UsersController } from './users/api';
 import { UsersFactory } from './users/application/factories';
 import { UsersService } from './users/application/services';
@@ -38,6 +39,7 @@ const commandHandlers = [
   NewUserPasswordUseCase,
   CreateUserByAdminUseCase,
   DeleteUserByAdminUseCase,
+  RefreshTokenUseCase,
 ];
 
 @Module({

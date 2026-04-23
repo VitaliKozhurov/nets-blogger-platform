@@ -5,7 +5,7 @@ import { CreateDeviceSessionInstanceDto } from './device-session.dto';
 export type DeviceSessionDocument = HydratedDocument<DeviceSession>;
 
 export type DeviceSessionMethodsType = {
-  someMethods(): void;
+  updateSession(args: { iat: number; expirationAt: number }): void;
 };
 
 export type DeviceSessionStaticMethodsType = {

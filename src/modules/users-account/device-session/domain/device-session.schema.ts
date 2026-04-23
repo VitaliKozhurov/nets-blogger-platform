@@ -43,3 +43,8 @@ DeviceSessionSchema.static(
     return deviceSession;
   }
 );
+
+DeviceSessionSchema.method('updateSession', function (dto: { iat: number; expirationAt: number }) {
+  this.iat = dto.iat;
+  this.expirationAt = dto.expirationAt;
+});

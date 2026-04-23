@@ -3,7 +3,7 @@ import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from '../constants/injection-tokens';
-import { UsersAccountConfig } from '../config/users-account-config';
+import { UsersAccountConfig } from './users-account-config';
 
 export const jwtConfigProviders = [
   {
