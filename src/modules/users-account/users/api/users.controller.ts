@@ -20,7 +20,7 @@ import {
 } from '../decorators/swagger';
 import { UsersQueryRepository } from '../repository';
 import { CreateUserByAdminRequestDto, GetUsersQueryDto } from './dto';
-import { UseBasicGuard } from '../../auth';
+import { UseBasicGuard } from '../../auth/decorators';
 
 @Controller('users')
 @UseBasicGuard()
