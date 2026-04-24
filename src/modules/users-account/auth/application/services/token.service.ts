@@ -15,7 +15,7 @@ export class TokenService {
     private readonly refreshJwtService: JwtService
   ) {}
 
-  async createAccessToken(dto: { userId: string; login: string }) {
+  async createAccessToken(dto: { userId: string; login: string; email: string }) {
     const accessToken = await this.accessJwtService.signAsync(dto);
 
     return accessToken;

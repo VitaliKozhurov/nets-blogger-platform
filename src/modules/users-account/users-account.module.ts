@@ -17,29 +17,30 @@ import {
   RegistrationEmailResendingUseCase,
   RegistrationUseCase,
 } from './auth/application/use-cases';
+import { jwtConfigProviders } from './config/jwt-config.provider';
 import { UsersAccountConfig } from './config/users-account-config';
 import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from './constants/injection-tokens';
-import { jwtConfigProviders } from './config/jwt-config.provider';
-import { UsersController } from './users/api';
-import { UsersFactory } from './users/application/factories';
-import { UsersService } from './users/application/services';
-import { CreateUserByAdminUseCase, DeleteUserByAdminUseCase } from './users/application/use-cases';
-import { User, UserSchema } from './users/domain';
-import { UsersQueryRepository, UsersRepository } from './users/repository';
 import {
   DeviceSession,
   DeviceSessionSchema,
   DeviceSessionsQueryRepository,
   DeviceSessionsRepository,
 } from './device-session';
+import { DeviceSessionController } from './device-session/api';
+import { GetDeviceSessionsHandler } from './device-session/application/queries';
 import {
   DeleteAllMyDeviceSessionWithoutCurrentUseCase,
   DeleteMyDeviceSessionUseCase,
 } from './device-session/application/use-cases';
-import { GetDeviceSessionsHandler } from './device-session/application/queries';
+import { UsersController } from './users/api';
+import { UsersFactory } from './users/application/factories';
+import { UsersService } from './users/application/services';
+import { CreateUserByAdminUseCase, DeleteUserByAdminUseCase } from './users/application/use-cases';
+import { User, UserSchema } from './users/domain';
+import { UsersQueryRepository, UsersRepository } from './users/repository';
 
 const commandHandlers = [
   RegistrationUseCase,
@@ -67,7 +68,7 @@ const queryHandlers = [GetDeviceSessionsHandler];
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 10000, limit: 5 }] }),
     NotificationsModule,
   ],
-  controllers: [AuthController, UsersController],
+  controllers: [AuthController, UsersController, DeviceSessionController],
   providers: [
     ...commandHandlers,
     ...queryHandlers,

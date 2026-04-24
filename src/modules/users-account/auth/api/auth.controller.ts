@@ -23,6 +23,10 @@ import {
   RegistrationSwagger,
 } from '../decorators/swagger';
 
+import { type Response } from 'express';
+import { LogoutCommand, RefreshTokenCommand, type RequestUserDto } from '../application';
+import { UserFromRequest } from '../decorators';
+import { UseBearerGuard } from '../decorators/bearer-auth/use-bearer-guard.decorator';
 import {
   LoginRequestDto,
   NewPasswordRequestDto,
@@ -31,10 +35,6 @@ import {
   RegistrationEmailResendingRequestDto,
   RegistrationRequestDto,
 } from './dto';
-import { UseBearerGuard } from '../decorators/bearer-auth/use-bearer-guard.decorator';
-import { type Response } from 'express';
-import { UserFromRequest } from '../decorators';
-import { LogoutCommand, RefreshTokenCommand, type RequestUserDto } from '../application';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
@@ -88,6 +88,7 @@ export class AuthController {
     await this.commandBus.execute(new LogoutCommand(refreshToken));
 
     response.clearCookie('refreshToken');
+    response.status(HttpStatus.NO_CONTENT).send();
   }
 
   @Post('refresh-token')

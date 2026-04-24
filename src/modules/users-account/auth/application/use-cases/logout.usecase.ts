@@ -1,9 +1,8 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { DeviceSessionsRepository } from '../../../device-session';
 import { TokenService } from '../services';
-import { InjectModel } from '@nestjs/mongoose';
-import { DeviceSession, DeviceSessionsRepository } from '../../../device-session';
 
 export class LogoutCommand extends Command<void> {
   constructor(public refreshToken: string) {
@@ -14,7 +13,6 @@ export class LogoutCommand extends Command<void> {
 @CommandHandler(LogoutCommand)
 export class LogoutUseCase implements ICommandHandler<LogoutCommand> {
   constructor(
-    @InjectModel(DeviceSession.name)
     private tokenService: TokenService,
     private deviceSessionsRepository: DeviceSessionsRepository
   ) {}
@@ -37,8 +35,13 @@ export class LogoutUseCase implements ICommandHandler<LogoutCommand> {
       iat,
     });
 
-    if (session) {
-      await session.deleteSession();
+    if (!session) {
+      throw new DomainException({
+        code: DomainExceptionCode.UNAUTHORIZED_ERROR,
+        message: 'Unauthorized',
+      });
     }
+
+    await session.deleteSession();
   }
 }

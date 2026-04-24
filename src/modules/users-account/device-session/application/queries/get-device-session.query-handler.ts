@@ -1,8 +1,8 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { DeviceSessionsQueryRepository } from '../../repository';
-import { TokenService } from 'src/modules/users-account/auth';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { TokenService } from 'src/modules/users-account/auth';
 import { DeviceSessionResponseDto } from '../../api/dto';
+import { DeviceSessionsQueryRepository } from '../../repository';
 
 export class GetDeviceSessionsQuery {
   constructor(public refreshToken: string) {}
@@ -20,6 +20,8 @@ export class GetDeviceSessionsHandler implements IQueryHandler<
 
   async execute({ refreshToken }: GetDeviceSessionsQuery): Promise<DeviceSessionResponseDto[]> {
     const tokenData = await this.tokenService.verifyRefreshToken(refreshToken);
+
+    console.log('TOKEN: ', tokenData);
 
     if (!tokenData) {
       throw new DomainException({

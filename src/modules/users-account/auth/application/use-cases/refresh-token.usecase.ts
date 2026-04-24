@@ -1,9 +1,9 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { TokenService } from '../services';
-import { DeviceSessionsRepository } from '../../../device-session';
 import { UsersRepository } from 'src/modules/users-account/users';
+import { DeviceSessionsRepository } from '../../../device-session';
+import { TokenService } from '../services';
 
 type RefreshTokenResult = {
   accessToken: string;
@@ -49,7 +49,11 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
       this.throwUnauthorized();
     }
 
-    const accessToken = await this.tokenService.createAccessToken({ userId, login: user.login });
+    const accessToken = await this.tokenService.createAccessToken({
+      userId,
+      login: user.login,
+      email: user.email,
+    });
 
     const refreshTokenWithMeta = await this.tokenService.createRefreshTokenWithMeta({
       userId,

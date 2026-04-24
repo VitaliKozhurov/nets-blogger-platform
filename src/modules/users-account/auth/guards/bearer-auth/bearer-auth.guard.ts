@@ -1,11 +1,11 @@
 import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { ACCESS_TOKEN_STRATEGY_INJECT_TOKEN } from '../../../constants/injection-tokens';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { AccessTokenPayload } from './access-token.payload';
-import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/core/guards';
+import { ACCESS_TOKEN_STRATEGY_INJECT_TOKEN } from '../../../constants/injection-tokens';
+import { AccessTokenPayload } from './access-token.payload';
 
 @Injectable()
 export class BearerAuthGuard implements CanActivate {
@@ -39,7 +39,7 @@ export class BearerAuthGuard implements CanActivate {
     try {
       const payload = await this.jwtService.verifyAsync<AccessTokenPayload>(token);
 
-      request.user = payload;
+      request.user = { userId: payload.userId, login: payload.login, email: payload.email };
     } catch {
       throw new DomainException({
         code: DomainExceptionCode.UNAUTHORIZED_ERROR,
