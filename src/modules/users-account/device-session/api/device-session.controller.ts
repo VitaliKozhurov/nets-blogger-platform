@@ -3,7 +3,11 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Cookies } from 'src/core/decorators';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { GetDeviceSessionsQuery } from '../application/queries';
-import { GetDeviceSessionsSwagger } from '../decorators';
+import {
+  DeleteSessionsSwagger,
+  DeleteSessionSwagger,
+  GetDeviceSessionsSwagger,
+} from '../decorators';
 import {
   DeleteAllMyDeviceSessionWithoutCurrentCommand,
   DeleteMyDeviceSessionCommand,
@@ -22,17 +26,15 @@ export class DeviceSessionController {
     return this.queryBus.execute(new GetDeviceSessionsQuery(refreshToken));
   }
 
-  // TODO add swagger
   @Delete()
-  //   @DeleteUserSwagger()
+  @DeleteSessionsSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteOwnerSessions(@Cookies('refreshToken') refreshToken: string) {
     return this.commandBus.execute(new DeleteAllMyDeviceSessionWithoutCurrentCommand(refreshToken));
   }
 
-  // TODO add swagger
   @Delete(':id')
-  //   @DeleteUserSwagger()
+  @DeleteSessionSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSession(
     @Param('id', ObjectIdValidationPipe) id: string,
