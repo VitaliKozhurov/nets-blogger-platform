@@ -10,8 +10,8 @@ export class DeviceSessionsQueryRepository {
     private DeviceSessionModel: DeviceSessionModelType
   ) {}
 
-  async findAll() {
-    const sessions = await this.DeviceSessionModel.find().lean().exec();
+  async findAllByUser(userId: string) {
+    const sessions = await this.DeviceSessionModel.find({ userId }).lean().exec();
 
     return sessions.map(DeviceSessionMapperDto.mapToView);
   }

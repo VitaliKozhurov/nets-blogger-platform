@@ -10,7 +10,7 @@ import {
   DeviceSessionsRepository,
   type DeviceSessionModelType,
 } from '../../../device-session';
-import { randomUUID } from 'crypto';
+import { Types } from 'mongoose';
 
 type LoginResult = {
   accessToken: string;
@@ -43,7 +43,7 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
       });
     }
 
-    const deviceId = randomUUID();
+    const deviceId = new Types.ObjectId().toString();
 
     const accessToken = await this.tokenService.createAccessToken(user);
     const refreshTokenWithMeta = await this.tokenService.createRefreshTokenWithMeta({

@@ -28,7 +28,7 @@ export class DeleteMyDeviceSessionUseCase implements ICommandHandler<DeleteMyDev
 
     const deviceSession = await this.deviceSessionRepository.findByIdOrThrow(deviceId);
 
-    if (deviceId !== deviceSession.deviceId) {
+    if (tokenData.userId !== deviceSession.userId) {
       throw new DomainException({
         code: DomainExceptionCode.FORBIDDEN_ERROR,
         message: 'Not enough permissions',

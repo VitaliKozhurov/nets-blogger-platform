@@ -21,8 +21,6 @@ export class GetDeviceSessionsHandler implements IQueryHandler<
   async execute({ refreshToken }: GetDeviceSessionsQuery): Promise<DeviceSessionResponseDto[]> {
     const tokenData = await this.tokenService.verifyRefreshToken(refreshToken);
 
-    console.log('TOKEN: ', tokenData);
-
     if (!tokenData) {
       throw new DomainException({
         code: DomainExceptionCode.UNAUTHORIZED_ERROR,
@@ -30,6 +28,6 @@ export class GetDeviceSessionsHandler implements IQueryHandler<
       });
     }
 
-    return this.deviceSessionsQueryRepository.findAll();
+    return this.deviceSessionsQueryRepository.findAllByUser(tokenData.userId);
   }
 }
