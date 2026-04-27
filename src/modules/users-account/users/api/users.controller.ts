@@ -34,7 +34,8 @@ export class UsersController {
   @Get()
   @GetUsersSwagger()
   async findAll(@Query() query: GetUsersQueryDto) {
-    return this.usersQueryRepository.findAll(query);
+    return this.usersQueryRepository.findAllPG()
+    // return this.usersQueryRepository.findAll(query);
   }
 
   @Post()

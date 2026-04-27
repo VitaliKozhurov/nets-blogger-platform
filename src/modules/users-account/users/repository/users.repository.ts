@@ -3,12 +3,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { User } from '../domain';
 import { UserDocument, type UserModelType } from '../domain';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectModel(User.name)
-    private UserModel: UserModelType
+    private UserModel: UserModelType,
+    @InjectDataSource() protected dataSource: DataSource
   ) {}
 
   async findById(id: string) {
@@ -81,5 +84,19 @@ export class UsersRepository {
 
   async save(userDocument: UserDocument) {
     await userDocument.save();
+  }
+
+  async create(dto: { login: string; email: string; passwordHash: string }) {
+    const { login, email, passwordHash } = dto;
+
+    const user = await this.dataSource.query(
+      `
+        INSERT INTO users (login, email, "passwordHash", "isConfirmed")
+          VALUES ($1, $2, $3, true)
+      `,
+      [login, email, passwordHash]
+    );
+
+    console.log(user);
   }
 }

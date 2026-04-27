@@ -29,12 +29,12 @@ export class UsersFactory {
   async createUserByAdmin(dto: ICreateUserByAdminDto) {
     const passwordHash = await this.passwordHasherService.createHash(dto.password);
 
-    const createdUser = await this.UserModel.createUserInstance({
-      login: dto.login,
-      email: dto.email,
-      passwordHash,
-    });
+    // const createdUser = await this.UserModel.createUserInstance({
+    // login: dto.login,
+    // email: dto.email,
+    // passwordHash,
+    // });
 
-    return createdUser;
+    return { login: dto.login, email: dto.email, passwordHash };
   }
 }

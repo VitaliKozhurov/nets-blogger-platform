@@ -9,12 +9,16 @@ import { User } from '../domain';
 import { UserDocument, type UserModelType } from '../domain';
 import { UserResponseMapperDto } from '../api/dto';
 import { IGetUsersQueryParamsDto } from '../api/dto';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { UserDbDto } from './user-db.dto';
 
 @Injectable()
 export class UsersQueryRepository {
   constructor(
     @InjectModel(User.name)
-    private UserModel: UserModelType
+    private UserModel: UserModelType,
+    @InjectDataSource() protected dataSource: DataSource
   ) {}
 
   async findAll(
@@ -57,6 +61,15 @@ export class UsersQueryRepository {
       page: query.pageNumber,
       size: query.pageSize,
     });
+  }
+
+  async findAllPG() {
+    const result: UserDbDto[] = await this.dataSource.query(`
+      SELECT *
+        FROM "users"
+      `);
+
+    return result;
   }
 
   async findByIdOrThrow(id: string): Promise<UserResponseMapperDto> {

@@ -33,10 +33,12 @@ export class CreateUserByAdminUseCase implements ICommandHandler<CreateUserByAdm
       });
     }
 
-    const createdUser = await this.usersFactory.createUserByAdmin(dto);
+    const userByAdminDto = await this.usersFactory.createUserByAdmin(dto);
+    const user = this.userRepository.create(userByAdminDto);
+    // await this.userRepository.save(createdUser);
 
-    await this.userRepository.save(createdUser);
+    // return createdUser._id.toString();
 
-    return createdUser._id.toString();
+    return '1';
   }
 }

@@ -21,6 +21,11 @@ export class CoreConfig {
       this.configService.get(EnvVariables.INCLUDE_TESTING_MODULE)
     ) as boolean;
 
+    this.postgresDB = this.configService.get(EnvVariables.POSTGRES_DB);
+    this.postgresUser = this.configService.get(EnvVariables.POSTGRES_USER);
+    this.postgresPassword = this.configService.get(EnvVariables.POSTGRES_PASSWORD);
+    this.postgresPort = Number(this.configService.get(EnvVariables.POSTGRES_PORT));
+
     configValidationUtility.validateConfig(this);
   }
 
@@ -49,4 +54,27 @@ export class CoreConfig {
       'Set Env variable INCLUDE_TESTING_MODULE to enable/disable Dangerous for production TestingModule, example: true, available values: true, false, 0, 1',
   })
   includeTestingModule: boolean;
+
+  @IsNotEmpty({
+    message: `Set Env variable ${EnvVariables.POSTGRES_DB}, example: my-postgres-db`,
+  })
+  postgresDB: string;
+
+  @IsNotEmpty({
+    message: `Set Env variable ${EnvVariables.POSTGRES_USER}, example: my-postgres-user`,
+  })
+  postgresUser: string;
+
+  @IsNotEmpty({
+    message: `Set Env variable ${EnvVariables.POSTGRES_PASSWORD}, example: my-postgres-password`,
+  })
+  postgresPassword: string;
+
+  @IsNumber(
+    {},
+    {
+      message: `Set Env variable ${EnvVariables.POSTGRES_PORT}, example: 5432`,
+    }
+  )
+  postgresPort: number;
 }
