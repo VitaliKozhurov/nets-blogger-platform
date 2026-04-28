@@ -34,18 +34,16 @@ export class UsersController {
   @Get()
   @GetUsersSwagger()
   async findAll(@Query() query: GetUsersQueryDto) {
-    return this.usersQueryRepository.findAllPG()
+    return this.usersQueryRepository.findAllPG();
     // return this.usersQueryRepository.findAll(query);
   }
 
   @Post()
   @CreateUserByAdminSwagger()
   async create(@Body() dto: CreateUserByAdminRequestDto) {
-    const userId = await this.commandBus.execute<CreateUserByAdminCommand, string>(
-      new CreateUserByAdminCommand(dto)
-    );
+    const createdUser = await this.commandBus.execute(new CreateUserByAdminCommand(dto));
 
-    return this.usersQueryRepository.findByIdOrThrow(userId);
+    return createdUser;
   }
 
   @Delete(':id')

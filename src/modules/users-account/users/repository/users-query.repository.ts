@@ -11,7 +11,7 @@ import { UserResponseMapperDto } from '../api/dto';
 import { IGetUsersQueryParamsDto } from '../api/dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { UserDbDto } from './user-db.dto';
+import { IUserDbDto } from './dto/user-db.dto';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -64,7 +64,7 @@ export class UsersQueryRepository {
   }
 
   async findAllPG() {
-    const result: UserDbDto[] = await this.dataSource.query(`
+    const result: IUserDbDto[] = await this.dataSource.query(`
       SELECT *
         FROM "users"
       `);

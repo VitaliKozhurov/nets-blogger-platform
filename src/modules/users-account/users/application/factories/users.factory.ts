@@ -1,40 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
-import { User } from '../../domain';
-import { type UserModelType } from '../../domain';
 import { IRegistrationDto } from '../../../auth/application/dto';
 import { ICreateUserByAdminDto } from '../dto';
+import { UsersRepository } from '../../repository';
 
 @Injectable()
 export class UsersFactory {
   constructor(
-    @InjectModel(User.name)
-    private UserModel: UserModelType,
+    private usersRepository: UsersRepository,
     private passwordHasherService: PasswordHasherService
   ) {}
 
   async createUnconfirmedUser(dto: IRegistrationDto) {
     const passwordHash = await this.passwordHasherService.createHash(dto.password);
 
-    const createdUser = await this.UserModel.createUnconfirmedUserInstance({
-      login: dto.login,
-      email: dto.email,
-      passwordHash,
-    });
+    // const createdUser = await this.UserModel.createUnconfirmedUserInstance({
+    //   login: dto.login,
+    //   email: dto.email,
+    //   passwordHash,
+    // });
 
-    return createdUser;
+    // return createdUser;
+
+    return {
+      login: 'string',
+      password: 'string',
+      email: 'string',
+    };
   }
 
   async createUserByAdmin(dto: ICreateUserByAdminDto) {
-    const passwordHash = await this.passwordHasherService.createHash(dto.password);
+    const { login, email, password } = dto;
 
-    // const createdUser = await this.UserModel.createUserInstance({
-    // login: dto.login,
-    // email: dto.email,
-    // passwordHash,
-    // });
+    const passwordHash = await this.passwordHasherService.createHash(password);
 
-    return { login: dto.login, email: dto.email, passwordHash };
+    const createdUser = await this.usersRepository.createByAdmin({ login, email, passwordHash });
+
+    return createdUser;
   }
 }

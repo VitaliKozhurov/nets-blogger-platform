@@ -7,7 +7,6 @@ CREATE TABLE public.users
     "createdAt" timestamp with time zone NOT NULL DEFAULT NOW(),
     "deletedAt" timestamp with time zone,
     PRIMARY KEY (id),
-    CONSTRAINT check_login_unique UNIQUE (login),
     CONSTRAINT check_email_unique UNIQUE (email)
 );
 
@@ -37,8 +36,8 @@ ALTER TABLE IF EXISTS public."user_confirmations"
 CREATE TABLE public.user_recovery_codes
 (
     "userId" uuid NOT NULL,
-    code uuid,
-    "expirationDate" timestamp with time zone,
+    code uuid NOT NULL,
+    "expirationDate" timestamp with time zone NOT NULL,
     PRIMARY KEY ("userId"),
     FOREIGN KEY ("userId")
         REFERENCES public.users (id) MATCH SIMPLE

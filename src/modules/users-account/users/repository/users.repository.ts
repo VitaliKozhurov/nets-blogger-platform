@@ -5,6 +5,8 @@ import { User } from '../domain';
 import { UserDocument, type UserModelType } from '../domain';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { IUserDbDto } from './dto/user-db.dto';
+import { IUserViewDto } from './dto/user-view.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -39,14 +41,14 @@ export class UsersRepository {
     return user;
   }
 
-  async findByLoginOrEmail(loginOrEmail: string) {
-    const user = await this.UserModel.findOne({
-      $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
-      deletedAt: null,
-    }).exec();
+  // async findByLoginOrEmail(loginOrEmail: string) {
+  //   const user = await this.UserModel.findOne({
+  //     $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
+  //     deletedAt: null,
+  //   }).exec();
 
-    return user;
-  }
+  //   return user;
+  // }
 
   async findByPasswordRecoveryCode(code: string) {
     const user = await this.UserModel.findOne({
@@ -86,17 +88,43 @@ export class UsersRepository {
     await userDocument.save();
   }
 
-  async create(dto: { login: string; email: string; passwordHash: string }) {
+  async findByLoginOrEmail(loginOrEmail: string) {
+    const [user]: IUserDbDto[] = await this.dataSource.query(
+      `
+      SELECT *
+        FROM users
+        WHERE users.login = $1 OR users.email = $1
+      `,
+      [loginOrEmail]
+    );
+
+    const currentUser = user ? user : null;
+
+    return currentUser;
+  }
+
+  async createByAdmin(dto: { login: string; email: string; passwordHash: string }) {
     const { login, email, passwordHash } = dto;
 
-    const user = await this.dataSource.query(
+    const [user]: IUserViewDto[] = await this.dataSource.query(
       `
-        INSERT INTO users (login, email, "passwordHash", "isConfirmed")
-          VALUES ($1, $2, $3, true)
+        INSERT INTO users (login, email, "passwordHash")
+          VALUES ($1, $2, $3)
+          RETURNING id
       `,
       [login, email, passwordHash]
     );
 
-    console.log(user);
+    const userId = user.id;
+
+    await this.dataSource.query(
+      `
+        INSERT INTO user_confirmations ("userId", "isConfirmed")
+          VALUES ($1, true)
+      `,
+      [userId]
+    );
+
+    return user;
   }
 }
