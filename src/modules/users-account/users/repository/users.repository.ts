@@ -16,20 +16,38 @@ export class UsersRepository {
     @InjectDataSource() protected dataSource: DataSource
   ) {}
 
-  async findById(id: string) {
-    const user = await this.UserModel.findOne({
-      _id: id,
-      deletedAt: null,
-    }).exec();
+  async findByLoginOrEmail(loginOrEmail: string) {
+    const [user]: IUserDbDto[] = await this.dataSource.query(
+      `
+      SELECT *
+        FROM users
+        WHERE users.login = $1 OR users.email = $1 AND "deletedAt" IS NULL
+      `,
+      [loginOrEmail]
+    );
 
-    return user;
+    const currentUser = user ? user : null;
+
+    return currentUser;
+  }
+
+  async findById(id: string) {
+    const [user]: IUserDbDto[] = await this.dataSource.query(
+      `
+      SELECT *
+        FROM users
+        WHERE users.id = $1 AND "deletedAt" IS NULL
+      `,
+      [id]
+    );
+
+    const currentUser = user ? user : null;
+
+    return currentUser;
   }
 
   async findByIdOrThrow(id: string) {
-    const user = await this.UserModel.findOne({
-      _id: id,
-      deletedAt: null,
-    }).exec();
+    const user = await this.findById(id);
 
     if (!user) {
       throw new DomainException({
@@ -41,14 +59,46 @@ export class UsersRepository {
     return user;
   }
 
-  // async findByLoginOrEmail(loginOrEmail: string) {
-  //   const user = await this.UserModel.findOne({
-  //     $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
-  //     deletedAt: null,
-  //   }).exec();
+  async createByAdmin(dto: { login: string; email: string; passwordHash: string }) {
+    const { login, email, passwordHash } = dto;
 
-  //   return user;
-  // }
+    const [user]: IUserViewDto[] = await this.dataSource.query(
+      `
+        INSERT INTO users (login, email, "passwordHash")
+          VALUES ($1, $2, $3)
+          RETURNING id
+      `,
+      [login, email, passwordHash]
+    );
+
+    const userId = user.id;
+
+    await this.dataSource.query(
+      `
+        INSERT INTO user_confirmations ("userId", "isConfirmed")
+          VALUES ($1, true)
+      `,
+      [userId]
+    );
+
+    return user;
+  }
+
+  async softDelete(userId: string): Promise<boolean> {
+    const deletedAt = new Date();
+
+    const result: { id: string }[] = await this.dataSource.query(
+      `
+      UPDATE users
+        SET "deletedAt" = $1
+        WHERE users.id = $2 AND "deletedAt" IS NULL
+        RETURNING id
+      `,
+      [deletedAt, userId]
+    );
+
+    return result.length > 0;
+  }
 
   async findByPasswordRecoveryCode(code: string) {
     const user = await this.UserModel.findOne({
@@ -86,45 +136,5 @@ export class UsersRepository {
 
   async save(userDocument: UserDocument) {
     await userDocument.save();
-  }
-
-  async findByLoginOrEmail(loginOrEmail: string) {
-    const [user]: IUserDbDto[] = await this.dataSource.query(
-      `
-      SELECT *
-        FROM users
-        WHERE users.login = $1 OR users.email = $1
-      `,
-      [loginOrEmail]
-    );
-
-    const currentUser = user ? user : null;
-
-    return currentUser;
-  }
-
-  async createByAdmin(dto: { login: string; email: string; passwordHash: string }) {
-    const { login, email, passwordHash } = dto;
-
-    const [user]: IUserViewDto[] = await this.dataSource.query(
-      `
-        INSERT INTO users (login, email, "passwordHash")
-          VALUES ($1, $2, $3)
-          RETURNING id
-      `,
-      [login, email, passwordHash]
-    );
-
-    const userId = user.id;
-
-    await this.dataSource.query(
-      `
-        INSERT INTO user_confirmations ("userId", "isConfirmed")
-          VALUES ($1, true)
-      `,
-      [userId]
-    );
-
-    return user;
   }
 }
