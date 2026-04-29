@@ -1,24 +1,23 @@
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { TokenService } from 'src/modules/users-account/auth';
-import { DeviceSessionResponseDto } from '../../api/dto';
 import { DeviceSessionsQueryRepository } from '../../repository';
+import { DeviceSessionMapperDto } from '../../api/dto';
 
-export class GetDeviceSessionsQuery {
-  constructor(public refreshToken: string) {}
+export class GetDeviceSessionsQuery extends Query<DeviceSessionMapperDto[]> {
+  constructor(public refreshToken: string) {
+    super();
+  }
 }
 
 @QueryHandler(GetDeviceSessionsQuery)
-export class GetDeviceSessionsHandler implements IQueryHandler<
-  GetDeviceSessionsQuery,
-  DeviceSessionResponseDto[]
-> {
+export class GetDeviceSessionsHandler implements IQueryHandler<GetDeviceSessionsQuery> {
   constructor(
     private tokenService: TokenService,
     private readonly deviceSessionsQueryRepository: DeviceSessionsQueryRepository
   ) {}
 
-  async execute({ refreshToken }: GetDeviceSessionsQuery): Promise<DeviceSessionResponseDto[]> {
+  async execute({ refreshToken }: GetDeviceSessionsQuery) {
     const tokenData = await this.tokenService.verifyRefreshToken(refreshToken);
 
     if (!tokenData) {
@@ -28,6 +27,8 @@ export class GetDeviceSessionsHandler implements IQueryHandler<
       });
     }
 
-    return this.deviceSessionsQueryRepository.findAllByUser(tokenData.userId);
+    const result = await this.deviceSessionsQueryRepository.findAllByUser(tokenData.userId);
+
+    return result;
   }
 }

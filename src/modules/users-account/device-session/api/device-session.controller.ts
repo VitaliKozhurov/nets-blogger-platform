@@ -23,7 +23,9 @@ export class DeviceSessionController {
   @Get()
   @GetDeviceSessionsSwagger()
   async findAll(@Cookies('refreshToken') refreshToken: string) {
-    return this.queryBus.execute(new GetDeviceSessionsQuery(refreshToken));
+    const result = await this.queryBus.execute(new GetDeviceSessionsQuery(refreshToken));
+
+    return result;
   }
 
   @Delete()

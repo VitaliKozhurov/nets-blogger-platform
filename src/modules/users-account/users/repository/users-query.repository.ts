@@ -5,12 +5,12 @@ import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { User } from '../domain';
 import { type UserModelType } from '../domain';
 import { UserResponseMapperDto } from '../api/dto';
-import { IGetUsersQueryParamsDto } from '../api/dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IUserDbDto } from './dto/user-db.dto';
 import { getPaginationParams } from 'src/core/utils';
 import { PaginationResponseMapperDto } from 'src/core/dto';
+import { IGetUsersQueryDto } from '../application';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -20,7 +20,7 @@ export class UsersQueryRepository {
     @InjectDataSource() protected dataSource: DataSource
   ) {}
 
-  async findAll(query: IGetUsersQueryParamsDto) {
+  async findAll(query: IGetUsersQueryDto) {
     const { searchEmailTerm, searchLoginTerm, sortBy, sortDirection } = query;
     const sortColumn = `"${sortBy}"`;
     const { skip, limit } = getPaginationParams(query);

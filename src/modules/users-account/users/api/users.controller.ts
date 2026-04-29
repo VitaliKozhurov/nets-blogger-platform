@@ -9,7 +9,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBasicAuth } from '@nestjs/swagger';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { CreateUserByAdminCommand, DeleteUserByAdminCommand } from '../application/use-cases';
@@ -18,9 +18,9 @@ import {
   DeleteUserSwagger,
   GetUsersSwagger,
 } from '../decorators/swagger';
-import { UsersQueryRepository } from '../repository';
 import { CreateUserByAdminRequestDto, GetUsersQueryDto } from './dto';
 import { UseBasicGuard } from '../../auth/decorators';
+import { GetUsersQuery } from '../application/queries';
 
 @Controller('sa/users')
 @UseBasicGuard()
@@ -28,14 +28,15 @@ import { UseBasicGuard } from '../../auth/decorators';
 export class UsersController {
   constructor(
     private commandBus: CommandBus,
-    private usersQueryRepository: UsersQueryRepository
+    private queryBus: QueryBus
   ) {}
 
   @Get()
   @GetUsersSwagger()
   async getUsers(@Query() query: GetUsersQueryDto) {
-    return this.usersQueryRepository.findAll(query);
-    // return this.usersQueryRepository.findAll(query);
+    const result = await this.queryBus.execute(new GetUsersQuery(query));
+
+    return result;
   }
 
   @Post()
