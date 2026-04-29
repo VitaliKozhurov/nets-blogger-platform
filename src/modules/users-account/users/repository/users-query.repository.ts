@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
-import { QueryFilter } from 'mongoose';
-import { PaginationResponseMapperDto } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { getPaginationParams } from 'src/core/utils';
 import { User } from '../domain';
-import { UserDocument, type UserModelType } from '../domain';
+import { type UserModelType } from '../domain';
 import { UserResponseMapperDto } from '../api/dto';
 import { IGetUsersQueryParamsDto } from '../api/dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IUserDbDto } from './dto/user-db.dto';
+import { getPaginationParams } from 'src/core/utils';
+import { PaginationResponseMapperDto } from 'src/core/dto';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -21,55 +20,40 @@ export class UsersQueryRepository {
     @InjectDataSource() protected dataSource: DataSource
   ) {}
 
-  async findAll(
-    query: IGetUsersQueryParamsDto
-  ): Promise<PaginationResponseMapperDto<UserResponseMapperDto[]>> {
-    const filter: QueryFilter<UserDocument> = {
-      deletedAt: null,
-    };
+  async findAll(query: IGetUsersQueryParamsDto) {
+    const { searchEmailTerm, searchLoginTerm, sortBy, sortDirection } = query;
+    const sortColumn = `"${sortBy}"`;
+    const { skip, limit } = getPaginationParams(query);
 
-    if (query.searchLoginTerm) {
-      filter.$or = filter.$or ?? [];
-      filter.$or.push({
-        login: { $regex: query.searchLoginTerm, $options: 'i' },
-      });
-    }
+    const usersPromise: Promise<IUserDbDto[]> = this.dataSource.query(
+      `
+      SELECT *
+        FROM users
+        WHERE (email ILIKE $1 OR login ILIKE $2) AND "deletedAt" IS NULL
+        ORDER BY ${sortColumn} ${sortDirection}
+        LIMIT $3
+        OFFSET $4
+      `,
+      [`%${searchEmailTerm ?? ''}%`, `%${searchLoginTerm ?? ''}%`, limit, skip]
+    );
 
-    if (query.searchEmailTerm) {
-      filter.$or = filter.$or ?? [];
-      filter.$or.push({
-        email: { $regex: query.searchEmailTerm, $options: 'i' },
-      });
-    }
+    const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
+      `
+      SELECT COUNT(*) AS count
+        FROM users
+        WHERE (email ILIKE $1 OR login ILIKE $2) AND "deletedAt" IS NULL
+      `,
+      [`%${searchEmailTerm ?? ''}%`, `%${searchLoginTerm ?? ''}%`]
+    );
 
-    const { sort, skip, limit } = getPaginationParams(query);
-
-    const usersPromise = this.UserModel.find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .lean()
-      .exec();
-
-    const totalCountPromise = this.UserModel.countDocuments(filter).exec();
-
-    const [items, totalCount] = await Promise.all([usersPromise, totalCountPromise]);
+    const [usersResult, countResult] = await Promise.all([usersPromise, totalCountPromise]);
 
     return PaginationResponseMapperDto.mapToViewModel({
-      items: items.map(UserResponseMapperDto.mapToView),
-      totalCount,
+      items: usersResult.map(UserResponseMapperDto.mapToView),
+      totalCount: Number(countResult[0].count),
       page: query.pageNumber,
       size: query.pageSize,
     });
-  }
-
-  async findAllPG() {
-    const result: IUserDbDto[] = await this.dataSource.query(`
-      SELECT *
-        FROM "users"
-      `);
-
-    return result;
   }
 
   async findByIdOrThrow(id: string): Promise<UserResponseMapperDto> {

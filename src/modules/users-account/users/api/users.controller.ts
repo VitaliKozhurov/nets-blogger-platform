@@ -22,7 +22,7 @@ import { UsersQueryRepository } from '../repository';
 import { CreateUserByAdminRequestDto, GetUsersQueryDto } from './dto';
 import { UseBasicGuard } from '../../auth/decorators';
 
-@Controller('users')
+@Controller('sa/users')
 @UseBasicGuard()
 @ApiBasicAuth('basicAuth')
 export class UsersController {
@@ -33,8 +33,8 @@ export class UsersController {
 
   @Get()
   @GetUsersSwagger()
-  async findAll(@Query() query: GetUsersQueryDto) {
-    return this.usersQueryRepository.findAllPG();
+  async getUsers(@Query() query: GetUsersQueryDto) {
+    return this.usersQueryRepository.findAll(query);
     // return this.usersQueryRepository.findAll(query);
   }
 

@@ -20,8 +20,8 @@ export class CreateUserByAdminUseCase implements ICommandHandler<CreateUserByAdm
   async execute({ dto }: CreateUserByAdminCommand): Promise<IUserViewDto> {
     await this.userService.ensureEmailIsAvailable(dto.email);
 
-    const createdUserByAdmin = await this.usersFactory.createUserByAdmin(dto);
+    const createdUser = await this.usersFactory.createUserByAdmin(dto);
 
-    return createdUserByAdmin;
+    return createdUser;
   }
 }

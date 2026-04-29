@@ -24,7 +24,7 @@ export class BaseQueryParamsDocumentationDto implements IBaseQueryParamsDto {
 
   @ApiProperty({
     description: 'Sort order direction',
-    example: 'desc',
+    example: 'DESC',
     enum: SortDirection,
     enumName: 'SortDirection',
     default: SortDirection.Desc,
