@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { User } from '../domain';
-import { UserDocument, type UserModelType } from '../domain';
-import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { DataSource } from 'typeorm';
+import { User, UserDocument, type UserModelType } from '../domain';
 import { IUserDbDto } from './dto/user-db.dto';
 import { IUserViewDto } from './dto/user-view.dto';
 
@@ -59,7 +58,7 @@ export class UsersRepository {
     return user;
   }
 
-  async createByAdmin(dto: { login: string; email: string; passwordHash: string }) {
+  async createWithConfirmedStatus(dto: { login: string; email: string; passwordHash: string }) {
     const { login, email, passwordHash } = dto;
 
     const [user]: IUserViewDto[] = await this.dataSource.query(
@@ -79,6 +78,37 @@ export class UsersRepository {
           VALUES ($1, true)
       `,
       [userId]
+    );
+
+    return user;
+  }
+
+  async createWithUnconfirmedStatus(dto: {
+    login: string;
+    email: string;
+    passwordHash: string;
+    confirmationCode: string;
+    expirationDate: Date;
+  }) {
+    const { login, email, passwordHash, confirmationCode, expirationDate } = dto;
+
+    const [user]: IUserViewDto[] = await this.dataSource.query(
+      `
+        INSERT INTO users (login, email, "passwordHash")
+          VALUES ($1, $2, $3)
+          RETURNING id
+      `,
+      [login, email, passwordHash]
+    );
+
+    const userId = user.id;
+
+    await this.dataSource.query(
+      `
+        INSERT INTO user_confirmations ("userId", "isConfirmed", code, "expirationDate")
+          VALUES ($1, false, $2, $3)
+      `,
+      [userId, confirmationCode, expirationDate]
     );
 
     return user;

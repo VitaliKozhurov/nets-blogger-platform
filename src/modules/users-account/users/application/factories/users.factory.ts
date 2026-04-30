@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import { IRegistrationDto } from '../../../auth/application/dto';
-import { ICreateUserByAdminDto } from '../dto';
 import { UsersRepository } from '../../repository';
+import { ICreateUserByAdminDto } from '../dto';
 
 @Injectable()
 export class UsersFactory {
@@ -12,21 +13,23 @@ export class UsersFactory {
   ) {}
 
   async createUnconfirmedUser(dto: IRegistrationDto) {
-    const passwordHash = await this.passwordHasherService.createHash(dto.password);
+    const { login, email, password } = dto;
 
-    // const createdUser = await this.UserModel.createUnconfirmedUserInstance({
-    //   login: dto.login,
-    //   email: dto.email,
-    //   passwordHash,
-    // });
+    const passwordHash = await this.passwordHasherService.createHash(password);
+    const confirmationCode = randomUUID();
+    const expirationDate = new Date();
 
-    // return createdUser;
+    expirationDate.setHours(expirationDate.getHours() + 1);
 
-    return {
-      login: 'string',
-      password: 'string',
-      email: 'string',
-    };
+    const createdUser = await this.usersRepository.createWithUnconfirmedStatus({
+      login,
+      email,
+      passwordHash,
+      confirmationCode,
+      expirationDate,
+    });
+
+    return { createdUser, confirmationCode };
   }
 
   async createUserByAdmin(dto: ICreateUserByAdminDto) {
@@ -34,7 +37,11 @@ export class UsersFactory {
 
     const passwordHash = await this.passwordHasherService.createHash(password);
 
-    const createdUser = await this.usersRepository.createByAdmin({ login, email, passwordHash });
+    const createdUser = await this.usersRepository.createWithConfirmedStatus({
+      login,
+      email,
+      passwordHash,
+    });
 
     return createdUser;
   }

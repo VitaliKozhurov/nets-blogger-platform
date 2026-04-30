@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 
-import { UsersRepository } from '../../repository/users.repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { UsersRepository } from '../../repository/users.repository';
 
 @Injectable()
 export class UsersService {
@@ -45,6 +45,29 @@ export class UsersService {
             message: 'Incorrect credentials',
           },
         ],
+      });
+    }
+  }
+
+  async ensureUserIsAvailable({ login, email }: { login: string; email: string }): Promise<void> {
+    const userByLoginPromise = this.userRepository.findByLoginOrEmail(login);
+    const userByEmailPromise = this.userRepository.findByLoginOrEmail(email);
+
+    const [userByLogin, userByEmail] = await Promise.all([userByLoginPromise, userByEmailPromise]);
+
+    const takenFields = [
+      { field: 'login', isExist: userByLogin },
+      { field: 'email', isExist: userByEmail },
+    ].filter(el => Boolean(el.isExist));
+
+    if (takenFields.length > 0) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'User with this login or email already exists',
+        extensions: takenFields.map(el => ({
+          field: el.field,
+          message: `${el.field} is already taken`,
+        })),
       });
     }
   }
