@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { IRegistrationConfirmationDto } from '../dto';
-import { UsersRepository } from '../../../users/repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { UsersRepository } from '../../../users/repository';
+import { IRegistrationConfirmationDto } from '../dto';
 
 export class RegistrationConfirmationCommand {
   constructor(public dto: IRegistrationConfirmationDto) {}
@@ -9,32 +9,18 @@ export class RegistrationConfirmationCommand {
 
 @CommandHandler(RegistrationConfirmationCommand)
 export class RegistrationConfirmationUseCase implements ICommandHandler<RegistrationConfirmationCommand> {
-  constructor(private userRepository: UsersRepository) {}
+  constructor(private usersRepository: UsersRepository) {}
 
   async execute({ dto }: RegistrationConfirmationCommand) {
-    const user = await this.userRepository.findByRegistrationConfirmationCode(dto.code);
+    const isUpdating = await this.usersRepository.confirmUserRegistrationByCode(dto.code);
 
-    if (!user) {
+    if (!isUpdating) {
       throw new DomainException({
         code: DomainExceptionCode.BAD_REQUEST_ERROR,
-        message: 'Confirmation code is invalid',
+        message: 'Confirmation code is invalid, already used, or expired',
         extensions: [{ field: 'code', message: 'Invalid confirmation code' }],
       });
     }
-
-    const isValidCode = user.validateRegistrationConfirmationCode(dto.code);
-
-    if (!isValidCode) {
-      throw new DomainException({
-        code: DomainExceptionCode.BAD_REQUEST_ERROR,
-        message: 'Confirmation code is invalid',
-        extensions: [{ field: 'code', message: 'Invalid confirmation code' }],
-      });
-    }
-
-    const updatedUser = user.confirmRegistration();
-
-    await this.userRepository.save(updatedUser);
 
     return true;
   }

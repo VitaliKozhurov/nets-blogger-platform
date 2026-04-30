@@ -130,18 +130,25 @@ export class UsersRepository {
     return result.length > 0;
   }
 
+  async confirmUserRegistrationByCode(code: string) {
+    const result: { userId: string }[] = await this.dataSource.query(
+      `
+      UPDATE "user_confirmations"
+        SET "isConfirmed" = true, code = NULL, "expirationDate" = NULL
+        WHERE code = $1 
+        AND "isConfirmed" = false 
+        AND "expirationDate" > NOW()
+        RETURNING "userId"
+      `,
+      [code]
+    );
+
+    return result.length > 0;
+  }
+
   async findByPasswordRecoveryCode(code: string) {
     const user = await this.UserModel.findOne({
       'passwordRecovery.code': code,
-      deletedAt: null,
-    }).exec();
-
-    return user;
-  }
-
-  async findByRegistrationConfirmationCode(confirmationCode: string) {
-    const user = await this.UserModel.findOne({
-      'emailConfirmation.confirmationCode': confirmationCode,
       deletedAt: null,
     }).exec();
 
