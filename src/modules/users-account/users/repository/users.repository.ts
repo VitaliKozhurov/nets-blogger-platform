@@ -172,6 +172,29 @@ export class UsersRepository {
     return result.length > 0;
   }
 
+  async upsertUserPasswordRecoveryData(dto: {
+    userId: string;
+    code: string;
+    expirationDate: Date;
+  }) {
+    const { userId, code, expirationDate } = dto;
+
+    const result = await this.dataSource.query(
+      `
+    INSERT INTO "user_recovery_codes" ("userId", code, "expirationDate")
+    VALUES ($1, $2, $3)
+    ON CONFLICT ("userId") 
+    DO UPDATE SET 
+      code = EXCLUDED.code,
+      "expirationDate" = EXCLUDED."expirationDate"
+    RETURNING "userId"
+    `,
+      [userId, code, expirationDate]
+    );
+
+    return result.length > 0;
+  }
+
   async findByPasswordRecoveryCode(code: string) {
     const user = await this.UserModel.findOne({
       'passwordRecovery.code': code,

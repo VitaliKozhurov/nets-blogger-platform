@@ -33,7 +33,7 @@ ALTER TABLE IF EXISTS public."user_confirmations"
     OWNER to "nest-admin";
 
 
-CREATE TABLE public.user_recovery_codes
+CREATE TABLE public."user_recovery_codes"
 (
     "userId" uuid NOT NULL,
     code uuid NOT NULL,
