@@ -1,7 +1,8 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
-import { IRegistrationEmailResendingDto } from '../dto';
-import { UsersRepository } from '../../../users/repository';
+import { randomUUID } from 'crypto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { UsersRepository } from '../../../users/repository';
+import { IRegistrationEmailResendingDto } from '../dto';
 import { UserRegistrationEvent } from '../events';
 
 export class RegistrationEmailResendingCommand {
@@ -21,27 +22,42 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
     if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.BAD_REQUEST_ERROR,
-        message: 'Email is invalid',
+        message: 'Cannot resend confirmation email',
         extensions: [{ field: 'email', message: 'Invalid email' }],
       });
     }
 
-    if (user.emailConfirmation.isConfirmed) {
+    const prevConfirmationData = await this.usersRepository.findConfirmationByUserId(user.id);
+
+    if (!prevConfirmationData) {
       throw new DomainException({
         code: DomainExceptionCode.BAD_REQUEST_ERROR,
-        message: 'User is confirmed',
-        extensions: [{ field: 'email', message: 'User is confirmed' }],
+        message: 'Cannot resend confirmation email',
+        extensions: [{ field: 'email', message: 'Should register first' }],
       });
     }
 
-    const updatedUser = user.updateRegistrationConfirmationCode();
+    if (prevConfirmationData.isConfirmed) {
+      throw new DomainException({
+        code: DomainExceptionCode.BAD_REQUEST_ERROR,
+        message: 'Cannot resend confirmation email',
+        extensions: [{ field: 'email', message: 'User is already confirmed' }],
+      });
+    }
 
-    await this.usersRepository.save(updatedUser);
+    const confirmationCode = randomUUID();
+    const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
+
+    await this.usersRepository.updateRegistrationConfirmationCode({
+      userId: user.id,
+      confirmationCode,
+      expirationDate,
+    });
 
     this.eventBus.publish(
       new UserRegistrationEvent({
-        email: updatedUser.email,
-        confirmationCode: updatedUser.emailConfirmation.confirmationCode ?? '',
+        email: user.email,
+        confirmationCode,
       })
     );
 

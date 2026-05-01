@@ -17,9 +17,7 @@ export class UsersFactory {
 
     const passwordHash = await this.passwordHasherService.createHash(password);
     const confirmationCode = randomUUID();
-    const expirationDate = new Date();
-
-    expirationDate.setHours(expirationDate.getHours() + 1);
+    const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
 
     const createdUser = await this.usersRepository.createWithUnconfirmedStatus({
       login,

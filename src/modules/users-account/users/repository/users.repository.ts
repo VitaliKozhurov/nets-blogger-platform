@@ -4,6 +4,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { DataSource } from 'typeorm';
 import { User, UserDocument, type UserModelType } from '../domain';
+import { IConfirmationCodeDto } from './dto/confirmation-code.dto';
 import { IUserDbDto } from './dto/user-db.dto';
 import { IUserViewDto } from './dto/user-view.dto';
 
@@ -20,14 +21,12 @@ export class UsersRepository {
       `
       SELECT *
         FROM users
-        WHERE users.login = $1 OR users.email = $1 AND "deletedAt" IS NULL
+        WHERE (users.login = $1 OR users.email = $1) AND "deletedAt" IS NULL
       `,
       [loginOrEmail]
     );
 
-    const currentUser = user ? user : null;
-
-    return currentUser;
+    return user || null;
   }
 
   async findById(id: string) {
@@ -141,6 +140,33 @@ export class UsersRepository {
         RETURNING "userId"
       `,
       [code]
+    );
+
+    return result.length > 0;
+  }
+
+  async findConfirmationByUserId(userId: string): Promise<IConfirmationCodeDto | null> {
+    const [result]: IConfirmationCodeDto[] = await this.dataSource.query(
+      `SELECT * FROM "user_confirmations" WHERE "userId" = $1`,
+      [userId]
+    );
+
+    return result || null;
+  }
+
+  async updateRegistrationConfirmationCode(dto: {
+    userId: string;
+    confirmationCode: string;
+    expirationDate: Date;
+  }) {
+    const result: { userId: string }[] = await this.dataSource.query(
+      `
+      UPDATE "user_confirmations"
+        SET code = $1, "expirationDate" = $2
+        WHERE "userId" = $3 
+        RETURNING "userId"
+      `,
+      [dto.confirmationCode, dto.expirationDate, dto.userId]
     );
 
     return result.length > 0;
