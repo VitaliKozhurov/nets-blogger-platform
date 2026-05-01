@@ -27,6 +27,21 @@ export class DeviceSessionsRepository {
     );
   }
 
+  async deleteSession(dto: { userId: string; deviceId: string; iat: number }) {
+    const { userId, deviceId, iat } = dto;
+
+    const result: { id: string }[] = await this.dataSource.query(
+      `
+      DELETE FROM "user_device_sessions"
+        WHERE "userId" = $1 AND "deviceId" = $2 AND iat = $3
+        RETURNING id
+      `,
+      [userId, deviceId, iat]
+    );
+
+    return result.length > 0;
+  }
+
   async findSession({ userId, deviceId, iat }: { userId: string; deviceId: string; iat: number }) {
     const currentSession = await this.DeviceSessionModel.findOne({
       userId,

@@ -29,19 +29,17 @@ export class LogoutUseCase implements ICommandHandler<LogoutCommand> {
 
     const { userId, deviceId, iat } = tokenData;
 
-    const session = await this.deviceSessionsRepository.findSession({
+    const isDeleting = await this.deviceSessionsRepository.deleteSession({
       userId,
       deviceId,
       iat,
     });
 
-    if (!session) {
+    if (!isDeleting) {
       throw new DomainException({
         code: DomainExceptionCode.UNAUTHORIZED_ERROR,
         message: 'Unauthorized',
       });
     }
-
-    await session.deleteSession();
   }
 }
