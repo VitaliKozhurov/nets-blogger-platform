@@ -8,13 +8,13 @@ import { UsersRepository } from '../../repository/users.repository';
 export class UsersService {
   constructor(
     private passwordHasherService: PasswordHasherService,
-    private userRepository: UsersRepository
+    private usersRepository: UsersRepository
   ) {}
 
   async validateUser(dto: { loginOrEmail: string; password: string }) {
     const { loginOrEmail, password } = dto;
 
-    const user = await this.userRepository.findByLoginOrEmail(loginOrEmail);
+    const user = await this.usersRepository.findByLoginOrEmail(loginOrEmail);
 
     if (!user) {
       return null;
@@ -33,7 +33,7 @@ export class UsersService {
   }
 
   async ensureEmailIsAvailable(email: string): Promise<void> {
-    const user = await this.userRepository.findByLoginOrEmail(email);
+    const user = await this.usersRepository.findByLoginOrEmail(email);
 
     if (user) {
       throw new DomainException({
@@ -50,8 +50,8 @@ export class UsersService {
   }
 
   async ensureUserIsAvailable({ login, email }: { login: string; email: string }): Promise<void> {
-    const userByLoginPromise = this.userRepository.findByLoginOrEmail(login);
-    const userByEmailPromise = this.userRepository.findByLoginOrEmail(email);
+    const userByLoginPromise = this.usersRepository.findByLoginOrEmail(login);
+    const userByEmailPromise = this.usersRepository.findByLoginOrEmail(email);
 
     const [userByLogin, userByEmail] = await Promise.all([userByLoginPromise, userByEmailPromise]);
 

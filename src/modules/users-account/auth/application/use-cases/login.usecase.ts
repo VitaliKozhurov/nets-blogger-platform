@@ -1,16 +1,11 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ILoginDto } from '../dto';
 
+import { randomUUID } from 'crypto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { TokenService } from '../services';
+import { DeviceSessionsRepository } from '../../../device-session';
 import { UsersService } from '../../../users/application/services';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  DeviceSession,
-  DeviceSessionsRepository,
-  type DeviceSessionModelType,
-} from '../../../device-session';
-import { Types } from 'mongoose';
+import { TokenService } from '../services';
 
 type LoginResult = {
   accessToken: string;
@@ -26,8 +21,6 @@ export class LoginCommand extends Command<LoginResult> {
 @CommandHandler(LoginCommand)
 export class LoginUseCase implements ICommandHandler<LoginCommand> {
   constructor(
-    @InjectModel(DeviceSession.name)
-    private DeviceSessionModel: DeviceSessionModelType,
     private usersService: UsersService,
     private tokenService: TokenService,
     private deviceSessionsRepository: DeviceSessionsRepository
@@ -43,12 +36,12 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
       });
     }
 
-    const deviceId = new Types.ObjectId().toString();
+    const newDeviceId = randomUUID();
 
     const accessToken = await this.tokenService.createAccessToken(user);
     const refreshTokenWithMeta = await this.tokenService.createRefreshTokenWithMeta({
       ...user,
-      deviceId,
+      deviceId: newDeviceId,
     });
 
     if (!refreshTokenWithMeta) {
@@ -58,18 +51,16 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
       });
     }
 
-    const { iat, expirationAt, refreshToken } = refreshTokenWithMeta;
+    const { iat, expirationAt, deviceId, refreshToken } = refreshTokenWithMeta;
 
-    const deviceSession = await this.DeviceSessionModel.createDeviceSessionInstance({
+    await this.deviceSessionsRepository.createSession({
       userId: user.userId,
       deviceId,
-      ip: dto.ip,
       deviceName: dto.deviceName,
+      ip: dto.ip,
       iat,
       expirationAt,
     });
-
-    await this.deviceSessionsRepository.save(deviceSession);
 
     return { accessToken, refreshToken };
   }
