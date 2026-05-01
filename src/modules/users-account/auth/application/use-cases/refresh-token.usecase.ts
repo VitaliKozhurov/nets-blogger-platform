@@ -39,16 +39,6 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
       this.throwUnauthorized();
     }
 
-    const session = await this.deviceSessionsRepository.findSession({
-      userId,
-      deviceId,
-      iat,
-    });
-
-    if (!session) {
-      this.throwUnauthorized();
-    }
-
     const accessToken = await this.tokenService.createAccessToken({
       userId,
       login: user.login,
@@ -62,15 +52,23 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
     });
 
     if (!refreshTokenWithMeta) {
-      this.throwUnauthorized();
+      throw new DomainException({
+        code: DomainExceptionCode.INTERNAL_SERVER_ERROR,
+        message: 'Cannot create refresh token',
+      });
     }
 
-    session.updateSession({
-      iat: refreshTokenWithMeta.iat,
-      expirationAt: refreshTokenWithMeta.expirationAt,
+    const isUpdated = await this.deviceSessionsRepository.updateSession({
+      userId,
+      deviceId,
+      iat,
+      newIat: refreshTokenWithMeta.iat,
+      newExpirationAt: refreshTokenWithMeta.expirationAt,
     });
 
-    await this.deviceSessionsRepository.save(session);
+    if (!isUpdated) {
+      this.throwUnauthorized();
+    }
 
     return { accessToken, refreshToken: refreshTokenWithMeta.refreshToken };
   }

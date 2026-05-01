@@ -27,6 +27,28 @@ export class DeviceSessionsRepository {
     );
   }
 
+  async updateSession(dto: {
+    userId: string;
+    deviceId: string;
+    iat: number;
+    newIat: number;
+    newExpirationAt: number;
+  }) {
+    const { userId, deviceId, iat, newIat, newExpirationAt } = dto;
+
+    const result: { id: string }[] = await this.dataSource.query(
+      `
+      UPDATE "user_device_sessions"
+        SET iat = $4, "expirationAt" = $5
+        WHERE "userId" = $1 AND "deviceId" = $2 AND iat = $3
+        RETURNING id
+      `,
+      [userId, deviceId, iat, newIat, newExpirationAt]
+    );
+
+    return result.length > 0;
+  }
+
   async deleteSession(dto: { userId: string; deviceId: string; iat: number }) {
     const { userId, deviceId, iat } = dto;
 
