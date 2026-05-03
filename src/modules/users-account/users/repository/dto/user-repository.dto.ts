@@ -1,4 +1,4 @@
-export interface IUserDbDto {
+export interface IUserRepositoryDto {
   id: string;
   login: string;
   email: string;

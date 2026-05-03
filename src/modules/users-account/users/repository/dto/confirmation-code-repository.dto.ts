@@ -1,4 +1,4 @@
-export interface IConfirmationCodeDto {
+export interface IConfirmationCodeRepositoryDto {
   userId: string;
   isConfirmed: boolean;
   confirmationCode: string | null;

@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { UserResponseMapperDto } from '../api/dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { IUserDbDto } from './dto/user-db.dto';
+import { IUserRepositoryDto } from './dto/user-repository.dto';
 import { getPaginationParams } from 'src/core/utils';
 import { PaginationResponseMapperDto } from 'src/core/dto';
 import { IGetUsersQueryDto } from '../application';
@@ -17,7 +17,7 @@ export class UsersQueryRepository {
     const sortColumn = `"${sortBy}"`;
     const { skip, limit } = getPaginationParams(query);
 
-    const usersPromise: Promise<IUserDbDto[]> = this.dataSource.query(
+    const usersPromise: Promise<IUserRepositoryDto[]> = this.dataSource.query(
       `
       SELECT *
         FROM users

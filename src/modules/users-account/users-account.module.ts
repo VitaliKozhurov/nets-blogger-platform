@@ -39,7 +39,6 @@ import { UsersController } from './users/api';
 import { UsersFactory } from './users/application/factories';
 import { UsersService } from './users/application/services';
 import { CreateUserByAdminUseCase, DeleteUserByAdminUseCase } from './users/application/use-cases';
-import { User, UserSchema } from './users/domain';
 import { UsersQueryRepository, UsersRepository } from './users/repository';
 import { GetUsersHandler } from './users/application/queries';
 
@@ -62,7 +61,6 @@ const queryHandlers = [GetUsersHandler, GetDeviceSessionsHandler];
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: DeviceSession.name, schema: DeviceSessionSchema }]),
     CryptoModule,
     JwtModule,

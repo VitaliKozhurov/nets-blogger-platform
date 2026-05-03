@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { DataSource } from 'typeorm';
-import { IConfirmationCodeDto } from './dto/confirmation-code.dto';
-import { IUserDbDto } from './dto/user-db.dto';
+import { IConfirmationCodeRepositoryDto } from './dto/confirmation-code-repository.dto';
+import { IUserRepositoryDto } from './dto/user-repository.dto';
 import { IPasswordRecoveryRepositoryDto } from './dto/password-recovery-repository.dto';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class UsersRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findById(id: string) {
-    const [user]: IUserDbDto[] = await this.dataSource.query(
+    const [user]: IUserRepositoryDto[] = await this.dataSource.query(
       `
       SELECT *
         FROM users
@@ -37,7 +37,7 @@ export class UsersRepository {
   }
 
   async findByLoginOrEmail(loginOrEmail: string) {
-    const [user]: IUserDbDto[] = await this.dataSource.query(
+    const [user]: IUserRepositoryDto[] = await this.dataSource.query(
       `
       SELECT *
         FROM users
@@ -137,8 +137,10 @@ export class UsersRepository {
     return result.length > 0;
   }
 
-  async findRegistrationConfirmationByUserId(userId: string): Promise<IConfirmationCodeDto | null> {
-    const [confirmationData]: IConfirmationCodeDto[] = await this.dataSource.query(
+  async findRegistrationConfirmationByUserId(
+    userId: string
+  ): Promise<IConfirmationCodeRepositoryDto | null> {
+    const [confirmationData]: IConfirmationCodeRepositoryDto[] = await this.dataSource.query(
       `SELECT * 
         FROM "user_confirmations" 
         WHERE "userId" = $1`,
