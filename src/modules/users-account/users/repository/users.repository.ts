@@ -3,10 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { DataSource } from 'typeorm';
-import { User, UserDocument, type UserModelType } from '../domain';
+import { User, type UserModelType } from '../domain';
 import { IConfirmationCodeDto } from './dto/confirmation-code.dto';
 import { IUserDbDto } from './dto/user-db.dto';
 import { IUserViewDto } from './dto/user-view.dto';
+import { IPasswordRecoveryRepositoryDto } from './dto/password-recovery-repository.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -39,9 +40,7 @@ export class UsersRepository {
       [id]
     );
 
-    const currentUser = user ? user : null;
-
-    return currentUser;
+    return user || null;
   }
 
   async findByIdOrThrow(id: string) {
@@ -172,6 +171,35 @@ export class UsersRepository {
     return result.length > 0;
   }
 
+  async updateUserPassword(dto: { userId: string; passwordHash: string }) {
+    const { userId, passwordHash } = dto;
+
+    const result: { id: string }[] = await this.dataSource.query(
+      `
+    UPDATE users
+      SET "passwordHash" = $2
+      WHERE "userId" = $1
+      RETURNING id
+    `,
+      [userId, passwordHash]
+    );
+
+    return result.length > 0;
+  }
+
+  async deletePasswordRecoveryData(userId: string) {
+    const result: { userId: string }[] = await this.dataSource.query(
+      `
+    DELETE FROM "user_recovery_codes"
+      WHERE "userId" = $1
+      RETURNING "userId"
+    `,
+      [userId]
+    );
+
+    return result.length > 0;
+  }
+
   async upsertUserPasswordRecoveryData(dto: {
     userId: string;
     code: string;
@@ -195,13 +223,17 @@ export class UsersRepository {
     return result.length > 0;
   }
 
-  async findByPasswordRecoveryCode(code: string) {
-    const user = await this.UserModel.findOne({
-      'passwordRecovery.code': code,
-      deletedAt: null,
-    }).exec();
+  async findPasswordRecoveryData(code: string): Promise<IPasswordRecoveryRepositoryDto | null> {
+    const [result]: IPasswordRecoveryRepositoryDto[] = await this.dataSource.query(
+      `
+      SELECT *
+        FROM user_recovery_codes
+        WHERE "user_recovery_codes".code = $1 AND "expirationDate" > NOW()
+      `,
+      [code]
+    );
 
-    return user;
+    return result?.[0] || null;
   }
 
   async findByLoginOrEmailOrThrow(loginOrEmail: string) {
@@ -220,7 +252,7 @@ export class UsersRepository {
     return user;
   }
 
-  async save(userDocument: UserDocument) {
-    await userDocument.save();
-  }
+  // async save(userDocument: UserDocument) {
+  //   await userDocument.save();
+  // }
 }

@@ -16,9 +16,11 @@ export class NewUserPasswordUseCase implements ICommandHandler<NewUserPasswordCo
   ) {}
 
   async execute({ dto }: NewUserPasswordCommand): Promise<boolean> {
-    const user = await this.usersRepository.findByPasswordRecoveryCode(dto.recoveryCode);
+    const passwordRecoveryData = await this.usersRepository.findPasswordRecoveryData(
+      dto.recoveryCode
+    );
 
-    if (!user) {
+    if (!passwordRecoveryData) {
       throw new DomainException({
         code: DomainExceptionCode.BAD_REQUEST_ERROR,
         message: 'Recovery code is invalid',
@@ -31,26 +33,27 @@ export class NewUserPasswordUseCase implements ICommandHandler<NewUserPasswordCo
       });
     }
 
-    const isValidCode = user.validatePasswordRecoveryCode(dto.recoveryCode);
+    const passwordHash = await this.passwordHasherService.createHash(dto.newPassword);
 
-    if (!isValidCode) {
+    const isUpdated = await this.usersRepository.updateUserPassword({
+      userId: passwordRecoveryData.userId,
+      passwordHash,
+    });
+
+    if (!isUpdated) {
       throw new DomainException({
         code: DomainExceptionCode.BAD_REQUEST_ERROR,
-        message: 'Recovery code is expired or invalid',
+        message: 'Recovery code is invalid',
         extensions: [
           {
             field: 'recoveryCode',
-            message: 'Recovery code has expired',
+            message: 'Invalid recovery code',
           },
         ],
       });
     }
 
-    const passwordHash = await this.passwordHasherService.createHash(dto.newPassword);
-
-    const updatedUser = user.updatePassword(passwordHash);
-
-    await this.usersRepository.save(updatedUser);
+    await this.usersRepository.deletePasswordRecoveryData(passwordRecoveryData.userId);
 
     return true;
   }
