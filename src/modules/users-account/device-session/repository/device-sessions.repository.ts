@@ -1,19 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { DeviceSession, DeviceSessionDocument, type DeviceSessionModelType } from '../domain';
 import { ICreateSessionDto } from './dto/create-session.dto';
 import { IDeviceSessionRepositoryDto } from './dto/device-session-repository.dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 @Injectable()
 export class DeviceSessionsRepository {
-  constructor(
-    @InjectModel(DeviceSession.name)
-    private DeviceSessionModel: DeviceSessionModelType,
-    @InjectDataSource() protected dataSource: DataSource
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async createSession(dto: ICreateSessionDto) {
     const { userId, deviceId, deviceName, ip, iat, expirationAt } = dto;
@@ -65,7 +59,7 @@ export class DeviceSessionsRepository {
     return result.length > 0;
   }
 
-  async deleteSessionsExceptTheCurrent(deviceId: string) {
+  async deleteAllSessionsExceptCurrent(deviceId: string) {
     const result: { id: string }[] = await this.dataSource.query(
       `
       DELETE FROM "user_device_sessions"
@@ -76,16 +70,6 @@ export class DeviceSessionsRepository {
     );
 
     return result.length > 0;
-  }
-
-  async findSession({ userId, deviceId, iat }: { userId: string; deviceId: string; iat: number }) {
-    const currentSession = await this.DeviceSessionModel.findOne({
-      userId,
-      deviceId,
-      iat,
-    });
-
-    return currentSession;
   }
 
   async findByIdOrThrow(deviceId: string): Promise<IDeviceSessionRepositoryDto> {
@@ -106,9 +90,5 @@ export class DeviceSessionsRepository {
     }
 
     return session;
-  }
-
-  async save(deviceSessionDocument: DeviceSessionDocument) {
-    await deviceSessionDocument.save();
   }
 }

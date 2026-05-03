@@ -1,17 +1,15 @@
 import { Controller, Delete, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Cookies } from 'src/core/decorators';
-import { ObjectIdValidationPipe } from 'src/core/pipes';
+import { UUIDValidationPipe } from 'src/core/pipes';
 import { GetDeviceSessionsQuery } from '../application/queries';
 import {
   DeleteSessionsSwagger,
   DeleteSessionSwagger,
   GetDeviceSessionsSwagger,
 } from '../decorators';
-import {
-  DeleteAllMyDeviceSessionWithoutCurrentCommand,
-  DeleteMyDeviceSessionCommand,
-} from '../application/use-cases';
+import { DeleteAllDeviceSessionsExceptCurrentCommand } from '../application/use-cases';
+import { DeleteCurrentDeviceSessionCommand } from '../application/use-cases/delete-current-device-session.usecase';
 
 @Controller('security/devices')
 export class DeviceSessionController {
@@ -31,19 +29,19 @@ export class DeviceSessionController {
   @Delete()
   @DeleteSessionsSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteOwnerSessions(@Cookies('refreshToken') refreshToken: string) {
-    return this.commandBus.execute(new DeleteAllMyDeviceSessionWithoutCurrentCommand(refreshToken));
+  async deleteAllSessionsExceptCurrent(@Cookies('refreshToken') refreshToken: string) {
+    return this.commandBus.execute(new DeleteAllDeviceSessionsExceptCurrentCommand(refreshToken));
   }
 
   @Delete(':id')
   @DeleteSessionSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteSession(
-    @Param('id', ObjectIdValidationPipe) id: string,
+  async deleteCurrentOwnerSession(
+    @Param('id', UUIDValidationPipe) id: string,
     @Cookies('refreshToken') refreshToken: string
   ) {
     return this.commandBus.execute(
-      new DeleteMyDeviceSessionCommand({ deviceId: id, refreshToken })
+      new DeleteCurrentDeviceSessionCommand({ deviceId: id, refreshToken })
     );
   }
 }

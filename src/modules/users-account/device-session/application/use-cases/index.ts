@@ -1,8 +1,8 @@
 export {
-  DeleteMyDeviceSessionCommand,
-  DeleteMyDeviceSessionUseCase,
-} from './delete-my-session.usecase';
+  DeleteCurrentDeviceSessionCommand,
+  DeleteCurrentDeviceSessionUseCase,
+} from './delete-current-device-session.usecase';
 export {
-  DeleteAllMyDeviceSessionWithoutCurrentCommand,
-  DeleteAllMyDeviceSessionWithoutCurrentUseCase,
-} from './delete-all-my-sessions-without-current.usecase';
+  DeleteAllDeviceSessionsExceptCurrentCommand,
+  DeleteAllDeviceSessionsExceptCurrentUseCase,
+} from './delete-all-device-sessions-except-current.usecase';

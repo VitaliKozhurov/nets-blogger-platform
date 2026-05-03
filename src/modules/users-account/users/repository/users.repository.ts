@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { IConfirmationCodeRepositoryDto } from './dto/confirmation-code-repository.dto';
 import { IUserRepositoryDto } from './dto/user-repository.dto';
 import { IPasswordRecoveryRepositoryDto } from './dto/password-recovery-repository.dto';
+import { UserResponseMapperDto } from '../api';
 
 @Injectable()
 export class UsersRepository {
@@ -52,11 +53,11 @@ export class UsersRepository {
   async createWithConfirmedStatus(dto: { login: string; email: string; passwordHash: string }) {
     const { login, email, passwordHash } = dto;
 
-    const [user]: { id: string }[] = await this.dataSource.query(
+    const [user]: IUserRepositoryDto[] = await this.dataSource.query(
       `
         INSERT INTO users (login, email, "passwordHash")
           VALUES ($1, $2, $3)
-          RETURNING id
+          RETURNING *
       `,
       [login, email, passwordHash]
     );
@@ -71,7 +72,7 @@ export class UsersRepository {
       [userId]
     );
 
-    return user;
+    return UserResponseMapperDto.mapToView(user);
   }
 
   async createWithUnconfirmedStatus(dto: {
@@ -83,11 +84,11 @@ export class UsersRepository {
   }) {
     const { login, email, passwordHash, confirmationCode, expirationDate } = dto;
 
-    const [user]: { id: string }[] = await this.dataSource.query(
+    const [user]: IUserRepositoryDto[] = await this.dataSource.query(
       `
         INSERT INTO users (login, email, "passwordHash")
           VALUES ($1, $2, $3)
-          RETURNING id
+          RETURNING *
       `,
       [login, email, passwordHash]
     );
@@ -102,7 +103,7 @@ export class UsersRepository {
       [userId, confirmationCode, expirationDate]
     );
 
-    return user;
+    return UserResponseMapperDto.mapToView(user);
   }
 
   async softDelete(userId: string): Promise<boolean> {

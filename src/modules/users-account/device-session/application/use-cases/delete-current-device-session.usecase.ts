@@ -3,18 +3,18 @@ import { DeviceSessionsRepository } from '../../repository';
 import { TokenService } from 'src/modules/users-account/auth';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
-export class DeleteMyDeviceSessionCommand {
+export class DeleteCurrentDeviceSessionCommand {
   constructor(public dto: { deviceId: string; refreshToken: string }) {}
 }
 
-@CommandHandler(DeleteMyDeviceSessionCommand)
-export class DeleteMyDeviceSessionUseCase implements ICommandHandler<DeleteMyDeviceSessionCommand> {
+@CommandHandler(DeleteCurrentDeviceSessionCommand)
+export class DeleteCurrentDeviceSessionUseCase implements ICommandHandler<DeleteCurrentDeviceSessionCommand> {
   constructor(
     private tokenService: TokenService,
     private deviceSessionRepository: DeviceSessionsRepository
   ) {}
 
-  async execute({ dto }: DeleteMyDeviceSessionCommand): Promise<boolean> {
+  async execute({ dto }: DeleteCurrentDeviceSessionCommand): Promise<boolean> {
     const { deviceId, refreshToken } = dto;
 
     const tokenData = await this.tokenService.verifyRefreshToken(refreshToken);

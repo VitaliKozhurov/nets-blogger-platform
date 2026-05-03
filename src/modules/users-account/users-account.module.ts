@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CryptoModule } from '../crypto/crypto.module';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -23,17 +22,12 @@ import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from './constants/injection-tokens';
-import {
-  DeviceSession,
-  DeviceSessionSchema,
-  DeviceSessionsQueryRepository,
-  DeviceSessionsRepository,
-} from './device-session';
+import { DeviceSessionsQueryRepository, DeviceSessionsRepository } from './device-session';
 import { DeviceSessionController } from './device-session/api';
 import { GetDeviceSessionsHandler } from './device-session/application/queries';
 import {
-  DeleteAllMyDeviceSessionWithoutCurrentUseCase,
-  DeleteMyDeviceSessionUseCase,
+  DeleteAllDeviceSessionsExceptCurrentUseCase,
+  DeleteCurrentDeviceSessionUseCase,
 } from './device-session/application/use-cases';
 import { UsersController } from './users/api';
 import { UsersFactory } from './users/application/factories';
@@ -53,15 +47,14 @@ const commandHandlers = [
   RefreshTokenUseCase,
   LoginUseCase,
   LogoutUseCase,
-  DeleteMyDeviceSessionUseCase,
-  DeleteAllMyDeviceSessionWithoutCurrentUseCase,
+  DeleteCurrentDeviceSessionUseCase,
+  DeleteAllDeviceSessionsExceptCurrentUseCase,
 ];
 
 const queryHandlers = [GetUsersHandler, GetDeviceSessionsHandler];
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: DeviceSession.name, schema: DeviceSessionSchema }]),
     CryptoModule,
     JwtModule,
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 10000, limit: 5 }] }),
