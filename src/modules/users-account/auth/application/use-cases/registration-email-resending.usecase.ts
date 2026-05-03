@@ -1,9 +1,9 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { UsersRepository } from '../../../users/repository';
-import { IRegistrationEmailResendingDto } from '../dto';
-import { UserRegistrationEvent } from '../events';
+import { UsersRepository } from '../../../users/repository/users.repository';
+import type { IRegistrationEmailResendingDto } from '../dto/registration-email-resending.dto';
+import { UserRegistrationEvent } from '../events/user-registration.event';
 
 export class RegistrationEmailResendingCommand {
   constructor(public dto: IRegistrationEmailResendingDto) {}
@@ -27,7 +27,9 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
       });
     }
 
-    const prevConfirmationData = await this.usersRepository.findConfirmationDataByUserId(user.id);
+    const prevConfirmationData = await this.usersRepository.findRegistrationConfirmationByUserId(
+      user.id
+    );
 
     if (!prevConfirmationData) {
       throw new DomainException({
@@ -48,7 +50,7 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
     const confirmationCode = randomUUID();
     const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
 
-    await this.usersRepository.updateRegistrationConfirmationCode({
+    await this.usersRepository.updateRegistrationConfirmation({
       userId: user.id,
       confirmationCode,
       expirationDate,

@@ -31,7 +31,7 @@ export class DeviceSessionsRepository {
   }) {
     const { userId, deviceId, iat, newIat, newExpirationAt } = dto;
 
-    const result: { id: string }[] = await this.dataSource.query(
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
       UPDATE "user_device_sessions"
         SET iat = $4, "expirationAt" = $5
@@ -41,13 +41,13 @@ export class DeviceSessionsRepository {
       [userId, deviceId, iat, newIat, newExpirationAt]
     );
 
-    return result.length > 0;
+    return rows.length > 0;
   }
 
   async deleteSession(dto: { userId: string; deviceId: string; iat: number }) {
     const { userId, deviceId, iat } = dto;
 
-    const result: { id: string }[] = await this.dataSource.query(
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
       DELETE FROM "user_device_sessions"
         WHERE "userId" = $1 AND "deviceId" = $2 AND iat = $3
@@ -56,11 +56,11 @@ export class DeviceSessionsRepository {
       [userId, deviceId, iat]
     );
 
-    return result.length > 0;
+    return rows.length > 0;
   }
 
   async deleteAllSessionsExceptCurrent(deviceId: string) {
-    const result: { id: string }[] = await this.dataSource.query(
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
       DELETE FROM "user_device_sessions"
         WHERE "deviceId" != $1
@@ -69,7 +69,7 @@ export class DeviceSessionsRepository {
       [deviceId]
     );
 
-    return result.length > 0;
+    return rows.length > 0;
   }
 
   async findByIdOrThrow(deviceId: string): Promise<IDeviceSessionRepositoryDto> {

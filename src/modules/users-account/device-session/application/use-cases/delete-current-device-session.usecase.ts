@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DeviceSessionsRepository } from '../../repository';
-import { TokenService } from 'src/modules/users-account/auth';
+import { TokenService } from '../../../auth/application/services/token.service';
+import { DeviceSessionsRepository } from '../../repository/device-sessions.repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 export class DeleteCurrentDeviceSessionCommand {

@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../../users/repository';
-import { INewPasswordDto } from '../dto';
+import { UsersRepository } from '../../../users/repository/users.repository';
+import type { INewPasswordDto } from '../dto/new-password';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 
@@ -16,7 +16,7 @@ export class NewUserPasswordUseCase implements ICommandHandler<NewUserPasswordCo
   ) {}
 
   async execute({ dto }: NewUserPasswordCommand): Promise<boolean> {
-    const passwordRecoveryData = await this.usersRepository.findPasswordRecoveryData(
+    const passwordRecoveryData = await this.usersRepository.findPasswordRecoveryByCode(
       dto.recoveryCode
     );
 
@@ -53,7 +53,7 @@ export class NewUserPasswordUseCase implements ICommandHandler<NewUserPasswordCo
       });
     }
 
-    await this.usersRepository.deletePasswordRecoveryData(passwordRecoveryData.userId);
+    await this.usersRepository.deletePasswordRecoveryByUserId(passwordRecoveryData.userId);
 
     return true;
   }

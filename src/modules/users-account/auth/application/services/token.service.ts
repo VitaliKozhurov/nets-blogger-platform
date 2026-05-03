@@ -4,7 +4,7 @@ import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from '../../../constants/injection-tokens';
-import { RefreshTokenPayload } from '../../guards/bearer-auth';
+import type { RefreshTokenPayload } from '../../guards/bearer-auth/refresh-token.payload';
 
 @Injectable()
 export class TokenService {

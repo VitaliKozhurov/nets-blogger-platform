@@ -1,4 +1,4 @@
-import { UserDocument } from '../../domain';
+import type { IUserRepositoryDto } from '../../repository/dto/user-repository.dto';
 
 export class UserResponseMapperDto {
   id: string;
@@ -6,13 +6,13 @@ export class UserResponseMapperDto {
   email: string;
   createdAt: string;
 
-  static mapToView(userDocument: UserDocument): UserResponseMapperDto {
+  static mapToView(user: IUserRepositoryDto): UserResponseMapperDto {
     const dto = new UserResponseMapperDto();
 
-    dto.id = userDocument._id.toString();
-    dto.login = userDocument.login;
-    dto.email = userDocument.email;
-    dto.createdAt = userDocument.createdAt.toISOString();
+    dto.id = user.id;
+    dto.login = user.login;
+    dto.email = user.email;
+    dto.createdAt = user.createdAt.toISOString();
 
     return dto;
   }

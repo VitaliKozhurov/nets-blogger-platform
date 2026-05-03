@@ -17,13 +17,11 @@ import {
   UpdateCommentContentRequestDto,
   UpdateCommentLikeStatusRequestDto,
 } from '@modules/bloggers-platform/comments/api/dto';
-import {
-  OptionalUserFromRequest,
-  type RequestUserDto,
-  UseBearerGuard,
-  UseOptionalBearerGuard,
-  UserFromRequest,
-} from 'src/modules/users-account/auth';
+import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
+import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/optional-user-from-request.decorator';
+import { UseBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-bearer-guard.decorator';
+import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
+import { UserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/user-from-request.decorator';
 import { Public } from 'src/core/guards';
 
 @Controller('comments')

@@ -1,8 +1,8 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
-import { UsersFactory } from '../../../users/application/factories';
-import { UsersService } from '../../../users/application/services';
-import { IRegistrationDto } from '../dto';
-import { UserRegistrationEvent } from '../events';
+import type { IRegistrationDto } from '../dto/registration.dto';
+import { UserRegistrationEvent } from '../events/user-registration.event';
+import { UsersFactory } from '../../../users/application/factories/users.factory';
+import { UsersService } from '../../../users/application/services/users.service';
 
 export class RegistrationCommand {
   constructor(public dto: IRegistrationDto) {}

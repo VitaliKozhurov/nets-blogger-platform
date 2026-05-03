@@ -24,10 +24,12 @@ export class PostsQueryRepository {
   }): Promise<PaginationResponseMapperDto<PostResponseMapperDto[]>> {
     const { query, userId } = args;
 
-    const { sort, skip, limit } = getPaginationParams(query);
+    const { skip, limit } = getPaginationParams(query);
 
     const postsPromise = this.PostModel.find({ deletedAtL: null })
-      .sort(sort)
+      .sort({
+        [query.sortBy]: query.sortDirection,
+      })
       .skip(skip)
       .limit(limit)
       .lean()
@@ -56,10 +58,12 @@ export class PostsQueryRepository {
   }): Promise<PaginationResponseMapperDto<PostResponseMapperDto[]>> {
     const { blogId, userId, query } = args;
 
-    const { sort, skip, limit } = getPaginationParams(query);
+    const { skip, limit } = getPaginationParams(query);
 
     const postsPromise = this.PostModel.find({ blogId, deletedAt: null })
-      .sort(sort)
+      .sort({
+        [query.sortBy]: query.sortDirection,
+      })
       .skip(skip)
       .limit(limit)
       .lean()

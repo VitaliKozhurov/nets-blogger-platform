@@ -1,5 +1,5 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
-import { UserRegistrationEvent } from '@modules/users-account/auth/application/events';
+import { UserRegistrationEvent } from '@modules/users-account/auth/application/events/user-registration.event';
 import { EmailService } from '../email.service';
 
 @EventsHandler(UserRegistrationEvent)

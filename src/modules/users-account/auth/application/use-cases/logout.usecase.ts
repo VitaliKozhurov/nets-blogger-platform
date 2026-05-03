@@ -1,8 +1,8 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { DeviceSessionsRepository } from '../../../device-session';
-import { TokenService } from '../services';
+import { DeviceSessionsRepository } from '../../../device-session/repository/device-sessions.repository';
+import { TokenService } from '../services/token.service';
 
 export class LogoutCommand extends Command<void> {
   constructor(public refreshToken: string) {

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 export class RegistrationConfirmationRequestDto {
   @ApiProperty({
@@ -9,5 +9,6 @@ export class RegistrationConfirmationRequestDto {
   })
   @IsString()
   @IsNotEmpty()
+  @IsUUID(undefined, { message: 'Incorrect confirmation code' })
   code: string;
 }

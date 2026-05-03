@@ -1,11 +1,11 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ILoginDto } from '../dto';
+import type { ILoginDto } from '../dto/login.dto';
 
 import { randomUUID } from 'crypto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { DeviceSessionsRepository } from '../../../device-session';
-import { UsersService } from '../../../users/application/services';
-import { TokenService } from '../services';
+import { DeviceSessionsRepository } from '../../../device-session/repository/device-sessions.repository';
+import { UsersService } from '../../../users/application/services/users.service';
+import { TokenService } from '../services/token.service';
 
 type LoginResult = {
   accessToken: string;
@@ -37,7 +37,6 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
     }
 
     const newDeviceId = randomUUID();
-
     const accessToken = await this.tokenService.createAccessToken(user);
     const refreshTokenWithMeta = await this.tokenService.createRefreshTokenWithMeta({
       ...user,

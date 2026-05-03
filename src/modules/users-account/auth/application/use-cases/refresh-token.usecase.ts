@@ -1,9 +1,9 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { UsersRepository } from 'src/modules/users-account/users';
-import { DeviceSessionsRepository } from '../../../device-session';
-import { TokenService } from '../services';
+import { DeviceSessionsRepository } from '../../../device-session/repository/device-sessions.repository';
+import { UsersRepository } from '../../../users/repository/users.repository';
+import { TokenService } from '../services/token.service';
 
 type RefreshTokenResult = {
   accessToken: string;

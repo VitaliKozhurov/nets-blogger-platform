@@ -1,8 +1,8 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
-import { UsersRepository } from '../../../users/repository';
-import { IPasswordRecoveryDto } from '../dto';
-import { UserPasswordRecoveryEvent } from '../events';
+import { UsersRepository } from '../../../users/repository/users.repository';
+import type { IPasswordRecoveryDto } from '../dto/password-recovery.dto';
+import { UserPasswordRecoveryEvent } from '../events/user-password-recovery.event';
 
 export class PasswordRecoveryCommand {
   constructor(public dto: IPasswordRecoveryDto) {}
@@ -22,7 +22,7 @@ export class PasswordRecoveryUseCase implements ICommandHandler<PasswordRecovery
       const recoveryCode = randomUUID();
       const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
 
-      await this.usersRepository.upsertUserPasswordRecoveryData({
+      await this.usersRepository.upsertPasswordRecoveryByUserId({
         userId: user.id,
         code: recoveryCode,
         expirationDate,

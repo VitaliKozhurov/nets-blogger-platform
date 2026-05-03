@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
-import { UserResponseMapperDto } from '../api/dto';
+import { UserResponseMapperDto } from '../api/dto/user.mapper';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IUserRepositoryDto } from './dto/user-repository.dto';
 import { getPaginationParams } from 'src/core/utils';
 import { PaginationResponseMapperDto } from 'src/core/dto';
-import { IGetUsersQueryDto } from '../application';
+import type { IGetUsersQueryDto } from '../application/dto/get-users-query.dto';
 
 @Injectable()
 export class UsersQueryRepository {

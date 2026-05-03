@@ -1,4 +1,4 @@
-import { RequestUserDto } from '../../application';
+import type { RequestUserDto } from '../../application/dto/request-user.dto';
 
 export interface RefreshTokenPayload extends RequestUserDto {
   deviceId: string;

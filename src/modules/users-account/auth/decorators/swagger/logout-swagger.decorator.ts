@@ -1,7 +1,7 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiCookieAuth, ApiNoContentResponse, ApiOperation } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/core/decorators';
-import { LoginResponseDto } from '../../api/dto';
+import { LoginResponseDto } from '../../api/dto/login.dto';
 
 export const LogoutSwagger = () => {
   return applyDecorators(

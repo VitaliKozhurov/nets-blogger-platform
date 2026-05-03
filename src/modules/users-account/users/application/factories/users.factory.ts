@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
-import { IRegistrationDto } from '../../../auth/application/dto';
-import { UsersRepository } from '../../repository';
-import { ICreateUserByAdminDto } from '../dto';
+import type { IRegistrationDto } from '../../../auth/application/dto/registration.dto';
+import { UsersRepository } from '../../repository/users.repository';
+import type { ICreateUserByAdminDto } from '../dto/create-user-by-admin.dto';
 
 @Injectable()
 export class UsersFactory {

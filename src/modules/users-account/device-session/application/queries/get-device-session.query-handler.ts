@@ -1,8 +1,8 @@
 import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { TokenService } from 'src/modules/users-account/auth';
-import { DeviceSessionsQueryRepository } from '../../repository';
-import { DeviceSessionMapperDto } from '../../api/dto';
+import { TokenService } from '../../../auth/application/services/token.service';
+import { DeviceSessionMapperDto } from '../../api/dto/device-session.mapper';
+import { DeviceSessionsQueryRepository } from '../../repository/device-sessions-query.repository';
 
 export class GetDeviceSessionsQuery extends Query<DeviceSessionMapperDto[]> {
   constructor(public refreshToken: string) {

@@ -1,4 +1,4 @@
-import { DeviceSessionDocument } from '../../domain';
+import { IDeviceSessionRepositoryDto } from '../../repository/dto/device-session-repository.dto';
 
 export class DeviceSessionMapperDto {
   ip: string;
@@ -6,13 +6,13 @@ export class DeviceSessionMapperDto {
   lastActiveDate: string;
   deviceId: string;
 
-  static mapToView(userDocument: DeviceSessionDocument): DeviceSessionMapperDto {
+  static mapToView(session: IDeviceSessionRepositoryDto): DeviceSessionMapperDto {
     const dto = new DeviceSessionMapperDto();
 
-    dto.ip = userDocument.ip;
-    dto.title = userDocument.deviceName;
-    dto.lastActiveDate = new Date(userDocument.iat * 1000).toISOString();
-    dto.deviceId = userDocument.deviceId;
+    dto.ip = session.ip;
+    dto.title = session.deviceName;
+    dto.lastActiveDate = new Date(session.iat * 1000).toISOString();
+    dto.deviceId = session.deviceId;
 
     return dto;
   }

@@ -1,9 +1,9 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ICreateUserByAdminDto } from '../dto';
+import type { ICreateUserByAdminDto } from '../dto/create-user-by-admin.dto';
 
-import { UsersFactory } from '../factories';
-import { UsersService } from '../services';
-import { IUserViewDto } from '../../api/dto/user-view.dto';
+import { UsersFactory } from '../factories/users.factory';
+import { UsersService } from '../services/users.service';
+import type { IUserViewDto } from '../../api/dto/user-view.dto';
 
 export class CreateUserByAdminCommand extends Command<IUserViewDto> {
   constructor(public dto: ICreateUserByAdminDto) {
@@ -14,12 +14,12 @@ export class CreateUserByAdminCommand extends Command<IUserViewDto> {
 @CommandHandler(CreateUserByAdminCommand)
 export class CreateUserByAdminUseCase implements ICommandHandler<CreateUserByAdminCommand> {
   constructor(
-    private userService: UsersService,
+    private usersService: UsersService,
     private usersFactory: UsersFactory
   ) {}
 
   async execute({ dto }: CreateUserByAdminCommand): Promise<IUserViewDto> {
-    await this.userService.ensureEmailIsAvailable(dto.email);
+    await this.usersService.ensureEmailIsAvailable(dto.email);
 
     return this.usersFactory.createUserByAdmin(dto);
   }

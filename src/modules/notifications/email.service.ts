@@ -15,7 +15,7 @@ export class EmailService {
                   <p>You should follow the link:   <a href='https://somesite.com/confirm-email?code=${dto.confirmationCode}'>complete registration</a></p>
             </div>`,
       })
-      .catch(err => console.log(err));
+      .catch(err => console.log('[MAILER ERROR]: ', err));
   }
 
   async sendPasswordRecoveryCode(dto: { email: string; recoveryCode: string }) {
@@ -28,6 +28,6 @@ export class EmailService {
                   <p>You should follow the link:   <a href='https://somesite.com/recovery-password?code=${dto.recoveryCode}'>recovery password</a></p>
             </div>`,
       })
-      .catch(err => console.log(err));
+      .catch(err => console.log('[MAILER ERROR]: ', err));
   }
 }

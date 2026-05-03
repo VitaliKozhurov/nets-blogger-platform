@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DeviceSessionMapperDto } from '../api/dto';
+import { DeviceSessionMapperDto } from '../api/dto/device-session.mapper';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { IDeviceSessionRepositoryDto } from './dto/device-session-repository.dto';

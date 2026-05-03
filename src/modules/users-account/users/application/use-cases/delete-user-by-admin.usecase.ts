@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../repository';
+import { UsersRepository } from '../../repository/users.repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 export class DeleteUserByAdminCommand {
@@ -8,10 +8,10 @@ export class DeleteUserByAdminCommand {
 
 @CommandHandler(DeleteUserByAdminCommand)
 export class DeleteUserByAdminUseCase implements ICommandHandler<DeleteUserByAdminCommand> {
-  constructor(private userRepository: UsersRepository) {}
+  constructor(private usersRepository: UsersRepository) {}
 
   async execute({ id }: DeleteUserByAdminCommand): Promise<boolean> {
-    const isDeleted = await this.userRepository.softDelete(id);
+    const isDeleted = await this.usersRepository.softDelete(id);
 
     if (!isDeleted) {
       throw new DomainException({

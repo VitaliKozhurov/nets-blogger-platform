@@ -1,8 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ApiOkResponsePaginated } from 'src/core/decorators';
-import { GetUsersQueryDto } from '../../api/dto';
-import { UserResponseDto } from '../../api/dto';
+import { GetUsersQueryDto } from '../../api/dto/get-users-query.dto';
+import { UserResponseDto } from '../../api/dto/user-response.dto';
 
 export const GetUsersSwagger = () => {
   return applyDecorators(

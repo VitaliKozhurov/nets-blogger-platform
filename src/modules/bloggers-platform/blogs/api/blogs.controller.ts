@@ -40,7 +40,10 @@ import {
 
 import { BlogsQueryRepository } from '../repository/blogs-query.repository';
 import { BlogsRepository } from '../repository/blogs.repository';
-import { OptionalUserFromRequest, RequestUserDto, UseBasicGuard, UseOptionalBearerGuard } from 'src/modules/users-account/auth';
+import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
+import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/optional-user-from-request.decorator';
+import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
+import { UseBasicGuard } from 'src/modules/users-account/auth/decorators/basic-auth/use-basic-guard.decorator';
 
 @Controller('blogs')
 export class BlogsController {

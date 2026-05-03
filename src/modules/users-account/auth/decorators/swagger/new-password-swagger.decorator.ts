@@ -1,7 +1,7 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/core/decorators';
-import { NewPasswordRequestDto } from '../../api/dto';
+import { NewPasswordRequestDto } from '../../api/dto/new-password.dto';
 
 export const NewPasswordSwagger = () => {
   return applyDecorators(

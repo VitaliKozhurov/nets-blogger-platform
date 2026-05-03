@@ -22,10 +22,12 @@ export class CommentsQueryRepository {
     query: IGetCommentsByPostIdQueryDto;
   }): Promise<PaginationResponseMapperDto<CommentResponseMapperDto[]>> {
     const { postId, userId, query } = args;
-    const { sort, skip, limit } = getPaginationParams(query);
+    const { skip, limit } = getPaginationParams(query);
 
     const commentsPromise = this.CommentModel.find({ postId, deletedAt: null })
-      .sort(sort)
+      .sort({
+        [query.sortBy]: query.sortDirection,
+      })
       .skip(skip)
       .limit(limit)
       .lean()

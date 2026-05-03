@@ -27,10 +27,12 @@ export class BlogsQueryRepository {
       filter.$or = [{ name: { $regex: query.searchNameTerm, $options: 'i' } }];
     }
 
-    const { sort, skip, limit } = getPaginationParams(query);
+    const { skip, limit } = getPaginationParams(query);
 
     const blogsPromise = this.BlogModel.find(filter)
-      .sort(sort)
+      .sort({
+        [query.sortBy]: query.sortDirection,
+      })
       .skip(skip)
       .limit(limit)
       .lean()

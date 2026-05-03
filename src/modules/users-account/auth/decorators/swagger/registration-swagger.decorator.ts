@@ -1,7 +1,7 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/core/decorators';
-import { RegistrationRequestDto } from '../../api/dto';
+import { RegistrationRequestDto } from '../../api/dto/registration.dto';
 
 export const RegistrationSwagger = () => {
   return applyDecorators(

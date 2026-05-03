@@ -1,7 +1,7 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiCookieAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { ApiErrorResponse } from 'src/core/decorators';
-import { RefreshTokenResponseDto } from '../../api/dto';
+import { RefreshTokenResponseDto } from '../../api/dto/refresh-token.dto';
 
 export const RefreshTokenSwagger = () => {
   return applyDecorators(

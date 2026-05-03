@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm';
 import { IConfirmationCodeRepositoryDto } from './dto/confirmation-code-repository.dto';
 import { IUserRepositoryDto } from './dto/user-repository.dto';
 import { IPasswordRecoveryRepositoryDto } from './dto/password-recovery-repository.dto';
-import { UserResponseMapperDto } from '../api';
+import { UserResponseMapperDto } from '../api/dto/user.mapper';
 
 @Injectable()
 export class UsersRepository {
@@ -53,7 +53,7 @@ export class UsersRepository {
   async createWithConfirmedStatus(dto: { login: string; email: string; passwordHash: string }) {
     const { login, email, passwordHash } = dto;
 
-    const [user]: IUserRepositoryDto[] = await this.dataSource.query(
+    const res: IUserRepositoryDto[] = await this.dataSource.query(
       `
         INSERT INTO users (login, email, "passwordHash")
           VALUES ($1, $2, $3)
@@ -61,6 +61,8 @@ export class UsersRepository {
       `,
       [login, email, passwordHash]
     );
+
+    const [user] = res;
 
     const userId = user.id;
 
@@ -109,7 +111,7 @@ export class UsersRepository {
   async softDelete(userId: string): Promise<boolean> {
     const deletedAt = new Date();
 
-    const result: { id: string }[] = await this.dataSource.query(
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
       UPDATE users
         SET "deletedAt" = $1
@@ -119,13 +121,13 @@ export class UsersRepository {
       [deletedAt, userId]
     );
 
-    return result.length > 0;
+    return rows.length > 0;
   }
 
   async updateUserPassword(dto: { userId: string; passwordHash: string }) {
     const { userId, passwordHash } = dto;
 
-    const result: { id: string }[] = await this.dataSource.query(
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
     UPDATE users
       SET "passwordHash" = $2
@@ -135,7 +137,7 @@ export class UsersRepository {
       [userId, passwordHash]
     );
 
-    return result.length > 0;
+    return rows.length > 0;
   }
 
   async findRegistrationConfirmationByUserId(
@@ -156,7 +158,7 @@ export class UsersRepository {
     confirmationCode: string;
     expirationDate: Date;
   }) {
-    const result: { userId: string }[] = await this.dataSource.query(
+    const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
       `
       UPDATE "user_confirmations"
         SET code = $1, "expirationDate" = $2
@@ -166,11 +168,11 @@ export class UsersRepository {
       [dto.confirmationCode, dto.expirationDate, dto.userId]
     );
 
-    return result.length > 0;
+    return rows.length > 0;
   }
 
   async confirmUserRegistrationByCode(code: string) {
-    const result: { userId: string }[] = await this.dataSource.query(
+    const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
       `
       UPDATE "user_confirmations"
         SET "isConfirmed" = true, code = NULL, "expirationDate" = NULL
@@ -182,7 +184,7 @@ export class UsersRepository {
       [code]
     );
 
-    return result.length > 0;
+    return rows.length > 0;
   }
 
   async findPasswordRecoveryByCode(code: string): Promise<IPasswordRecoveryRepositoryDto | null> {
@@ -201,7 +203,7 @@ export class UsersRepository {
   async upsertPasswordRecoveryByUserId(dto: IPasswordRecoveryRepositoryDto) {
     const { userId, code, expirationDate } = dto;
 
-    const result = await this.dataSource.query(
+    const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
       `
     INSERT INTO "user_recovery_codes" ("userId", code, "expirationDate")
     VALUES ($1, $2, $3)
@@ -214,11 +216,11 @@ export class UsersRepository {
       [userId, code, expirationDate]
     );
 
-    return result.length > 0;
+    return rows.length > 0;
   }
 
   async deletePasswordRecoveryByUserId(userId: string) {
-    const result: { userId: string }[] = await this.dataSource.query(
+    const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
       `
     DELETE FROM "user_recovery_codes"
       WHERE "userId" = $1
@@ -227,6 +229,6 @@ export class UsersRepository {
       [userId]
     );
 
-    return result.length > 0;
+    return rows.length > 0;
   }
 }
