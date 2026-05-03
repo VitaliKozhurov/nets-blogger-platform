@@ -35,7 +35,11 @@ export class DeleteMyDeviceSessionUseCase implements ICommandHandler<DeleteMyDev
       });
     }
 
-    await deviceSession.deleteSession();
+    await this.deviceSessionRepository.deleteSession({
+      deviceId: deviceSession.deviceId,
+      userId: deviceSession.userId,
+      iat: deviceSession.iat,
+    });
 
     return true;
   }

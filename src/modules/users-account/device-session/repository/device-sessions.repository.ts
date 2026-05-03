@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { DataSource } from 'typeorm';
 import { DeviceSession, DeviceSessionDocument, type DeviceSessionModelType } from '../domain';
 import { ICreateSessionDto } from './dto/create-session.dto';
+import { IDeviceSessionRepositoryDto } from './dto/device-session-repository.dto';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 @Injectable()
 export class DeviceSessionsRepository {
@@ -64,6 +65,19 @@ export class DeviceSessionsRepository {
     return result.length > 0;
   }
 
+  async deleteSessionsExceptTheCurrent(deviceId: string) {
+    const result: { id: string }[] = await this.dataSource.query(
+      `
+      DELETE FROM "user_device_sessions"
+        WHERE "deviceId" != $1
+        RETURNING id
+      `,
+      [deviceId]
+    );
+
+    return result.length > 0;
+  }
+
   async findSession({ userId, deviceId, iat }: { userId: string; deviceId: string; iat: number }) {
     const currentSession = await this.DeviceSessionModel.findOne({
       userId,
@@ -74,25 +88,24 @@ export class DeviceSessionsRepository {
     return currentSession;
   }
 
-  async findByIdOrThrow(deviceId: string) {
-    const deviceSession = await this.DeviceSessionModel.findOne({
-      deviceId,
-    }).exec();
+  async findByIdOrThrow(deviceId: string): Promise<IDeviceSessionRepositoryDto> {
+    const [session]: IDeviceSessionRepositoryDto[] = await this.dataSource.query(
+      `
+      SELECT * 
+        FROM "user_device_sessions"
+        WHERE "deviceId" = $1
+      `,
+      [deviceId]
+    );
 
-    if (!deviceSession) {
+    if (!session) {
       throw new DomainException({
         code: DomainExceptionCode.NOT_FOUND_ERROR,
         message: 'Session not found',
       });
     }
 
-    return deviceSession;
-  }
-
-  async deleteSessionsExceptTheCurrent(deviceId: string) {
-    await this.DeviceSessionModel.deleteMany({
-      deviceId: { $ne: deviceId },
-    });
+    return session;
   }
 
   async save(deviceSessionDocument: DeviceSessionDocument) {
