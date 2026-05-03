@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 
-import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { User } from '../domain';
-import { type UserModelType } from '../domain';
 import { UserResponseMapperDto } from '../api/dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -14,11 +10,7 @@ import { IGetUsersQueryDto } from '../application';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(
-    @InjectModel(User.name)
-    private UserModel: UserModelType,
-    @InjectDataSource() protected dataSource: DataSource
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findAll(query: IGetUsersQueryDto) {
     const { searchEmailTerm, searchLoginTerm, sortBy, sortDirection } = query;
@@ -54,21 +46,5 @@ export class UsersQueryRepository {
       page: query.pageNumber,
       size: query.pageSize,
     });
-  }
-
-  async findByIdOrThrow(id: string): Promise<UserResponseMapperDto> {
-    const user = await this.UserModel.findOne({
-      _id: id,
-      deletedAt: null,
-    }).exec();
-
-    if (!user) {
-      throw new DomainException({
-        code: DomainExceptionCode.NOT_FOUND_ERROR,
-        message: 'User not found',
-      });
-    }
-
-    return UserResponseMapperDto.mapToView(user);
   }
 }

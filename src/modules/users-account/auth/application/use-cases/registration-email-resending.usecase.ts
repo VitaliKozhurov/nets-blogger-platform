@@ -27,7 +27,7 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
       });
     }
 
-    const prevConfirmationData = await this.usersRepository.findConfirmationByUserId(user.id);
+    const prevConfirmationData = await this.usersRepository.findConfirmationDataByUserId(user.id);
 
     if (!prevConfirmationData) {
       throw new DomainException({
