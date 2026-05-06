@@ -2,7 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from
 import { Request, Response } from 'express';
 import { DomainExceptionCode, ErrorExceptionResponseBody } from './exception.type';
 
-import { CoreConfig } from '../core.config';
+import { CoreConfig, Environments } from '../core.config';
 
 @Catch()
 export class GlobalHttpExceptionsFilter implements ExceptionFilter {
@@ -22,7 +22,7 @@ export class GlobalHttpExceptionsFilter implements ExceptionFilter {
   private buildResponseBody(requestUrl: string, message: string): ErrorExceptionResponseBody {
     const nodeEnv = this.configService.env;
 
-    const isProduction = nodeEnv === 'production';
+    const isProduction = nodeEnv === Environments.PRODUCTION;
 
     if (isProduction) {
       return {

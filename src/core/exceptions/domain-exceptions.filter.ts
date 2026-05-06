@@ -2,7 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/commo
 import { DomainException } from './domain-exception';
 import { Request, Response } from 'express';
 import { DomainExceptionCode } from './exception.type';
-import { CoreConfig } from '../core.config';
+import { CoreConfig, Environments } from '../core.config';
 
 @Catch(DomainException)
 export class DomainHttpExceptionsFilter implements ExceptionFilter {
@@ -53,7 +53,7 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
 
     console.log(requestUrl, exception);
 
-    if (nodeEnv === 'testing') {
+    if (nodeEnv === Environments.STAGING) {
       return {
         errorsMessages: exception.extensions,
       };

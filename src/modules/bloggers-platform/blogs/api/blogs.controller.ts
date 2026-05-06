@@ -12,12 +12,8 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
-import {
-  CreateBlogCommand,
-  DeleteBlogCommand,
-  UpdateBlogCommand,
-} from '@modules/bloggers-platform/blogs/application/use-cases';
-import { CreatePostCommand } from '@modules/bloggers-platform/posts/application/use-cases';
+import { CreateBlogCommand, DeleteBlogCommand, UpdateBlogCommand } from '../application/use-cases';
+import { CreatePostCommand } from '../../posts/application/use-cases';
 import {
   CreateBlogSwagger,
   DeleteBlogSwagger,
@@ -25,19 +21,11 @@ import {
   GetBlogsSwagger,
   GetPostsByBlogIdSwagger,
   UpdateBlogSwagger,
-} from '@modules/bloggers-platform/blogs/decorators/swagger';
+} from '../decorators/swagger';
 import { CreatePostByBlogIdSwagger } from '@modules/bloggers-platform/posts/decorators/swagger';
-import { PostsQueryRepository } from '@modules/bloggers-platform/posts/repository';
-import {
-  CreateBlogRequestDto,
-  GetBlogsQueryDto,
-  UpdateBlogRequestDto,
-} from '@modules/bloggers-platform/blogs/api/dto';
-import {
-  CreatePostByBlogIdRequestDto,
-  GetPostsQueryDto,
-} from '@modules/bloggers-platform/posts/api/dto';
-
+import { PostsQueryRepository } from '../../posts/repository';
+import { CreateBlogRequestDto, GetBlogsQueryDto, UpdateBlogRequestDto } from '../../blogs/api/dto';
+import { CreatePostByBlogIdRequestDto, GetPostsQueryDto } from '../../posts/api/dto';
 import { BlogsQueryRepository } from '../repository/blogs-query.repository';
 import { BlogsRepository } from '../repository/blogs.repository';
 import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
