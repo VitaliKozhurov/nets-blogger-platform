@@ -51,8 +51,6 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
   private buildExceptionResponse(exception: DomainException, requestUrl: string) {
     const nodeEnv = this.configService.env;
 
-    console.log(requestUrl, exception);
-
     if (nodeEnv === Environments.STAGING) {
       return {
         errorsMessages: exception.extensions,

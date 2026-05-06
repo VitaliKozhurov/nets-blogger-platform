@@ -31,3 +31,10 @@ export class UserResponseDto {
   })
   createdAt: string;
 }
+
+export interface IUserResponseDto {
+  id: string;
+  login: string;
+  email: string;
+  createdAt: string;
+}
