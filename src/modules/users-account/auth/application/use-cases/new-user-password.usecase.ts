@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../../users/repository/users.repository';
-import type { INewPasswordDto } from '../dto/new-password';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
+import { UsersRepository } from '../../../users/repository/users.repository';
+import type { INewPasswordDto } from '../dto/new-password';
 
 export class NewUserPasswordCommand {
   constructor(public dto: INewPasswordDto) {}

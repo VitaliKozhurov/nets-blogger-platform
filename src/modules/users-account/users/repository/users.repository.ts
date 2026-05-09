@@ -129,11 +129,11 @@ export class UsersRepository {
 
     const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
-    UPDATE users
-      SET "passwordHash" = $2
-      WHERE "userId" = $1
-      RETURNING id
-    `,
+      UPDATE users
+        SET "passwordHash" = $2
+        WHERE users.id = $1
+        RETURNING id
+      `,
       [userId, passwordHash]
     );
 

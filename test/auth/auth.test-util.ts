@@ -70,6 +70,14 @@ export class AuthTestUtil {
       .send({ email: email || 'example@gmail.com' });
   }
 
+  newPassword(dto: { newPassword: string; recoveryCode: string }) {
+    return request(this.app.getHttpServer()).post('/auth/new-password').send(dto);
+  }
+
+  me() {
+    return request(this.app.getHttpServer()).get('/auth/me');
+  }
+
   async findRecoveryCodeByEmail(email: string): Promise<{ code: string } | undefined> {
     const [recoveryCode] = await this.dataSource.query(
       `

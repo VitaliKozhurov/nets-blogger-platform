@@ -359,4 +359,78 @@ describe('E2E Controller  /sa/users', () => {
       expect(userRecoveryCode).toBe(dbRecoveryCode?.code);
     });
   });
+
+  describe('POST /auth/new-password', () => {
+    it('should return 400 status code if send incorrect new password values (validation)', async () => {
+      const errorResponse = await authTestUtils
+        .newPassword({ newPassword: '', recoveryCode: '' })
+        .expect(400);
+
+      const extensions = errorResponse.body.extensions;
+
+      expect(extensions.length).toBe(2);
+
+      const fieldNames = extensions.map(ext => ext.field);
+
+      expect(fieldNames).toContain('newPassword');
+      expect(fieldNames).toContain('recoveryCode');
+    });
+
+    it('should return 400 status code if send incorrect new password values (not exist)', async () => {
+      const errorResponse = await authTestUtils
+        .newPassword({ newPassword: 'newPassword123', recoveryCode: randomUUID() })
+        .expect(400);
+
+      const extensions = errorResponse.body.extensions;
+
+      expect(extensions.length).toBe(1);
+
+      const fieldNames = extensions.map(ext => ext.field);
+
+      expect(fieldNames).toContain('recoveryCode');
+    });
+
+    it('should return 204 status code if send valid values', async () => {
+      const newPassword = 'newPassword123';
+
+      await authTestUtils.registerUser().expect(204);
+      await authTestUtils.passwordRecovery().expect(204);
+
+      const recoveryCode = emailService.userRecoveryCode;
+
+      await authTestUtils.newPassword({ newPassword, recoveryCode }).expect(204);
+
+      const dbRecoveryCode = await authTestUtils.findRecoveryCodeByEmail(emailService.userEmail);
+
+      expect(dbRecoveryCode).toBeUndefined();
+    });
+  });
+
+  describe('GET /auth/me', () => {
+    it('should return 401 status code if request without token', async () => {
+      await authTestUtils.me().expect(401);
+    });
+
+    it('should return 401 status code if request with incorrect access token token', async () => {
+      await authTestUtils.me().set('Authorization', 'Bearer fakeAccessToken').expect(401);
+    });
+
+    it('should return 200 status code with current user data', async () => {
+      await authTestUtils.registerUser().expect(204);
+      const loginResponse = await authTestUtils.loginByUserLogin().expect(200);
+
+      const accessToken = loginResponse.body.accessToken;
+
+      const meResponse = await authTestUtils
+        .me()
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200);
+
+      expect(meResponse.body).toEqual({
+        userId: expect.any(String),
+        login: expect.any(String),
+        email: expect.any(String),
+      });
+    });
+  });
 });
