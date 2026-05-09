@@ -1,6 +1,8 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { getDataSourceToken } from '@nestjs/typeorm';
+import { randomUUID } from 'crypto';
 import { IPaginationResponseDto } from 'src/core/dto/contracts/pagination-response.dto';
+import { DomainExceptionCode } from 'src/core/exceptions';
 import { IUserResponseDto } from 'src/modules/users-account/users/api/dto';
 import { DataSource } from 'typeorm';
 import { VALID_BASIC_HEADER } from '../utils/constants';
@@ -97,7 +99,7 @@ describe('E2E Controller  /sa/users', () => {
       expect(fieldNames).toContain('email');
     });
 
-    it('should return 400 status code if try create the same user', async () => {
+    it('should return 400 status code if try create user with the same credentials', async () => {
       await usersTestUtils.createUser().set('Authorization', VALID_BASIC_HEADER).expect(201);
 
       const errorResponse = await usersTestUtils
@@ -109,6 +111,64 @@ describe('E2E Controller  /sa/users', () => {
 
       expect(extensions.length).toBe(1);
       expect(extensions[0].field).toBe('email');
+    });
+  });
+
+  describe('DELETE /sa/users/:userId', () => {
+    it('should return 401 status code without basic auth headers', async () => {
+      return usersTestUtils.deleteUser('randomId').expect(401);
+    });
+
+    it('should return 400 status code if send incorrect user id', async () => {
+      const errorResponse = await usersTestUtils
+        .deleteUser('fakeId')
+        .set('Authorization', VALID_BASIC_HEADER)
+        .expect(400);
+
+      const extensions = errorResponse.body.extensions;
+
+      expect(extensions.length).toBe(1);
+      expect(extensions[0].field).toBe('uri param');
+    });
+
+    it('should return 404 status code if user not found', async () => {
+      const notExistingUserId = randomUUID();
+
+      const errorResponse = await usersTestUtils
+        .deleteUser(notExistingUserId)
+        .set('Authorization', VALID_BASIC_HEADER)
+        .expect(404);
+
+      const code = errorResponse.body.code;
+
+      console.log(errorResponse.body);
+
+      expect(code).toBe(DomainExceptionCode.NOT_FOUND_ERROR);
+    });
+
+    it('should return 201 status code with basic auth headers', async () => {
+      const createdUser = await usersTestUtils
+        .createUser()
+        .set('Authorization', VALID_BASIC_HEADER)
+        .expect(201);
+
+      const responseBeforeDeleting = await usersTestUtils
+        .getUsers()
+        .set('Authorization', VALID_BASIC_HEADER)
+        .expect(200);
+
+      expect(responseBeforeDeleting.body.items.length).toBe(1);
+
+      const userId = createdUser.body.id;
+
+      await usersTestUtils.deleteUser(userId).set('Authorization', VALID_BASIC_HEADER).expect(204);
+
+      const responseAfterDeleting = await usersTestUtils
+        .getUsers()
+        .set('Authorization', VALID_BASIC_HEADER)
+        .expect(200);
+
+      expect(responseAfterDeleting.body.items.length).toBe(0);
     });
   });
 });
