@@ -1,4 +1,0 @@
-export {
-  ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
-  REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
-} from './auth.tokens';

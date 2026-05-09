@@ -34,6 +34,23 @@ export class AuthTestUtil {
       });
   }
 
+  login(loginOrEmail: string, password: string) {
+    return request(this.app.getHttpServer()).post('/auth/login').send({
+      loginOrEmail,
+      password,
+    });
+  }
+
+  logout() {
+    return request(this.app.getHttpServer()).post('/auth/logout');
+  }
+
+  refreshToken(refreshToken: string) {
+    return request(this.app.getHttpServer())
+      .post('/auth/refresh-token')
+      .set('Cookie', `refreshToken=${refreshToken}`);
+  }
+
   loginByUserLogin() {
     return request(this.app.getHttpServer()).post('/auth/login').send({
       loginOrEmail: 'login',

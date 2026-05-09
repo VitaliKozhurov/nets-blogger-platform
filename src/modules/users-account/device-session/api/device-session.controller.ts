@@ -5,8 +5,8 @@ import { UUIDValidationPipe } from 'src/core/pipes';
 import { GetDeviceSessionsQuery } from '../application/queries/get-device-session.query-handler';
 import { DeleteAllDeviceSessionsExceptCurrentCommand } from '../application/use-cases/delete-all-device-sessions-except-current.usecase';
 import { DeleteCurrentDeviceSessionCommand } from '../application/use-cases/delete-current-device-session.usecase';
-import { DeleteSessionsSwagger } from '../decorators/swagger/delete-sessions-swagger.decorator';
 import { DeleteSessionSwagger } from '../decorators/swagger/delete-session-swagger.decorator';
+import { DeleteSessionsSwagger } from '../decorators/swagger/delete-sessions-swagger.decorator';
 import { GetDeviceSessionsSwagger } from '../decorators/swagger/get-device-session-swagger.decorator';
 
 @Controller('security/devices')

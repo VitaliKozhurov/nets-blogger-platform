@@ -1,36 +1,28 @@
+import { JwtService } from '@nestjs/jwt';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
 import { AppThrottleGuard } from 'src/core/guards';
 import { EmailService } from 'src/modules/notifications/email.service';
+import { RefreshTokenPayload } from 'src/modules/users-account/auth/guards/bearer-auth';
+import { REFRESH_TOKEN_STRATEGY_INJECT_TOKEN } from 'src/modules/users-account/constants/injection-tokens';
 import { DataSource } from 'typeorm';
+import { DeviceSessionTestUtil } from '../device-session/device-session.test-util';
 import { UsersTestUtil } from '../users/users.test-util';
 import { VALID_BASIC_HEADER } from '../utils/constants';
 import { clearDatabase } from '../utils/db-tests.utils';
 import { initTestApp } from '../utils/init-test-app';
 import { AuthTestUtil } from './auth.test-util';
-
-class MockEmailService {
-  public userConfirmationCode: string = '';
-  public userEmail: string = '';
-
-  sendRegistrationConfirmationCode(dto: { email: string; confirmationCode: string }) {
-    this.userConfirmationCode = dto.confirmationCode;
-    this.userEmail = dto.email;
-    console.log(`Send registration data: ${JSON.stringify(dto)}`);
-  }
-
-  sendPasswordRecoveryCode(dto: { email: string; recoveryCode: string }) {
-    console.log(`Send recovery data: ${JSON.stringify(dto)}`);
-  }
-}
+import { MockEmailService } from './mock-email.service';
 
 describe('E2E Controller  /sa/users', () => {
   let app: NestExpressApplication;
   let authTestUtils: AuthTestUtil;
   let usersTestUtil: UsersTestUtil;
+  let deviceSessionTestUtil: DeviceSessionTestUtil;
   let dataSource: DataSource;
   let emailService: MockEmailService;
+  let refreshJwtService: JwtService;
 
   beforeAll(async () => {
     app = await initTestApp(builder => {
@@ -46,7 +38,9 @@ describe('E2E Controller  /sa/users', () => {
     dataSource = app.get<DataSource>(getDataSourceToken());
     authTestUtils = new AuthTestUtil(app, dataSource);
     usersTestUtil = new UsersTestUtil(app);
+    deviceSessionTestUtil = new DeviceSessionTestUtil(app, dataSource);
     emailService = app.get<MockEmailService>(EmailService);
+    refreshJwtService = app.get<JwtService>(REFRESH_TOKEN_STRATEGY_INJECT_TOKEN);
   });
 
   afterEach(async () => {
@@ -218,6 +212,129 @@ describe('E2E Controller  /sa/users', () => {
 
       expect(sendRegistrationConfirmationCode).toHaveBeenCalled();
       expect(sendRegistrationConfirmationCode).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('POST /auth/login', () => {
+    it('should return 400 status code if send incorrect values (validation error)', async () => {
+      const errorResponse = await authTestUtils.login('', '').expect(400);
+
+      const extensions = errorResponse.body.extensions;
+
+      expect(extensions.length).toBe(2);
+
+      const fieldNames = extensions.map(ext => ext.field);
+
+      expect(fieldNames).toContain('loginOrEmail');
+      expect(fieldNames).toContain('password');
+    });
+
+    it('should return 401 status code if send incorrect values (not existing)', async () => {
+      await authTestUtils.login('fakeLogin', 'fakePassword').expect(401);
+    });
+
+    it('should return 200 status code with auth tokens', async () => {
+      await authTestUtils.registerUser().expect(204);
+
+      const response = await authTestUtils.loginByUserLogin().expect(200);
+      const accessToken = response.body.accessToken;
+      const refreshToken = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
+
+      expect(accessToken).toBeDefined();
+      expect(refreshToken).toBeDefined();
+    });
+
+    it('should create device session', async () => {
+      await authTestUtils.registerUser().expect(204);
+
+      const response = await authTestUtils.loginByUserLogin().expect(200);
+      const refreshToken = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
+
+      const deviceSessions = await deviceSessionTestUtil
+        .getDeviceSessionsByRefreshToken(refreshToken)
+        .expect(200);
+
+      expect(deviceSessions.body.length).toBe(1);
+    });
+  });
+
+  describe('POST /auth/logout', () => {
+    it('should return 401 status code if send data without refresh token', async () => {
+      await authTestUtils.logout().expect(401);
+    });
+
+    it('should return 204 status code and remove user session', async () => {
+      await authTestUtils.registerUser().expect(204);
+
+      const response = await authTestUtils.loginByUserLogin().expect(200);
+      const refreshToken = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
+
+      const prevDeviceSessions = await deviceSessionTestUtil.getAllSessions();
+
+      expect(prevDeviceSessions.length).toBe(1);
+
+      await authTestUtils.logout().set('Cookie', `refreshToken=${refreshToken}`).expect(204);
+
+      const currentDeviceSessions = await deviceSessionTestUtil.getAllSessions();
+
+      expect(currentDeviceSessions.length).toBe(0);
+    });
+  });
+
+  describe('POST /auth/refresh-token', () => {
+    it('should return 401 status code if send data with incorrect refresh token', async () => {
+      await authTestUtils.refreshToken('').expect(401);
+    });
+
+    it('should return 401 status code with incorrect refresh token (user not exist)', async () => {
+      const refreshToken = await refreshJwtService.signAsync({
+        userId: randomUUID(),
+        deviceId: randomUUID(),
+        login: 'fakeLogin',
+      });
+
+      await authTestUtils.refreshToken(refreshToken).expect(401);
+    });
+
+    it('should return 401 status code with incorrect refresh token (expired)', async () => {
+      await authTestUtils.registerUser().expect(204);
+
+      const response = await authTestUtils.loginByUserLogin().expect(200);
+      const refreshToken = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
+
+      const tokenPayload = (await refreshJwtService.verifyAsync(
+        refreshToken
+      )) as RefreshTokenPayload;
+
+      const expiredRefreshToken = await refreshJwtService.signAsync(
+        {
+          userId: tokenPayload.userId,
+          deviceId: tokenPayload.deviceId,
+          login: tokenPayload.login,
+        },
+        {
+          expiresIn: '-1s',
+        }
+      );
+
+      await authTestUtils.refreshToken(expiredRefreshToken).expect(401);
+    });
+
+    it('should return 200 status code with new pairs auth tokens', async () => {
+      await authTestUtils.registerUser().expect(204);
+
+      const response = await authTestUtils.loginByUserLogin().expect(200);
+      const refreshToken = response.headers['set-cookie'][0].split(';')[0].split('=')[1];
+
+      const responseWithNewTokens = await authTestUtils.refreshToken(refreshToken).expect(200);
+
+      const newAccessToken = responseWithNewTokens.body.accessToken;
+      const newRefreshToken = responseWithNewTokens.headers['set-cookie'][0]
+        .split(';')[0]
+        .split('=')[1];
+
+      expect(newAccessToken).toBeDefined();
+      expect(newRefreshToken).toBeDefined();
     });
   });
 });
