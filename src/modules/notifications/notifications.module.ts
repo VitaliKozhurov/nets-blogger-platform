@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { MailerConfig } from './config/mailer.config';
 import { EmailService } from './email.service';
 import { SendRegistrationConfirmationCodeToEmailEventHandler } from './event-handlers/send-registration-confirmation-code-to-email.event-handler';
+import { SendUserPasswordRecoveryCodeToEmailEventHandler } from './event-handlers/send-user-password-recovery-code-to-email.event-handler';
 
 @Module({
   imports: [
@@ -10,6 +11,10 @@ import { SendRegistrationConfirmationCodeToEmailEventHandler } from './event-han
       useClass: MailerConfig,
     }),
   ],
-  providers: [EmailService, SendRegistrationConfirmationCodeToEmailEventHandler],
+  providers: [
+    EmailService,
+    SendRegistrationConfirmationCodeToEmailEventHandler,
+    SendUserPasswordRecoveryCodeToEmailEventHandler,
+  ],
 })
 export class NotificationsModule {}

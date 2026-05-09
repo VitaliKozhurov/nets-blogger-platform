@@ -337,4 +337,26 @@ describe('E2E Controller  /sa/users', () => {
       expect(newRefreshToken).toBeDefined();
     });
   });
+
+  describe('POST /auth/password-recovery', () => {
+    it('should return 400 status code if send incorrect email (validation)', async () => {
+      await authTestUtils.passwordRecovery('fakeEmail').expect(400);
+    });
+
+    it('should return 204 status code and send recovery code to user email', async () => {
+      const sendPasswordRecoveryCode = jest.spyOn(emailService, 'sendPasswordRecoveryCode');
+
+      await authTestUtils.registerUser().expect(204);
+
+      await authTestUtils.passwordRecovery().expect(204);
+
+      expect(sendPasswordRecoveryCode).toHaveBeenCalled();
+      expect(sendPasswordRecoveryCode).toHaveBeenCalledTimes(1);
+
+      const userRecoveryCode = emailService.userRecoveryCode;
+      const dbRecoveryCode = await authTestUtils.findRecoveryCodeByEmail(emailService.userEmail);
+
+      expect(userRecoveryCode).toBe(dbRecoveryCode?.code);
+    });
+  });
 });

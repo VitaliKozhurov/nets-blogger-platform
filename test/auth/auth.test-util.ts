@@ -64,6 +64,26 @@ export class AuthTestUtil {
     });
   }
 
+  passwordRecovery(email?: string) {
+    return request(this.app.getHttpServer())
+      .post('/auth/password-recovery')
+      .send({ email: email || 'example@gmail.com' });
+  }
+
+  async findRecoveryCodeByEmail(email: string): Promise<{ code: string } | undefined> {
+    const [recoveryCode] = await this.dataSource.query(
+      `
+      SELECT urc.code
+      FROM users u
+      JOIN user_recovery_codes urc ON urc."userId" = u.id
+      WHERE u.email = $1
+    `,
+      [email]
+    );
+
+    return recoveryCode;
+  }
+
   async makeConfirmationCodeExpired(login: string): Promise<{ code: string }> {
     const [confirmation] = await this.dataSource.query(
       `
