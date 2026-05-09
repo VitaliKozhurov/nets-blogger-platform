@@ -1,6 +1,7 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
+import { AppThrottleGuard } from 'src/core/guards';
 import { EmailService } from 'src/modules/notifications/email.service';
 import { DataSource } from 'typeorm';
 import { UsersTestUtil } from '../users/users.test-util';
@@ -11,9 +12,11 @@ import { AuthTestUtil } from './auth.test-util';
 
 class MockEmailService {
   public userConfirmationCode: string = '';
+  public userEmail: string = '';
 
   sendRegistrationConfirmationCode(dto: { email: string; confirmationCode: string }) {
     this.userConfirmationCode = dto.confirmationCode;
+    this.userEmail = dto.email;
     console.log(`Send registration data: ${JSON.stringify(dto)}`);
   }
 
@@ -31,7 +34,13 @@ describe('E2E Controller  /sa/users', () => {
 
   beforeAll(async () => {
     app = await initTestApp(builder => {
-      return builder.overrideProvider(EmailService).useClass(MockEmailService);
+      return builder
+        .overrideProvider(EmailService)
+        .useClass(MockEmailService)
+        .overrideGuard(AppThrottleGuard)
+        .useValue({
+          canActivate: () => true,
+        });
     });
 
     dataSource = app.get<DataSource>(getDataSourceToken());
@@ -117,6 +126,24 @@ describe('E2E Controller  /sa/users', () => {
       expect(fieldNames).toContain('code');
     });
 
+    it('should return 400 status code if confirmation code is expired', async () => {
+      const newUserLogin = 'superUser';
+
+      await authTestUtils.registerUser({ login: newUserLogin }).expect(204);
+
+      const confirmationCode = emailService.userConfirmationCode;
+
+      await authTestUtils.makeConfirmationCodeExpired(newUserLogin);
+
+      const errorResponse = await authTestUtils.confirmationUser(confirmationCode).expect(400);
+
+      const extensions = errorResponse.body.extensions;
+
+      const fieldNames = extensions.map(ext => ext.field);
+
+      expect(fieldNames).toContain('code');
+    });
+
     it('should return 204 status code if send correct confirmation code', async () => {
       const newUserLogin = 'superUser';
 
@@ -131,6 +158,66 @@ describe('E2E Controller  /sa/users', () => {
       const isConfirmedStatus = await authTestUtils.getUserConfirmedStatus(newUserLogin);
 
       expect(isConfirmedStatus.isConfirmed).toBe(true);
+    });
+  });
+
+  describe('POST /auth/registration-email-resending', () => {
+    it('should return 400 status code if send incorrect email (validation error)', async () => {
+      const errorResponse = await authTestUtils.registrationEmailResending('badEmail').expect(400);
+
+      const extensions = errorResponse.body.extensions;
+
+      expect(extensions.length).toBe(1);
+
+      const fieldNames = extensions.map(ext => ext.field);
+
+      expect(fieldNames).toContain('email');
+    });
+
+    it('should return 400 status code if send incorrect email (not exists)', async () => {
+      const errorResponse = await authTestUtils
+        .registrationEmailResending('notExists@mail.com')
+        .expect(400);
+
+      const extensions = errorResponse.body.extensions;
+
+      expect(extensions.length).toBe(1);
+
+      const fieldNames = extensions.map(ext => ext.field);
+
+      expect(fieldNames).toContain('email');
+    });
+
+    it('should return 400 status code if user is confirmed', async () => {
+      await authTestUtils.registerUser().expect(204);
+
+      await authTestUtils.confirmationUser(emailService.userConfirmationCode).expect(204);
+
+      const errorResponse = await authTestUtils
+        .registrationEmailResending(emailService.userEmail)
+        .expect(400);
+
+      const extensions = errorResponse.body.extensions;
+
+      expect(extensions.length).toBe(1);
+
+      const fieldNames = extensions.map(ext => ext.field);
+
+      expect(fieldNames).toContain('email');
+    });
+
+    it('should return 204 status code and send confirmation code to user email', async () => {
+      const sendRegistrationConfirmationCode = jest.spyOn(
+        emailService,
+        'sendRegistrationConfirmationCode'
+      );
+
+      await authTestUtils.registerUser().expect(204);
+
+      await authTestUtils.registrationEmailResending(emailService.userEmail).expect(204);
+
+      expect(sendRegistrationConfirmationCode).toHaveBeenCalled();
+      expect(sendRegistrationConfirmationCode).toHaveBeenCalledTimes(2);
     });
   });
 });

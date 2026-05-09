@@ -26,6 +26,14 @@ export class AuthTestUtil {
     });
   }
 
+  registrationEmailResending(email?: string) {
+    return request(this.app.getHttpServer())
+      .post('/auth/registration-email-resending')
+      .send({
+        email: email || 'example@gmail.com',
+      });
+  }
+
   loginByUserLogin() {
     return request(this.app.getHttpServer()).post('/auth/login').send({
       loginOrEmail: 'login',
