@@ -1,5 +1,5 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
-import request, { Test } from 'supertest';
+import request from 'supertest';
 import { ICreateUserByAdminDto } from '../../src/modules/users-account/users/application/dto';
 
 export class UsersTestUtil {
@@ -20,7 +20,7 @@ export class UsersTestUtil {
     return request(this.app.getHttpServer()).delete(`/sa/users/${userId}`);
   }
 
-  getUsers(): Test {
+  getUsers() {
     return request(this.app.getHttpServer()).get('/sa/users');
   }
 }
