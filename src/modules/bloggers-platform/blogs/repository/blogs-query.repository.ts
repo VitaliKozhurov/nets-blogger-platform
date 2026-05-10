@@ -3,7 +3,7 @@ import { PaginationResponseMapperDto } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { getPaginationParams } from 'src/core/utils';
 import { BlogResponseMapperDto } from '../api/dto/blog.mapper';
-import { IGetBlogsQueryParamsDto } from '../api/dto/get-blogs-query.dto';
+import { IGetBlogsQueryDto } from '../api/dto/get-blogs-query.dto';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { IBlogRepository } from './dto/IBlogRepositoryDto';
@@ -13,7 +13,7 @@ export class BlogsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findAll(
-    query: IGetBlogsQueryParamsDto
+    query: IGetBlogsQueryDto
   ): Promise<PaginationResponseMapperDto<BlogResponseMapperDto[]>> {
     const { searchNameTerm, sortBy, sortDirection } = query;
 

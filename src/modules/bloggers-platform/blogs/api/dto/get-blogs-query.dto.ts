@@ -25,7 +25,7 @@ export class GetBlogsQueryDto extends BaseQueryParamsDto {
   sortBy: BlogsSortBy = BlogsSortBy.CreatedAt;
 }
 
-export interface IGetBlogsQueryParamsDto extends IBaseQueryParamsDto {
+export interface IGetBlogsQueryDto extends IBaseQueryParamsDto {
   searchNameTerm: Nullable<string>;
   sortBy: BlogsSortBy;
 }

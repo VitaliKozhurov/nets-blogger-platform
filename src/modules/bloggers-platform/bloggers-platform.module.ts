@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
-  Blog,
-  BlogSchema,
   BlogsController,
   BlogsFactory,
   BlogsQueryRepository,
   BlogsRepository,
   CreateBlogUseCase,
   DeleteBlogUseCase,
+  GetBlogsHandler,
   UpdateBlogUseCase,
 } from './blogs';
 import {
@@ -53,9 +52,10 @@ const commandHandlers = [
   UpdateCommentLikeStatusUseCase,
 ];
 
+const queryHandlers = [GetBlogsHandler];
+
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     MongooseModule.forFeature([{ name: Like.name, schema: LikeSchema }]),
@@ -65,6 +65,7 @@ const commandHandlers = [
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [
     ...commandHandlers,
+    ...queryHandlers,
     BlogsRepository,
     BlogsQueryRepository,
     CommentsRepository,

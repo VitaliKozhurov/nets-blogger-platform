@@ -10,8 +10,8 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ObjectIdValidationPipe, UUIDValidationPipe } from 'src/core/pipes';
+import { CommandBus } from '@nestjs/cqrs';
+import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { CreateBlogCommand, DeleteBlogCommand, UpdateBlogCommand } from '../application/use-cases';
 import { CreatePostCommand } from '../../posts/application/use-cases';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../decorators/swagger';
 import { CreatePostByBlogIdSwagger } from '@modules/bloggers-platform/posts/decorators/swagger';
 import { PostsQueryRepository } from '../../posts/repository';
-import { CreateBlogRequestDto, GetBlogsQueryDto, UpdateBlogRequestDto } from '../../blogs/api/dto';
+import { CreateBlogRequestDto, GetBlogsQueryDto, UpdateBlogRequestDto } from './dto';
 import { CreatePostByBlogIdRequestDto, GetPostsQueryDto } from '../../posts/api/dto';
 import { BlogsQueryRepository } from '../repository/blogs-query.repository';
 import { BlogsRepository } from '../repository/blogs.repository';
@@ -32,7 +32,6 @@ import type { RequestUserDto } from 'src/modules/users-account/auth/application/
 import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/optional-user-from-request.decorator';
 import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
 import { UseBasicGuard } from 'src/modules/users-account/auth/decorators/basic-auth/use-basic-guard.decorator';
-import { GetBlogsQuery } from '../application';
 
 @Controller('blogs')
 export class BlogsController {
@@ -40,19 +39,18 @@ export class BlogsController {
     private commandBus: CommandBus,
     private blogsQueryRepository: BlogsQueryRepository,
     private blogsRepository: BlogsRepository,
-    private postsQueryRepository: PostsQueryRepository,
-    private queryBus: QueryBus
+    private postsQueryRepository: PostsQueryRepository
   ) {}
 
   @Get()
   @GetBlogsSwagger()
   async findAll(@Query() query: GetBlogsQueryDto) {
-    return this.queryBus.execute(new GetBlogsQuery(query));
+    return this.blogsQueryRepository.findAll(query);
   }
 
   @Get(':id')
   @GetBlogSwagger()
-  async getById(@Param('id', UUIDValidationPipe) id: string) {
+  async getById(@Param('id', ObjectIdValidationPipe) id: string) {
     return this.blogsQueryRepository.findByIdOrThrow(id);
   }
 
