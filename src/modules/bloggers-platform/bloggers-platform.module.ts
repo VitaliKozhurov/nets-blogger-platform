@@ -28,8 +28,6 @@ import { Like, LikeSchema, LikesFactory, LikesRepository } from './likes';
 import {
   CreatePostUseCase,
   DeletePostUseCase,
-  Post,
-  PostSchema,
   PostsController,
   PostsFactory,
   PostsQueryRepository,
@@ -39,6 +37,7 @@ import {
 } from './posts';
 import { UsersAccountModule } from '../users-account/users-account.module';
 import { JwtModule } from '@nestjs/jwt';
+import { GetPostsByIdHandler, GetPostsHandler } from './posts/application';
 
 const commandHandlers = [
   CreateBlogUseCase,
@@ -54,11 +53,16 @@ const commandHandlers = [
   UpdateCommentLikeStatusUseCase,
 ];
 
-const queryHandlers = [GetBlogsHandler, GetBlogByIdHandler, GetPostsByBlogIdHandler];
+const queryHandlers = [
+  GetBlogsHandler,
+  GetBlogByIdHandler,
+  GetPostsByBlogIdHandler,
+  GetPostsHandler,
+  GetPostsByIdHandler,
+];
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     MongooseModule.forFeature([{ name: Like.name, schema: LikeSchema }]),
     JwtModule,
