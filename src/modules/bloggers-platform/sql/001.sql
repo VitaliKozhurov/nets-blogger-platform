@@ -5,7 +5,7 @@ CREATE TABLE public.blogs
     description text NOT NULL,
     "websiteUrl" text NOT NULL,
     "createdAt" timestamp with time zone NOT NULL DEFAULT NOW(),
-    "deletedAt" timestamp with time zone,
+    "deletedAt" timestamp with time zone DEFAULT NULL,
     "isMembership" boolean NOT NULL DEFAULT false,
     PRIMARY KEY (id)
 );
@@ -22,6 +22,7 @@ CREATE TABLE public.posts
     content text NOT NULL,
     "blogId" uuid NOT NULL,
     "createdAt" timestamp with time zone NOT NULL DEFAULT NOW(),
+    "deletedAt" timestamp with time zone DEFAULT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY ("blogId")
         REFERENCES public.blogs (id) MATCH SIMPLE

@@ -10,14 +10,13 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
 import { CreateBlogCommand, DeleteBlogCommand, UpdateBlogCommand } from '../application/use-cases';
 import { CreatePostCommand } from '../../posts/application/use-cases';
 import {
   CreateBlogSwagger,
   DeleteBlogSwagger,
-  GetBlogSwagger,
   GetBlogsSwagger,
   GetPostsByBlogIdSwagger,
   UpdateBlogSwagger,
@@ -26,18 +25,21 @@ import { CreatePostByBlogIdSwagger } from '@modules/bloggers-platform/posts/deco
 import { PostsQueryRepository } from '../../posts/repository';
 import { CreateBlogRequestDto, GetBlogsQueryDto, UpdateBlogRequestDto } from './dto';
 import { CreatePostByBlogIdRequestDto, GetPostsQueryDto } from '../../posts/api/dto';
-import { BlogsQueryRepository } from '../repository/blogs-query.repository';
 import { BlogsRepository } from '../repository/blogs.repository';
 import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
 import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/optional-user-from-request.decorator';
 import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
 import { UseBasicGuard } from 'src/modules/users-account/auth/decorators/basic-auth/use-basic-guard.decorator';
+import { ApiBasicAuth } from '@nestjs/swagger';
+import { GetBlogsQuery } from '../application';
 
-@Controller('blogs')
+@UseBasicGuard()
+@ApiBasicAuth('basicAuth')
+@Controller('sa/blogs')
 export class BlogsController {
   constructor(
     private commandBus: CommandBus,
-    private blogsQueryRepository: BlogsQueryRepository,
+    private queryBus: QueryBus,
     private blogsRepository: BlogsRepository,
     private postsQueryRepository: PostsQueryRepository
   ) {}
@@ -45,37 +47,24 @@ export class BlogsController {
   @Get()
   @GetBlogsSwagger()
   async findAll(@Query() query: GetBlogsQueryDto) {
-    return this.blogsQueryRepository.findAll(query);
-  }
-
-  @Get(':id')
-  @GetBlogSwagger()
-  async getById(@Param('id', ObjectIdValidationPipe) id: string) {
-    return this.blogsQueryRepository.findByIdOrThrow(id);
+    return this.queryBus.execute(new GetBlogsQuery(query));
   }
 
   @Post()
-  @UseBasicGuard()
   @CreateBlogSwagger()
   async create(@Body() dto: CreateBlogRequestDto) {
-    const blogId = await this.commandBus.execute<CreateBlogCommand, string>(
-      new CreateBlogCommand(dto)
-    );
+    const createdBlog = await this.commandBus.execute(new CreateBlogCommand(dto));
 
-    return this.blogsQueryRepository.findByIdOrThrow(blogId);
+    return createdBlog;
   }
 
   @Put(':id')
-  @UseBasicGuard()
   @UpdateBlogSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async update(@Param('id', ObjectIdValidationPipe) id: string, @Body() dto: UpdateBlogRequestDto) {
-    return this.commandBus.execute(
-      new UpdateBlogCommand({
-        blogId: id,
-        ...dto,
-      })
-    );
+    const commandDto = { blogId: id, ...dto };
+
+    return this.commandBus.execute(new UpdateBlogCommand(commandDto));
   }
 
   @Delete(':id')

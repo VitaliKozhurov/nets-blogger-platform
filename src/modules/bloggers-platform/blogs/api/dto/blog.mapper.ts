@@ -1,4 +1,4 @@
-import { IBlogRepository } from '../../repository';
+import { IBlogRepositoryDto } from '../../repository';
 
 export class BlogResponseMapperDto {
   id: string;
@@ -8,7 +8,7 @@ export class BlogResponseMapperDto {
   createdAt: string;
   isMembership: boolean;
 
-  static mapToView(dbBlog: IBlogRepository): BlogResponseMapperDto {
+  static mapToView(dbBlog: IBlogRepositoryDto): BlogResponseMapperDto {
     const dto = new BlogResponseMapperDto();
 
     dto.id = dbBlog.id;

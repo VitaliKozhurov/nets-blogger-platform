@@ -1,4 +1,4 @@
-export interface IBlogRepository {
+export interface IBlogRepositoryDto {
   id: string;
   name: string;
   description: string;
