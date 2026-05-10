@@ -1,5 +1,6 @@
-import { PostDocument } from '@modules/bloggers-platform/posts/domain';
 import { LikeDocument, LikeStatus } from '@modules/bloggers-platform/likes/domain';
+import { IPostRepository } from '../../repository';
+import { IPostViewDto } from './post-view.dto';
 
 export class PostResponseMapperDto {
   id: string;
@@ -17,48 +18,28 @@ export class PostResponseMapperDto {
   };
 
   static mapToView(args: {
-    postDocument: PostDocument;
+    post: IPostRepository;
     myStatus: LikeStatus;
     newestLikes: LikeDocument[];
-  }): IPostResponseDto {
+  }): IPostViewDto {
     const dto = new PostResponseMapperDto();
-    const { postDocument, myStatus, newestLikes } = args;
+    const { post, myStatus } = args;
 
-    dto.id = postDocument._id.toString();
-    dto.title = postDocument.title;
-    dto.shortDescription = postDocument.shortDescription;
-    dto.content = postDocument.content;
-    dto.blogId = postDocument.blogId;
-    dto.blogName = postDocument.blogName;
-    dto.createdAt = postDocument.createdAt.toISOString();
+    dto.id = post.id;
+    dto.title = post.title;
+    dto.shortDescription = post.shortDescription;
+    dto.content = post.content;
+    dto.blogId = post.blogId;
+    dto.blogName = post.blogName;
+    dto.createdAt = post.createdAt.toISOString();
 
     dto.extendedLikesInfo = {
-      likesCount: postDocument.likesInfo.likesCount,
-      dislikesCount: postDocument.likesInfo.dislikesCount,
+      likesCount: 0,
+      dislikesCount: 0,
       myStatus: myStatus,
-      newestLikes: newestLikes.map(like => ({
-        addedAt: like.addedLikeDate?.toISOString() ?? '',
-        userId: like.authorId,
-        login: like.login,
-      })),
+      newestLikes: [],
     };
 
     return dto;
   }
-}
-
-export interface IPostResponseDto {
-  id: string;
-  title: string;
-  shortDescription: string;
-  content: string;
-  blogId: string;
-  blogName: string;
-  createdAt: string;
-  extendedLikesInfo: {
-    likesCount: number;
-    dislikesCount: number;
-    myStatus: LikeStatus;
-    newestLikes: { addedAt: string; userId: string; login: string }[];
-  };
 }

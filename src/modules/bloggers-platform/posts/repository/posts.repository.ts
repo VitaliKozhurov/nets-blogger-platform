@@ -1,25 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Post } from '@modules/bloggers-platform/posts/domain';
-import { PostDocument, type PostModelType } from '@modules/bloggers-platform/posts/domain';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { IPostRepository } from './dto/post-repository.dto';
 
 @Injectable()
 export class PostsRepository {
-  constructor(
-    @InjectModel(Post.name)
-    private PostModel: PostModelType
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async getById(id: string) {
-    const post = await this.PostModel.findOne({
-      _id: id,
-      deletedAt: null,
-    }).exec();
+  async findById(postId: string): Promise<IPostRepository | null> {
+    const [post]: IPostRepository[] = await this.dataSource.query(
+      `
+          SELECT *, b."name" as blogName
+            FROM posts p
+            LEFT JOIN blogs b on p."blogId" = b."id"
+            WHERE p."id" = $1 "deletedAt" IS NULL
+          `,
+      [postId]
+    );
 
-    return post;
-  }
-
-  async save(postDocument: PostDocument) {
-    await postDocument.save();
+    return post || null;
   }
 }

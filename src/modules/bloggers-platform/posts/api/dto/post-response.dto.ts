@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IPostResponseDto } from '@modules/bloggers-platform/posts/application/dto';
+
 import { LikeStatus } from '@modules/bloggers-platform/likes/domain';
+import { IPostViewDto } from './post-view.dto';
 
 class NewestLike {
   @ApiProperty({
@@ -53,7 +54,7 @@ class ExtendedPostLikeInfo {
     description: 'Like status',
     example: LikeStatus.Like,
   })
-  newestLikes: IPostResponseDto['extendedLikesInfo']['newestLikes'][];
+  newestLikes: IPostViewDto['extendedLikesInfo']['newestLikes'][];
 }
 
 export class PostResponseDto {
@@ -113,5 +114,5 @@ export class PostResponseDto {
     type: ExtendedPostLikeInfo,
     description: 'additional information about post likes.',
   })
-  extendedLikesInfo: IPostResponseDto['extendedLikesInfo'];
+  extendedLikesInfo: IPostViewDto['extendedLikesInfo'];
 }

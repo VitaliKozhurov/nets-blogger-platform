@@ -6,7 +6,7 @@ import { BlogResponseMapperDto } from '../api/dto/blog.mapper';
 import { IGetBlogsQueryDto } from '../api/dto/get-blogs-query.dto';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { IBlogRepository } from './dto/IBlogRepositoryDto';
+import { IBlogRepository } from './dto/blog-repository.dto';
 
 @Injectable()
 export class BlogsQueryRepository {
