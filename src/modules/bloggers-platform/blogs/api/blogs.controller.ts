@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
-import { ObjectIdValidationPipe, UUIDValidationPipe } from 'src/core/pipes';
+import { UUIDValidationPipe } from 'src/core/pipes';
 import { GetBlogSwagger, GetBlogsSwagger, GetPostsByBlogIdSwagger } from '../decorators/swagger';
 import { GetBlogsQueryDto } from '../../blogs/api/dto';
 import { GetPostsQueryDto } from '../../posts/api/dto';
@@ -29,16 +29,16 @@ export class BlogsController {
   @GetPostsByBlogIdSwagger()
   @UseOptionalBearerGuard()
   async getPostsForBlog(
-    @Param('id', ObjectIdValidationPipe) id: string,
+    @Param('id', UUIDValidationPipe) id: string,
     @Query() query: GetPostsQueryDto,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    return this.queryBus.execute(
-      new GetPostsByBlogIdQuery({
-        blogId: id,
-        query,
-        userId: userDto ? userDto.userId : undefined,
-      })
-    );
+    const queryCommandDto = {
+      blogId: id,
+      query,
+      userId: userDto ? userDto.userId : undefined,
+    };
+
+    return this.queryBus.execute(new GetPostsByBlogIdQuery(queryCommandDto));
   }
 }

@@ -42,4 +42,6 @@ export class CreatePostRequestDto {
   blogId: string;
 }
 
-export class CreatePostByBlogIdRequestDto extends OmitType(CreatePostRequestDto, ['blogId']) {}
+export class CreatePostWithoutBlogIdRequestDto extends OmitType(CreatePostRequestDto, ['blogId']) {}
+
+export class UpdatePostWithoutBlogIdRequestDto extends OmitType(CreatePostRequestDto, ['blogId']) {}

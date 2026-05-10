@@ -53,4 +53,18 @@ export class BlogsRepository {
 
     return blog || null;
   }
+
+  async softDelete(blogId: string) {
+    const [blog]: IBlogRepositoryDto[] = await this.dataSource.query(
+      `
+          UPDATE blogs
+            SET "deletedAt" = NOW()
+            WHERE blogs.id = $1 AND "deletedAt" IS NULL
+            RETURNING *
+        `,
+      [blogId]
+    );
+
+    return Boolean(blog);
+  }
 }

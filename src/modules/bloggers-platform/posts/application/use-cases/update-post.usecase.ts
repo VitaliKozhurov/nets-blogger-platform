@@ -13,20 +13,14 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
   constructor(private postsRepository: PostsRepository) {}
 
   async execute({ dto }: UpdatePostCommand): Promise<boolean> {
-    const { postId, ...restDto } = dto;
+    const isUpdated = await this.postsRepository.update(dto);
 
-    const post = await this.postsRepository.getById(postId);
-
-    if (!post) {
+    if (!isUpdated) {
       throw new DomainException({
         code: DomainExceptionCode.NOT_FOUND_ERROR,
         message: 'Post not found',
       });
     }
-
-    const updatedPost = post.update(restDto);
-
-    await this.postsRepository.save(updatedPost);
 
     return true;
   }

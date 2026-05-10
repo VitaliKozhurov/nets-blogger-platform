@@ -1,4 +1,8 @@
-export { CreatePostByBlogIdRequestDto, CreatePostRequestDto } from './create-post.dto';
+export {
+  CreatePostWithoutBlogIdRequestDto,
+  UpdatePostWithoutBlogIdRequestDto,
+  CreatePostRequestDto,
+} from './create-post.dto';
 export { GetPostsQueryDto } from './get-posts-query.dto';
 export type { IGetPostsQueryDto } from './get-posts-query.dto';
 export { PostResponseMapperDto } from './post.mapper';

@@ -1,9 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { PostsRepository } from '@modules/bloggers-platform/posts/repository';
 import { ICreatePostDto } from '@modules/bloggers-platform/posts/application/dto';
 import { PostsFactory } from '@modules/bloggers-platform/posts/application/factories';
-import { BlogsRepository } from '@modules/bloggers-platform/blogs/repository';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 export class CreatePostCommand {
   constructor(public dto: ICreatePostDto) {}
@@ -11,22 +10,18 @@ export class CreatePostCommand {
 
 @CommandHandler(CreatePostCommand)
 export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
-  constructor(
-    private postsFactory: PostsFactory,
-    private postsRepository: PostsRepository,
-    private blogsRepository: BlogsRepository
-  ) {}
+  constructor(private postsFactory: PostsFactory) {}
 
-  async execute({ dto }: CreatePostCommand): Promise<string> {
-    const { name } = await this.blogsRepository.getByIdOrFail(dto.blogId);
+  async execute({ dto }: CreatePostCommand) {
+    const createdPost = await this.postsFactory.createPost(dto);
 
-    const createdPost = await this.postsFactory.createPost({
-      ...dto,
-      blogName: name,
-    });
+    if (!createdPost) {
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'Blog not found',
+      });
+    }
 
-    await this.postsRepository.save(createdPost);
-
-    return createdPost._id.toString();
+    return createdPost;
   }
 }

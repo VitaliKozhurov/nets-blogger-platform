@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogsRepository } from '../../repository/blogs.repository';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 export class DeleteBlogCommand {
   constructor(public id: string) {}
@@ -10,11 +11,14 @@ export class DeleteBlogUseCase implements ICommandHandler<DeleteBlogCommand> {
   constructor(private blogsRepository: BlogsRepository) {}
 
   async execute({ id }: DeleteBlogCommand): Promise<boolean> {
-    const blog = await this.blogsRepository.getByIdOrFail(id);
+    const isDeleted = await this.blogsRepository.softDelete(id);
 
-    blog.softDelete();
-
-    await this.blogsRepository.save(blog);
+    if (!isDeleted) {
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'Blog not found',
+      });
+    }
 
     return true;
   }
