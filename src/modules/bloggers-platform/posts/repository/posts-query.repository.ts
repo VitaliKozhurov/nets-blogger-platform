@@ -6,7 +6,7 @@ import { getPaginationParams } from 'src/core/utils';
 import { Post } from '../domain/post.schema';
 import { PostDocument, type PostModelType } from '../domain/post.types';
 import { LikeDocument, LikeStatus } from '@modules/bloggers-platform/likes/domain';
-import { IGetPostsQueryParamsDto, PostResponseMapperDto } from '../api/dto';
+import { IGetPostsQueryDto, PostResponseMapperDto } from '../api/dto';
 import { LikesRepository } from '@modules/bloggers-platform/likes/repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
@@ -19,7 +19,7 @@ export class PostsQueryRepository {
   ) {}
 
   async findAll(args: {
-    query: IGetPostsQueryParamsDto;
+    query: IGetPostsQueryDto;
     userId?: string;
   }): Promise<PaginationResponseMapperDto<PostResponseMapperDto[]>> {
     const { query, userId } = args;
@@ -54,7 +54,7 @@ export class PostsQueryRepository {
   async findAllForBlogId(args: {
     blogId: string;
     userId?: string;
-    query: IGetPostsQueryParamsDto;
+    query: IGetPostsQueryDto;
   }): Promise<PaginationResponseMapperDto<PostResponseMapperDto[]>> {
     const { blogId, userId, query } = args;
 

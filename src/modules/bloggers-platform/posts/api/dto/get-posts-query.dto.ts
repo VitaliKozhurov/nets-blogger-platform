@@ -14,6 +14,6 @@ export class GetPostsQueryDto extends BaseQueryParamsDto {
   sortBy: PostsSortBy = PostsSortBy.CreatedAt;
 }
 
-export interface IGetPostsQueryParamsDto extends IBaseQueryParamsDto {
+export interface IGetPostsQueryDto extends IBaseQueryParamsDto {
   sortBy: PostsSortBy;
 }

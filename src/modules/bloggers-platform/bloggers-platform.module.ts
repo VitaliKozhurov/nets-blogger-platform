@@ -7,7 +7,9 @@ import {
   BlogsRepository,
   CreateBlogUseCase,
   DeleteBlogUseCase,
+  GetBlogByIdHandler,
   GetBlogsHandler,
+  GetPostsByBlogIdHandler,
   UpdateBlogUseCase,
 } from './blogs';
 import {
@@ -52,7 +54,7 @@ const commandHandlers = [
   UpdateCommentLikeStatusUseCase,
 ];
 
-const queryHandlers = [GetBlogsHandler];
+const queryHandlers = [GetBlogsHandler, GetBlogByIdHandler, GetPostsByBlogIdHandler];
 
 @Module({
   imports: [

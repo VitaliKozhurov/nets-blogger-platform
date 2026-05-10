@@ -7,7 +7,7 @@ import { IBlogRepository } from './dto/IBlogRepositoryDto';
 export class BlogsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async getById(id: string) {
+  async findById(id: string) {
     const [blog]: IBlogRepository[] = await this.dataSource.query(
       `
           SELECT *
