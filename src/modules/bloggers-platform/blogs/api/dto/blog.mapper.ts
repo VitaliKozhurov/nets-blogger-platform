@@ -1,4 +1,4 @@
-import { BlogDocument } from '@modules/bloggers-platform/blogs/domain';
+import { IBlogRepository } from '../../repository';
 
 export class BlogResponseMapperDto {
   id: string;
@@ -8,15 +8,15 @@ export class BlogResponseMapperDto {
   createdAt: string;
   isMembership: boolean;
 
-  static mapToView(blogDocument: BlogDocument): BlogResponseMapperDto {
+  static mapToView(dbBlog: IBlogRepository): BlogResponseMapperDto {
     const dto = new BlogResponseMapperDto();
 
-    dto.id = blogDocument._id.toString();
-    dto.name = blogDocument.name;
-    dto.description = blogDocument.description;
-    dto.websiteUrl = blogDocument.websiteUrl;
-    dto.createdAt = blogDocument.createdAt.toISOString();
-    dto.isMembership = blogDocument.isMembership;
+    dto.id = dbBlog.id;
+    dto.name = dbBlog.name;
+    dto.description = dbBlog.description;
+    dto.websiteUrl = dbBlog.websiteUrl;
+    dto.createdAt = dbBlog.createdAt.toISOString();
+    dto.isMembership = dbBlog.isMembership;
 
     return dto;
   }

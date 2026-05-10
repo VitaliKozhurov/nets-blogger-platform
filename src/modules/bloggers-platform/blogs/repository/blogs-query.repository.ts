@@ -1,44 +1,46 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { QueryFilter } from 'mongoose';
 import { PaginationResponseMapperDto } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { getPaginationParams } from 'src/core/utils';
-import { Blog } from '../domain/blog.schema';
-import { BlogDocument, type BlogModelType } from '../domain/blog.types';
 import { BlogResponseMapperDto } from '../api/dto/blog.mapper';
 import { IGetBlogsQueryParamsDto } from '../api/dto/get-blogs-query.dto';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { IBlogRepository } from './dto/IBlogRepositoryDto';
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(
-    @InjectModel(Blog.name)
-    private BlogModel: BlogModelType
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findAll(
     query: IGetBlogsQueryParamsDto
   ): Promise<PaginationResponseMapperDto<BlogResponseMapperDto[]>> {
-    const filter: QueryFilter<BlogDocument> = {
-      deletedAt: null,
-    };
+    const { searchNameTerm, sortBy, sortDirection } = query;
 
-    if (query.searchNameTerm) {
-      filter.$or = [{ name: { $regex: query.searchNameTerm, $options: 'i' } }];
-    }
+    const sortColumn = `"${sortBy}"`;
 
     const { skip, limit } = getPaginationParams(query);
 
-    const blogsPromise = this.BlogModel.find(filter)
-      .sort({
-        [query.sortBy]: query.sortDirection,
-      })
-      .skip(skip)
-      .limit(limit)
-      .lean()
-      .exec();
+    const blogsPromise: Promise<IBlogRepository[]> = this.dataSource.query(
+      `
+      SELECT *
+        FROM blogs
+        WHERE (name ILIKE $1) AND "deletedAt" IS NULL
+        ORDER BY ${sortColumn} ${sortDirection}
+        LIMIT $3
+        OFFSET $4
+      `,
+      [`%${searchNameTerm ?? ''}%`, limit, skip]
+    );
 
-    const totalCountPromise = this.BlogModel.countDocuments(filter).exec();
+    const totalCountPromise = this.dataSource.query(
+      `
+      SELECT COUNT(*)
+        FROM blogs
+        WHERE (name ILIKE $1) AND "deletedAt" IS NULL
+      `,
+      [`%${searchNameTerm ?? ''}%`]
+    );
 
     const [items, totalCount] = await Promise.all([blogsPromise, totalCountPromise]);
 
@@ -51,10 +53,14 @@ export class BlogsQueryRepository {
   }
 
   async findByIdOrThrow(id: string): Promise<BlogResponseMapperDto> {
-    const blog = await this.BlogModel.findOne({
-      _id: id,
-      deletedAt: null,
-    }).exec();
+    const [blog]: IBlogRepository[] = await this.dataSource.query(
+      `
+      SELECT *
+        FROM blogs
+        WHERE id=$1 AND "deletedAt" IS NULL
+      `,
+      [id]
+    );
 
     if (!blog) {
       throw new DomainException({
