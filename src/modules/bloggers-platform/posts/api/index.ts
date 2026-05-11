@@ -1,2 +1,2 @@
-export { PostsController } from './posts.controller';
 export * from './dto';
+export { PostsController } from './posts.controller';

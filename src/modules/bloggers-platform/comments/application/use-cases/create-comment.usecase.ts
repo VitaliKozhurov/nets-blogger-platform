@@ -1,9 +1,8 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '@modules/bloggers-platform/comments/repository';
 import { ICreateCommentDto } from '@modules/bloggers-platform/comments/application/dto';
 import { CommentsFactory } from '@modules/bloggers-platform/comments/application/factories';
+import { CommentsRepository } from '@modules/bloggers-platform/comments/repository';
 import { PostsRepository } from '@modules/bloggers-platform/posts/repository';
-import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 export class CreateCommentCommand {
   constructor(public dto: ICreateCommentDto) {}
@@ -18,19 +17,21 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
   ) {}
 
   async execute({ dto }: CreateCommentCommand): Promise<string> {
-    const post = await this.postsRepository.getById(dto.id);
+    // const post = await this.postsRepository.getById(dto.id);
 
-    if (!post) {
-      throw new DomainException({
-        code: DomainExceptionCode.NOT_FOUND_ERROR,
-        message: 'Post not found',
-      });
-    }
+    // if (!post) {
+    //   throw new DomainException({
+    //     code: DomainExceptionCode.NOT_FOUND_ERROR,
+    //     message: 'Post not found',
+    //   });
+    // }
 
-    const createdComment = await this.commentsFactory.createComment(dto);
+    // const createdComment = await this.commentsFactory.createComment(dto);
 
-    await this.commentsRepository.save(createdComment);
+    // await this.commentsRepository.save(createdComment);
 
-    return createdComment._id.toString();
+    // return createdComment._id.toString();
+
+    return '';
   }
 }

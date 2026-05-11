@@ -1,4 +1,34 @@
 import {
+  CreateCommentRequestDto,
+  GetCommentsByPostIdQueryDto,
+} from '@modules/bloggers-platform/comments/api/dto';
+import { CreateCommentCommand } from '@modules/bloggers-platform/comments/application/use-cases';
+import {
+  CreateCommentByPostIdSwagger,
+  GetCommentsByPostIdSwagger,
+} from '@modules/bloggers-platform/comments/decorators/swagger';
+import { CommentsQueryRepository } from '@modules/bloggers-platform/comments/repository';
+import {
+  CreatePostRequestDto,
+  GetPostsQueryDto,
+  UpdatePostLikeStatusRequestDto,
+  UpdatePostRequestDto,
+} from '@modules/bloggers-platform/posts/api/dto';
+import {
+  CreatePostCommand,
+  UpdatePostCommand,
+  UpdatePostLikeStatusCommand,
+} from '@modules/bloggers-platform/posts/application/use-cases';
+import {
+  CreatePostSwagger,
+  DeletePostSwagger,
+  GetPostSwagger,
+  GetPostsSwagger,
+  UpdatePostLikeStatusSwagger,
+  UpdatePostSwagger,
+} from '@modules/bloggers-platform/posts/decorators/swagger';
+import { PostsQueryRepository, PostsRepository } from '@modules/bloggers-platform/posts/repository';
+import {
   Body,
   Controller,
   Delete,
@@ -11,46 +41,14 @@ import {
   Query,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
+import { Public } from 'src/core/guards';
 import { ObjectIdValidationPipe } from 'src/core/pipes';
-import {
-  CreatePostCommand,
-  DeletePostCommand,
-  UpdatePostCommand,
-  UpdatePostLikeStatusCommand,
-} from '@modules/bloggers-platform/posts/application/use-cases';
-import { CreateCommentCommand } from '@modules/bloggers-platform/comments/application/use-cases';
-import {
-  CreatePostSwagger,
-  DeletePostSwagger,
-  GetPostSwagger,
-  GetPostsSwagger,
-  UpdatePostSwagger,
-  UpdatePostLikeStatusSwagger,
-} from '@modules/bloggers-platform/posts/decorators/swagger';
-import {
-  CreateCommentByPostIdSwagger,
-  GetCommentsByPostIdSwagger,
-} from '@modules/bloggers-platform/comments/decorators/swagger';
-import { PostsQueryRepository, PostsRepository } from '@modules/bloggers-platform/posts/repository';
-import { CommentsQueryRepository } from '@modules/bloggers-platform/comments/repository';
-import {
-  CreatePostRequestDto,
-  GetPostsQueryDto,
-  UpdatePostLikeStatusRequestDto,
-  UpdatePostRequestDto,
-} from '@modules/bloggers-platform/posts/api/dto';
-import {
-  CreateCommentRequestDto,
-  GetCommentsByPostIdQueryDto,
-} from '@modules/bloggers-platform/comments/api/dto';
-import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
+import { UseBasicGuard } from 'src/modules/users-account/auth/decorators/basic-auth/use-basic-guard.decorator';
 import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/optional-user-from-request.decorator';
 import { UseBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-bearer-guard.decorator';
 import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
 import { UserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/user-from-request.decorator';
-import { UseBasicGuard } from 'src/modules/users-account/auth/decorators/basic-auth/use-basic-guard.decorator';
-import { Public } from 'src/core/guards';
 
 @Controller('posts')
 export class PostsController {
@@ -112,8 +110,8 @@ export class PostsController {
   @UseBasicGuard()
   @DeletePostSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id', ObjectIdValidationPipe) id: string) {
-    return this.commandBus.execute(new DeletePostCommand(id));
+  async delete(@Param('id', ObjectIdValidationPipe) _: string) {
+    // return this.commandBus.execute(new DeletePostCommand(id));
   }
 
   @Get(':id/comments')
@@ -125,14 +123,14 @@ export class PostsController {
     @Query() query: GetCommentsByPostIdQueryDto,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    const post = await this.postsRepository.getById(id);
+    // const post = await this.postsRepository.getById(id);
 
-    if (!post) {
-      throw new DomainException({
-        code: DomainExceptionCode.NOT_FOUND_ERROR,
-        message: 'Post not found',
-      });
-    }
+    // if (!post) {
+    //   throw new DomainException({
+    //     code: DomainExceptionCode.NOT_FOUND_ERROR,
+    //     message: 'Post not found',
+    //   });
+    // }
 
     return this.commentsQueryRepository.getAllByPostId({
       postId: id,
