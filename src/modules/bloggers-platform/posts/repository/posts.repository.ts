@@ -30,14 +30,13 @@ export class PostsRepository {
       `
           INSERT INTO "posts" ("blogId", title, "shortDescription", content)
             VALUES ($1, $2, $3, $4)
-            RETURNING *
+            RETURNING *, (SELECT name FROM blogs WHERE id = $1) as "blogName"
         `,
       [blogId, title, shortDescription, content]
     );
 
-    return post
-      ? PostResponseMapperDto.mapToView({ post, myStatus: LikeStatus.None, newestLikes: [] })
-      : null;
+    return PostResponseMapperDto.mapToView({ post, myStatus: LikeStatus.None, newestLikes: [] })
+     
   }
 
   async update(dto: {
@@ -49,34 +48,34 @@ export class PostsRepository {
   }) {
     const { blogId, postId, title, shortDescription, content } = dto;
 
-    const [post]: { id: string }[] = await this.dataSource.query(
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
           UPDATE "posts"
-            SET title = $3,
-                shortDescription = $4,
-                content = $5
+            SET "title" = $3,
+                "shortDescription" = $4,
+                "content" = $5
             WHERE "blogId" = $1 AND "id" = $2 AND "deletedAt" IS NULL
             RETURNING id
         `,
       [blogId, postId, title, shortDescription, content]
     );
 
-    return Boolean(post);
+    return rows.length > 0;
   }
 
   async delete(dto: { blogId: string; postId: string }) {
     const { blogId, postId } = dto;
 
-    const [post]: { id: string }[] = await this.dataSource.query(
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
           UPDATE "posts"
-            SET deletedAt = NOW()
+            SET "deletedAt" = NOW()
             WHERE "blogId" = $1 AND "id" = $2 AND "deletedAt" IS NULL
             RETURNING id
         `,
       [blogId, postId]
     );
 
-    return Boolean(post);
+    return rows.length > 0;
   }
 }

@@ -16,6 +16,8 @@ export class GlobalHttpExceptionsFilter implements ExceptionFilter {
     const message = exception.message || 'Unknown exception occurred.';
     const jsonResponse = this.buildResponseBody(request.url, message);
 
+    console.log(exception);
+
     response.status(HttpStatus.INTERNAL_SERVER_ERROR).json(jsonResponse);
   }
 

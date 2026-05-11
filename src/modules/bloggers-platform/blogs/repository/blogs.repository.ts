@@ -39,32 +39,32 @@ export class BlogsRepository {
   async update(dto: { blogId: string; name: string; description: string; websiteUrl: string }) {
     const { blogId, name, description, websiteUrl } = dto;
 
-    const [blog]: IBlogRepositoryDto[] = await this.dataSource.query(
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
           UPDATE blogs
             SET name = $1,
                 description = $2,
                 "websiteUrl" = $3
             WHERE blogs.id = $4 AND "deletedAt" IS NULL
-            RETURNING *
+            RETURNING id
         `,
       [name, description, websiteUrl, blogId]
     );
 
-    return blog || null;
+    return rows.length > 0;
   }
 
   async softDelete(blogId: string) {
-    const [blog]: IBlogRepositoryDto[] = await this.dataSource.query(
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
           UPDATE blogs
             SET "deletedAt" = NOW()
             WHERE blogs.id = $1 AND "deletedAt" IS NULL
-            RETURNING *
+            RETURNING id
         `,
       [blogId]
     );
 
-    return Boolean(blog);
+    return rows.length > 0;
   }
 }

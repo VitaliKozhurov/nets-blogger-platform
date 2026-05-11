@@ -27,13 +27,13 @@ export class BlogsQueryRepository {
         FROM blogs
         WHERE (name ILIKE $1) AND "deletedAt" IS NULL
         ORDER BY ${sortColumn} ${sortDirection}
-        LIMIT $3
-        OFFSET $4
+        LIMIT $2
+        OFFSET $3
       `,
       [`%${searchNameTerm ?? ''}%`, limit, skip]
     );
 
-    const totalCountPromise = this.dataSource.query(
+    const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
       `
       SELECT COUNT(*)
         FROM blogs
@@ -42,11 +42,11 @@ export class BlogsQueryRepository {
       [`%${searchNameTerm ?? ''}%`]
     );
 
-    const [items, totalCount] = await Promise.all([blogsPromise, totalCountPromise]);
+    const [items, countResult] = await Promise.all([blogsPromise, totalCountPromise]);
 
     return PaginationResponseMapperDto.mapToViewModel({
       items: items.map(BlogResponseMapperDto.mapToView),
-      totalCount,
+      totalCount: Number(countResult[0].count),
       page: query.pageNumber,
       size: query.pageSize,
     });

@@ -24,10 +24,10 @@ export class PostsQueryRepository {
 
     const postsPromise: Promise<IPostRepository[]> = this.dataSource.query(
       `
-          SELECT *, b."name" as blogName
+          SELECT p.*, b."name" as "blogName"
             FROM posts p
             LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE "deletedAt" IS NULL
+            WHERE p."deletedAt" IS NULL
             ORDER BY ${sortColumn} ${sortDirection}
             LIMIT $1
             OFFSET $2
@@ -35,16 +35,17 @@ export class PostsQueryRepository {
       [limit, skip]
     );
 
-    const totalCountPromise = this.dataSource.query(
+    const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
       `
           SELECT COUNT(*)
             FROM posts p
-            WHERE "deletedAt" IS NULL
+            LEFT JOIN blogs b on p."blogId" = b."id"
+            WHERE p."deletedAt" IS NULL
           `,
       []
     );
 
-    const [posts, totalCount] = await Promise.all([postsPromise, totalCountPromise]);
+    const [posts, countResult] = await Promise.all([postsPromise, totalCountPromise]);
 
     const items = posts.map(post =>
       PostResponseMapperDto.mapToView({
@@ -56,7 +57,7 @@ export class PostsQueryRepository {
 
     return PaginationResponseMapperDto.mapToViewModel({
       items,
-      totalCount,
+      totalCount: Number(countResult[0].count),
       page: query.pageNumber,
       size: query.pageSize,
     });
@@ -76,10 +77,10 @@ export class PostsQueryRepository {
 
     const postsPromise: Promise<IPostRepository[]> = this.dataSource.query(
       `
-          SELECT *, b."name" as blogName
+          SELECT p.*, b."name" as "blogName"
             FROM posts p
             LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE p."blogId" = $1 AND "deletedAt" IS NULL
+            WHERE p."blogId" = $1 AND p."deletedAt" IS NULL
             ORDER BY ${sortColumn} ${sortDirection}
             LIMIT $2
             OFFSET $3
@@ -87,17 +88,19 @@ export class PostsQueryRepository {
       [blogId, limit, skip]
     );
 
-    const totalCountPromise = this.dataSource.query(
+    const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
       `
           SELECT COUNT(*)
             FROM posts p
             LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE p."blogId" = $1 AND "deletedAt" IS NULL
+            WHERE p."blogId" = $1 AND p."deletedAt" IS NULL
           `,
       [blogId]
     );
 
-    const [posts, totalCount] = await Promise.all([postsPromise, totalCountPromise]);
+    const [posts, countResult] = await Promise.all([postsPromise, totalCountPromise]);
+
+    console.log(posts);
 
     const items = posts.map(post =>
       PostResponseMapperDto.mapToView({
@@ -111,7 +114,7 @@ export class PostsQueryRepository {
       items,
       page: query.pageNumber,
       size: query.pageSize,
-      totalCount,
+      totalCount: Number(countResult[0].count),
     });
   }
 
@@ -120,10 +123,10 @@ export class PostsQueryRepository {
 
     const [post]: IPostRepository[] = await this.dataSource.query(
       `
-          SELECT *, b."name" as blogName
+          SELECT p.*, b."name" as "blogName"
             FROM posts p
-            LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE p."id" = $1 "deletedAt" IS NULL
+            LEFT JOIN blogs b ON p."blogId" = b."id"
+            WHERE p."id" = $1 AND p."deletedAt" IS NULL
           `,
       [postId]
     );

@@ -36,8 +36,8 @@ export class PostsController {
     @Param('id', UUIDValidationPipe) id: string,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    return this.queryBus.execute(
-      new GetPostByIdQuery({ postId: id, userId: userDto ? userDto.userId : undefined })
-    );
+    const commandQuery = { postId: id, userId: userDto ? userDto.userId : undefined };
+
+    return this.queryBus.execute(new GetPostByIdQuery(commandQuery));
   }
 }

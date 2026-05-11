@@ -39,6 +39,7 @@ export class PostResponseMapperDto {
       myStatus: myStatus,
       newestLikes: [],
     };
+    console.log(dto);
 
     return dto;
   }
