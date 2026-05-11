@@ -1,10 +1,10 @@
+import { PostResponseDto } from '@modules/bloggers-platform/posts/api/dto';
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
-import { CreatePostWithoutBlogIdRequestDto } from '@modules/bloggers-platform/posts/api/dto';
-import { PostResponseDto } from '@modules/bloggers-platform/posts/api/dto';
 import { ApiErrorResponse } from 'src/core/decorators';
+import { CreatePostByBlogRequestDto } from '../../api';
 
-export const CreatePostByBlogIdSwagger = () => {
+export const CreatePostByBlogSwagger = () => {
   return applyDecorators(
     ApiOperation({
       summary: 'Create a new post',
@@ -12,7 +12,7 @@ export const CreatePostByBlogIdSwagger = () => {
         'Creates a new post with the provided information. Returns the created post data.',
     }),
     ApiBody({
-      type: CreatePostWithoutBlogIdRequestDto,
+      type: CreatePostByBlogRequestDto,
       description:
         'Post creation data including title,shortDescription, content,blogId and blogName',
     }),

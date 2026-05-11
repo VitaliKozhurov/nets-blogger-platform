@@ -11,34 +11,39 @@ import {
   Query,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { ApiBasicAuth } from '@nestjs/swagger';
 import { UUIDValidationPipe } from 'src/core/pipes';
+import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
+import {
+  OptionalUserFromRequest,
+  UseBasicGuard,
+  UseOptionalBearerGuard,
+} from 'src/modules/users-account/auth/decorators';
+import { GetPostsQueryDto, UpdatePostWithoutBlogIdRequestDto } from '../../posts/api/dto';
+import {
+  CreatePostCommand,
+  DeletePostCommand,
+  UpdatePostCommand,
+} from '../../posts/application/use-cases';
+import { GetBlogsQuery, GetPostsByBlogIdQuery } from '../application';
 import { CreateBlogCommand, DeleteBlogCommand, UpdateBlogCommand } from '../application/use-cases';
-import { CreatePostCommand, UpdatePostCommand } from '../../posts/application/use-cases';
 import {
   CreateBlogSwagger,
+  CreatePostByBlogSwagger,
   DeleteBlogSwagger,
+  DeletePostByBlogSwagger,
   GetBlogsSwagger,
   GetPostsByBlogIdSwagger,
   UpdateBlogSwagger,
+  UpdatePostByBlogSwagger,
 } from '../decorators/swagger';
-import { CreatePostByBlogIdSwagger } from '@modules/bloggers-platform/posts/decorators/swagger';
 import { CreateBlogRequestDto, GetBlogsQueryDto, UpdateBlogRequestDto } from './dto';
-import {
-  CreatePostWithoutBlogIdRequestDto,
-  GetPostsQueryDto,
-  UpdatePostWithoutBlogIdRequestDto,
-} from '../../posts/api/dto';
-import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
-import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/optional-user-from-request.decorator';
-import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
-import { UseBasicGuard } from 'src/modules/users-account/auth/decorators/basic-auth/use-basic-guard.decorator';
-import { ApiBasicAuth } from '@nestjs/swagger';
-import { GetBlogsQuery, GetPostsByBlogIdQuery } from '../application';
+import { CreatePostByBlogRequestDto } from './dto/create-post-by-blog.dto';
 
-@UseBasicGuard()
 @ApiBasicAuth('basicAuth')
+@UseBasicGuard()
 @Controller('sa/blogs')
-export class BlogsController {
+export class SuperAdminBlogsController {
   constructor(
     private commandBus: CommandBus,
     private queryBus: QueryBus
@@ -75,10 +80,10 @@ export class BlogsController {
   }
 
   @Post(':id/posts')
-  @CreatePostByBlogIdSwagger()
+  @CreatePostByBlogSwagger()
   async createPost(
     @Param('id', UUIDValidationPipe) id: string,
-    @Body() dto: CreatePostWithoutBlogIdRequestDto
+    @Body() dto: CreatePostByBlogRequestDto
   ) {
     const commandDto = { blogId: id, ...dto };
 
@@ -93,17 +98,13 @@ export class BlogsController {
     @Query() query: GetPostsQueryDto,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    const queryCommandDto = {
-      blogId: id,
-      query,
-      userId: userDto ? userDto.userId : undefined,
-    };
+    const queryCommandDto = { blogId: id, query, userId: userDto ? userDto.userId : undefined };
 
     return this.queryBus.execute(new GetPostsByBlogIdQuery(queryCommandDto));
   }
 
   @Put(':id/posts/:postId')
-  @UpdateBlogSwagger()
+  @UpdatePostByBlogSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Param('id', UUIDValidationPipe) id: string,
@@ -113,5 +114,17 @@ export class BlogsController {
     const commandDto = { blogId: id, postId, ...dto };
 
     return this.commandBus.execute(new UpdatePostCommand(commandDto));
+  }
+
+  @Delete(':id/posts/:postId')
+  @DeletePostByBlogSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deletePost(
+    @Param('id', UUIDValidationPipe) id: string,
+    @Param('postId', UUIDValidationPipe) postId: string
+  ) {
+    const commandDto = { blogId: id, postId };
+
+    return this.commandBus.execute(new DeletePostCommand(commandDto));
   }
 }

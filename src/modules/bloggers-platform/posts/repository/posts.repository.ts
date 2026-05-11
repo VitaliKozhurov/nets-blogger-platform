@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { IPostRepository } from './dto/post-repository.dto';
-import { PostResponseMapperDto } from '../api';
 import { LikeStatus } from '../../likes';
+import { PostResponseMapperDto } from '../api';
+import { IPostRepository } from './dto/post-repository.dto';
 
 @Injectable()
 export class PostsRepository {
@@ -56,9 +56,25 @@ export class PostsRepository {
                 shortDescription = $4,
                 content = $5
             WHERE "blogId" = $1 AND "id" = $2 AND "deletedAt" IS NULL
-            RETURNING *
+            RETURNING id
         `,
       [blogId, postId, title, shortDescription, content]
+    );
+
+    return Boolean(post);
+  }
+
+  async delete(dto: { blogId: string; postId: string }) {
+    const { blogId, postId } = dto;
+
+    const [post]: { id: string }[] = await this.dataSource.query(
+      `
+          UPDATE "posts"
+            SET deletedAt = NOW()
+            WHERE "blogId" = $1 AND "id" = $2 AND "deletedAt" IS NULL
+            RETURNING id
+        `,
+      [blogId, postId]
     );
 
     return Boolean(post);

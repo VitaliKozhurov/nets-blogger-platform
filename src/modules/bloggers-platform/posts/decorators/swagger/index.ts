@@ -1,4 +1,3 @@
-export { CreatePostByBlogIdSwagger } from './create-post-by-blog-id-swagger.decorator';
 export { CreatePostSwagger } from './create-post-swagger.decorator';
 export { DeletePostSwagger } from './delete-post-swagger.decorator';
 export { GetPostSwagger } from './get-post-swagger.decorator';

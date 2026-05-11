@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UsersAccountModule } from '../users-account/users-account.module';
 import {
   BlogsController,
   BlogsFactory,
@@ -10,6 +12,7 @@ import {
   GetBlogByIdHandler,
   GetBlogsHandler,
   GetPostsByBlogIdHandler,
+  SuperAdminBlogsController,
   UpdateBlogUseCase,
 } from './blogs';
 import {
@@ -35,8 +38,6 @@ import {
   UpdatePostLikeStatusUseCase,
   UpdatePostUseCase,
 } from './posts';
-import { UsersAccountModule } from '../users-account/users-account.module';
-import { JwtModule } from '@nestjs/jwt';
 import { GetPostsByIdHandler, GetPostsHandler } from './posts/application';
 
 const commandHandlers = [
@@ -68,7 +69,7 @@ const queryHandlers = [
     JwtModule,
     UsersAccountModule,
   ],
-  controllers: [BlogsController, PostsController, CommentsController],
+  controllers: [SuperAdminBlogsController, BlogsController, PostsController, CommentsController],
   providers: [
     ...commandHandlers,
     ...queryHandlers,

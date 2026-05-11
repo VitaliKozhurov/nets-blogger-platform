@@ -1,13 +1,15 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { UUIDValidationPipe } from 'src/core/pipes';
-import { GetBlogSwagger, GetBlogsSwagger, GetPostsByBlogIdSwagger } from '../decorators/swagger';
+import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
+import {
+  OptionalUserFromRequest,
+  UseOptionalBearerGuard,
+} from 'src/modules/users-account/auth/decorators';
 import { GetBlogsQueryDto } from '../../blogs/api/dto';
 import { GetPostsQueryDto } from '../../posts/api/dto';
-import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
-import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/optional-user-from-request.decorator';
-import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
 import { GetBlogByIdQuery, GetBlogsQuery, GetPostsByBlogIdQuery } from '../application';
+import { GetBlogSwagger, GetBlogsSwagger, GetPostsByBlogIdSwagger } from '../decorators/swagger';
 
 @Controller('blogs')
 export class BlogsController {
