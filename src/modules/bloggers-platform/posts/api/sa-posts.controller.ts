@@ -49,7 +49,7 @@ import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorato
 import { UseBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-bearer-guard.decorator';
 import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
 import { UserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/user-from-request.decorator';
-
+// TODO delete
 @Controller('posts')
 export class PostsController {
   constructor(

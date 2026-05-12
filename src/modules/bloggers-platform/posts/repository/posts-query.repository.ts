@@ -118,18 +118,44 @@ export class PostsQueryRepository {
     });
   }
 
-  async findByIdOrThrow(args: { postId: string; userId?: string }): Promise<PostResponseMapperDto> {
-    const { postId } = args;
+  async findById(args: { postId: string; userId?: string }): Promise<PostResponseMapperDto | null> {
+    const { postId, userId } = args;
+
+    const [newestLikes] = await this.dataSource.query(
+      `
+      SELECT "createdAt" as "addedAt", "userId", "login"
+          FROM post_likes
+          LEFT JOIN users u ON post_likes."userId" = u."id"
+          WHERE post_likes."postId" = $1
+          ORDER BY "createdAt" DESC
+          LIMIT 3
+      `,
+      [postId]
+    );
 
     const [post]: IPostRepository[] = await this.dataSource.query(
       `
-          SELECT p.*, b."name" as "blogName"
+          SELECT p.*, 
+          b."name" as "blogName", 
+          (SELECT COUNT(*) FROM post_likes WHERE "postId" = p."id" AND status = 'Like') as "likesCount",
+          (SELECT COUNT(*) FROM post_likes WHERE "postId" = p."id" AND status = 'Dislike') as "dislikesCount",
+          COALESCE(
+          (SELECT status FROM post_likes WHERE "postId" = p."id" AND "userId" = $2 LIMIT 1),
+          'None') as "myStatus"
             FROM posts p
             LEFT JOIN blogs b ON p."blogId" = b."id"
             WHERE p."id" = $1 AND p."deletedAt" IS NULL
           `,
-      [postId]
+      [postId, userId]
     );
+
+    return post
+      ? PostResponseMapperDto.mapToView({ post, myStatus: LikeStatus.None, newestLikes: [] })
+      : null;
+  }
+
+  async findByIdOrThrow(args: { postId: string; userId?: string }): Promise<PostResponseMapperDto> {
+    const post = await this.findById(args);
 
     if (!post) {
       throw new DomainException({
@@ -138,6 +164,6 @@ export class PostsQueryRepository {
       });
     }
 
-    return PostResponseMapperDto.mapToView({ post, myStatus: LikeStatus.None, newestLikes: [] });
+    return post;
   }
 }
