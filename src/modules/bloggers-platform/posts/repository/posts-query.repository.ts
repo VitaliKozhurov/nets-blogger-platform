@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { PaginationResponseMapperDto } from 'src/core/dto';
-import { getPaginationParams } from 'src/core/utils';
 import { LikeStatus } from '@modules/bloggers-platform/likes/domain';
-import { IGetPostsQueryDto, PostResponseMapperDto } from '../api/dto';
-import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { DataSource } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { PaginationResponseMapperDto } from 'src/core/dto';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { getPaginationParams } from 'src/core/utils';
+import { DataSource } from 'typeorm';
+import { IGetPostsQueryDto, PostResponseMapperDto } from '../api/dto';
+import { INewestLike } from './dto/newest-like.dto';
 import { IPostRepository } from './dto/post-repository.dto';
 
 @Injectable()
@@ -16,7 +17,7 @@ export class PostsQueryRepository {
     query: IGetPostsQueryDto;
     userId?: string;
   }): Promise<PaginationResponseMapperDto<PostResponseMapperDto[]>> {
-    const { query, userId: _ } = args;
+    const { query, userId } = args;
     const { skip, limit } = getPaginationParams(query);
     const { sortBy, sortDirection } = query;
 
@@ -24,7 +25,13 @@ export class PostsQueryRepository {
 
     const postsPromise: Promise<IPostRepository[]> = this.dataSource.query(
       `
-          SELECT p.*, b."name" as "blogName"
+          SELECT p.*, 
+            b."name" as "blogName",
+            (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Like')::int as "likesCount",
+            (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Dislike')::int as "dislikesCount",
+            COALESCE(
+            (SELECT status FROM post_likes pl WHERE pl."postId" = p."id" AND "userId" = $3 LIMIT 1),
+            'None') as "myStatus"
             FROM posts p
             LEFT JOIN blogs b on p."blogId" = b."id"
             WHERE p."deletedAt" IS NULL
@@ -32,7 +39,7 @@ export class PostsQueryRepository {
             LIMIT $1
             OFFSET $2
           `,
-      [limit, skip]
+      [limit, skip, userId ?? null]
     );
 
     const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
@@ -47,11 +54,47 @@ export class PostsQueryRepository {
 
     const [posts, countResult] = await Promise.all([postsPromise, totalCountPromise]);
 
+    const postMap = posts.map(p => p.id);
+
+    const newestLikes: ({ postId: string } & INewestLike)[] = await this.dataSource.query(
+      `
+          SELECT ranked."postId", ranked."addedAt", ranked."userId", ranked."login"
+            FROM (
+               SELECT 
+                  pl."postId",
+                  pl."createdAt" as "addedAt",
+                  u."id" as "userId",
+                  u."login",
+                  ROW_NUMBER() OVER (
+                  PARTITION BY pl."postId"
+                  ORDER BY pl."createdAt" DESC
+                  ) as rn
+                FROM post_likes pl
+                LEFT JOIN users u ON pl."userId" = u."id"
+                WHERE pl."postId" = ANY($1) AND pl.status = 'Like'
+                  ) ranked
+              WHERE ranked.rn <= 3
+              ORDER BY ranked."postId", ranked."addedAt" DESC
+          `,
+      [postMap]
+    );
+
+    const entries = newestLikes.reduce<Record<string, INewestLike[]>>((acc, curr) => {
+      const { postId, ...restData } = curr;
+
+      if (acc[postId]) {
+        acc[postId].push(restData);
+      } else {
+        acc[postId] = [restData];
+      }
+
+      return acc;
+    }, {});
+
     const items = posts.map(post =>
       PostResponseMapperDto.mapToView({
         post,
-        myStatus: LikeStatus.None,
-        newestLikes: [],
+        newestLikes: entries[post.id],
       })
     );
 
@@ -121,12 +164,12 @@ export class PostsQueryRepository {
   async findById(args: { postId: string; userId?: string }): Promise<PostResponseMapperDto | null> {
     const { postId, userId } = args;
 
-    const [newestLikes] = await this.dataSource.query(
+    const newestLikes: INewestLike[] = await this.dataSource.query(
       `
       SELECT "createdAt" as "addedAt", "userId", "login"
-          FROM post_likes
-          LEFT JOIN users u ON post_likes."userId" = u."id"
-          WHERE post_likes."postId" = $1
+          FROM post_likes pl
+          LEFT JOIN users u ON pl."userId" = u."id"
+          WHERE pl."postId" = $1 AND pl.status = 'Like'
           ORDER BY "createdAt" DESC
           LIMIT 3
       `,
@@ -135,23 +178,21 @@ export class PostsQueryRepository {
 
     const [post]: IPostRepository[] = await this.dataSource.query(
       `
-          SELECT p.*, 
+      SELECT p.*, 
           b."name" as "blogName", 
-          (SELECT COUNT(*) FROM post_likes WHERE "postId" = p."id" AND status = 'Like') as "likesCount",
-          (SELECT COUNT(*) FROM post_likes WHERE "postId" = p."id" AND status = 'Dislike') as "dislikesCount",
+          (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Like')::int as "likesCount",
+          (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Dislike')::int as "dislikesCount",
           COALESCE(
-          (SELECT status FROM post_likes WHERE "postId" = p."id" AND "userId" = $2 LIMIT 1),
+          (SELECT status post_likes FROM pl WHERE pl."postId" = p."id" AND "userId" = $2 LIMIT 1),
           'None') as "myStatus"
             FROM posts p
             LEFT JOIN blogs b ON p."blogId" = b."id"
             WHERE p."id" = $1 AND p."deletedAt" IS NULL
           `,
-      [postId, userId]
+      [postId, userId ?? null]
     );
 
-    return post
-      ? PostResponseMapperDto.mapToView({ post, myStatus: LikeStatus.None, newestLikes: [] })
-      : null;
+    return post ? PostResponseMapperDto.mapToView({ post, newestLikes }) : null;
   }
 
   async findByIdOrThrow(args: { postId: string; userId?: string }): Promise<PostResponseMapperDto> {

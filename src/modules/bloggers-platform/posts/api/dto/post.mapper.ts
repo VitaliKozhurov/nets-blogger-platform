@@ -1,5 +1,6 @@
-import { LikeDocument, LikeStatus } from '@modules/bloggers-platform/likes/domain';
+import { LikeStatus } from '@modules/bloggers-platform/likes/domain';
 import { IPostRepository } from '../../repository';
+import { INewestLike } from '../../repository/dto/newest-like.dto';
 import { IPostViewDto } from './post-view.dto';
 
 export class PostResponseMapperDto {
@@ -17,13 +18,9 @@ export class PostResponseMapperDto {
     newestLikes: { addedAt: string; userId: string; login: string }[];
   };
 
-  static mapToView(args: {
-    post: IPostRepository;
-    myStatus: LikeStatus;
-    newestLikes: LikeDocument[];
-  }): IPostViewDto {
+  static mapToView(args: { post: IPostRepository; newestLikes: INewestLike[] }): IPostViewDto {
     const dto = new PostResponseMapperDto();
-    const { post, myStatus } = args;
+    const { post, newestLikes } = args;
 
     dto.id = post.id;
     dto.title = post.title;
@@ -34,12 +31,15 @@ export class PostResponseMapperDto {
     dto.createdAt = post.createdAt.toISOString();
 
     dto.extendedLikesInfo = {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: myStatus,
-      newestLikes: [],
+      likesCount: post.likesCount,
+      dislikesCount: post.dislikesCount,
+      myStatus: post.myStatus,
+      newestLikes: newestLikes.map(item => ({
+        login: item.login,
+        userId: item.userId,
+        addedAt: item.addedAt.toISOString(),
+      })),
     };
-    console.log(dto);
 
     return dto;
   }
