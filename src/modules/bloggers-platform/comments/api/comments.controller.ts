@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Put } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { ObjectIdValidationPipe } from 'src/core/pipes';
+import { ObjectIdValidationPipe, UUIDValidationPipe } from 'src/core/pipes';
 import {
   DeleteCommentCommand,
   UpdateCommentContentCommand,
@@ -37,7 +37,7 @@ export class CommentsController {
   @UseOptionalBearerGuard()
   @Public()
   async getById(
-    @Param('id', ObjectIdValidationPipe) id: string,
+    @Param('id', UUIDValidationPipe) id: string,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
     return this.commentsQueryRepository.findByIdOrThrow({

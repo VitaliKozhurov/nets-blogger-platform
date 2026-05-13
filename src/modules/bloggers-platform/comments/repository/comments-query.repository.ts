@@ -8,10 +8,14 @@ import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { LikesRepository, LikeStatus } from '../../likes';
 import { IGetCommentsByPostIdQueryDto } from '../api/dto';
 import { CommentResponseMapperDto } from '../api/dto/comment.mapper';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { ICommentRepositoryDto } from './dto/comment-repository.dto';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
+    @InjectDataSource() protected dataSource: DataSource,
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
     @Inject() private likesRepository: LikesRepository
   ) {}
@@ -64,6 +68,36 @@ export class CommentsQueryRepository {
       page: query.pageNumber,
       size: query.pageSize,
     });
+  }
+
+  async findById(args: {
+    commentId: string;
+    userId?: string;
+  }): Promise<CommentResponseMapperDto | null> {
+    const { commentId, userId } = args;
+
+    const [comment]: ICommentRepositoryDto[] = await this.dataSource.query(
+      `
+          SELECT 
+            c."id", 
+            c."content",
+            c."createdAt",
+            u."id" as "userId",
+            u."login" as "userLogin",
+              (SELECT COUNT(*) FROM comment_likes 
+              WHERE comment_likes."commentId" =  c."id" AND comment_likes."status" = 'Like')::int as "likesCount",
+              (SELECT COUNT(*) FROM comment_likes 
+              WHERE comment_likes."commentId" =  c."id" AND comment_likes."status" = 'Dislike')::int as "dislikesCount",
+              COALESCE((SELECT status FROM comment_likes 
+              WHERE comment_likes."commentId" =  c."id" AND comment_likes."userId" = $2 LIMIT 1), 'None') as "myStatus"
+              FROM comments c
+              LEFT JOIN users u ON c."ownerId" = u."id"
+              WHERE c."deletedAt" IS NULL AND c."id" = $1 
+        `,
+      [commentId, userId ?? '']
+    );
+
+    return comment ? CommentResponseMapperDto.mapToView(comment) : null;
   }
 
   async findByIdOrThrow(args: {

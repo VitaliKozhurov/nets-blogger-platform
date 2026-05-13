@@ -1,5 +1,5 @@
-import { CommentDocument } from '@modules/bloggers-platform/comments/domain';
 import { LikeStatus } from '@modules/bloggers-platform/likes/domain';
+import { ICommentRepositoryDto } from '../../repository';
 
 export class CommentResponseMapperDto {
   id: string;
@@ -12,27 +12,24 @@ export class CommentResponseMapperDto {
     myStatus: LikeStatus;
   };
 
-  static mapToView(
-    commentDocument: CommentDocument,
-    myStatus: LikeStatus
-  ): CommentResponseMapperDto {
+  static mapToView(comment: ICommentRepositoryDto): CommentResponseMapperDto {
     const dto = new CommentResponseMapperDto();
 
-    dto.id = commentDocument._id.toString();
-    dto.content = commentDocument.content;
+    dto.id = comment.id;
+    dto.content = comment.content;
+    dto.createdAt = comment.createdAt.toISOString();
     const commentatorInfo = {
-      userId: commentDocument.commentatorInfo.userId,
-      userLogin: commentDocument.commentatorInfo.userLogin,
+      userId: comment.userId,
+      userLogin: comment.userLogin,
     };
 
     dto.commentatorInfo = commentatorInfo;
 
-    dto.createdAt = commentDocument.createdAt.toISOString();
 
     const likesInfo = {
-      likesCount: commentDocument.likesInfo.likesCount,
-      dislikesCount: commentDocument.likesInfo.dislikesCount,
-      myStatus: myStatus,
+      likesCount: comment.likesCount,
+      dislikesCount: comment.dislikesCount,
+      myStatus: comment.myStatus,
     };
 
     dto.likesInfo = likesInfo;
