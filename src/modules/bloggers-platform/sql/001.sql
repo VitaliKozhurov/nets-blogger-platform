@@ -62,7 +62,7 @@ CREATE TABLE public.post_likes
     "userId" uuid NOT NULL,
     "postId" uuid NOT NULL,
     "createdAt" timestamp with time zone NOT NULL DEFAULT NOW(),
-    status text NOT NULL,
+    status like_status_type NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT uniq_post_likes UNIQUE ("userId", "postId"),
     FOREIGN KEY ("postId")

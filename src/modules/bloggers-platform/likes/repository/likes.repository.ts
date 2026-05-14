@@ -1,82 +1,122 @@
+import { LikeStatus } from 'src/modules/bloggers-platform/likes';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Like } from '../domain/like.schema';
-import { LikeDocument, type LikeModelType } from '../domain/like.types';
-import { Types } from 'mongoose';
-import { LikeStatus } from '../domain/like.dto';
-
-const LIKES_LIMIT_COUNT = 3;
-
-type NewestLikesAggregationResult = {
-  _id: Types.ObjectId;
-  newestLikes: LikeDocument[];
-};
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { IPostLikeRepository, ICommentLikeRepository } from './dto/like-repository.dto';
 
 @Injectable()
 export class LikesRepository {
-  constructor(
-    @InjectModel(Like.name)
-    private LikeModel: LikeModelType
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async getLikeByAuthorId(args: { authorId: string; parentId: string }) {
-    const { authorId, parentId } = args;
+  async getPostLike(args: { userId: string; postId: string }) {
+    const { userId, postId } = args;
 
-    return this.LikeModel.findOne({ parentId, authorId }).exec();
+    const [like]: IPostLikeRepository[] = await this.dataSource.query(
+      `
+          SELECT *
+            FROM "post_likes" 
+            WHERE "userId" = $1 AND "postId" = $2
+         `,
+      [userId, postId]
+    );
+
+    return like;
   }
 
-  async getLikesForUser(args: { authorId: string; parentIds: string[] }) {
-    const { authorId, parentIds } = args;
+  async getCommentLike(args: { userId: string; commentId: string }) {
+    const { userId, commentId } = args;
 
-    return this.LikeModel.find({
-      parentId: { $in: parentIds },
-      authorId,
-    }).exec();
+    const [like]: IPostLikeRepository[] = await this.dataSource.query(
+      `
+          SELECT *
+            FROM "comment_likes" 
+            WHERE "userId" = $1 AND "commentId" = $2
+         `,
+      [userId, commentId]
+    );
+
+    return like;
   }
 
-  async getMyStatus(args: { parentId: string; authorId: string }) {
-    const { parentId, authorId } = args;
+  async createPostLike(dto: {
+    userId: string;
+    postId: string;
+    likeStatus: LikeStatus;
+  }): Promise<IPostLikeRepository> {
+    const { userId, postId, likeStatus } = dto;
 
-    const like = await this.LikeModel.findOne({ parentId, authorId }).exec();
+    const [like]: IPostLikeRepository[] = await this.dataSource.query(
+      `
+           INSERT INTO "post_likes" 
+            ("userId", "postId", "status")
+             VALUES ($1, $2, $3)
+             RETURNING *
+         `,
+      [userId, postId, likeStatus]
+    );
 
-    return like?.status ?? LikeStatus.None;
+    return like;
   }
 
-  async getNewestLikes(args: { parentId: string; limit?: number }) {
-    const { parentId, limit = LIKES_LIMIT_COUNT } = args;
+  async createCommentLike(dto: {
+    userId: string;
+    commentId: string;
+    likeStatus: LikeStatus;
+  }): Promise<ICommentLikeRepository> {
+    const { userId, commentId, likeStatus } = dto;
 
-    return this.LikeModel.find({ parentId, status: LikeStatus.Like })
-      .sort({ addedLikeDate: -1 })
-      .limit(limit)
-      .exec();
+    const [like]: ICommentLikeRepository[] = await this.dataSource.query(
+      `
+           INSERT INTO "comment_likes" 
+              ("userId", "commentId", "status")
+              VALUES ($1, $2, $3)
+              RETURNING *
+         `,
+      [userId, commentId, likeStatus]
+    );
+
+    return like;
   }
 
-  async getNewestLikesForParents(args: { parentIds: string[]; limit?: number }) {
-    const { parentIds, limit = LIKES_LIMIT_COUNT } = args;
+  async updateCommentLike(dto: {
+    userId: string;
+    commentId: string;
+    likeStatus: LikeStatus;
+  }): Promise<ICommentLikeRepository> {
+    const { userId, commentId, likeStatus } = dto;
 
-    return this.LikeModel.aggregate<NewestLikesAggregationResult>([
-      {
-        $match: {
-          parentId: { $in: parentIds },
-          status: LikeStatus.Like,
-        },
-      },
-      {
-        $group: {
-          _id: '$parentId',
-          newestLikes: {
-            $topN: {
-              n: limit,
-              sortBy: { addedLikeDate: -1 },
-              output: '$$ROOT',
-            },
-          },
-        },
-      },
-    ]);
+    const [like]: ICommentLikeRepository[] = await this.dataSource.query(
+      `
+           UPDATE "comment_likes"
+              SET status = $3
+              WHERE "userId" = $1 AND "commentId" = $2
+              RETURNING *
+         `,
+      [userId, commentId, likeStatus]
+    );
+
+    return like;
   }
 
-  async save(likeDocument: LikeDocument) {
-    await likeDocument.save();
+  async upsertCommentLike(dto: {
+    userId: string;
+    commentId: string;
+    likeStatus: LikeStatus;
+  }): Promise<ICommentLikeRepository> {
+    const { userId, commentId, likeStatus } = dto;
+
+    const [like]: ICommentLikeRepository[] = await this.dataSource.query(
+      `
+           INSERT INTO "comment_likes" 
+            ("userId", "commentId", "status")
+            VALUES ($1, $2, $3)
+            ON CONFLICT ("userId", "commentId")
+            DO UPDATE SET status = EXCLUDED.status 
+            RETURNING *
+         `,
+      [userId, commentId, likeStatus]
+    );
+
+    return like;
   }
 }

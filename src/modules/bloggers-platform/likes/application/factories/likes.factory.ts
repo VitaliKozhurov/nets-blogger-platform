@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Like } from '../../domain';
-import { type LikeModelType } from '../../domain';
-import { ICreateLikeDto } from '../dto/create-like.dto';
+import { LikesRepository } from '../../repository';
+import { ICreateCommentLikeDto, ICreatePostLikeDto } from '../dto';
 
 @Injectable()
 export class LikesFactory {
-  constructor(
-    @InjectModel(Like.name)
-    private LikeModel: LikeModelType
-  ) {}
+  constructor(private likeRepository: LikesRepository) {}
 
-  async createLike(dto: ICreateLikeDto) {
-    const newLike = this.LikeModel.createInstance(dto);
+  async createCommentLike(dto: ICreateCommentLikeDto) {
+    const newLike = this.likeRepository.createCommentLike(dto);
+
+    return newLike;
+  }
+
+  async createPostLike(dto: ICreatePostLikeDto) {
+    const newLike = this.likeRepository.createPostLike(dto);
 
     return newLike;
   }

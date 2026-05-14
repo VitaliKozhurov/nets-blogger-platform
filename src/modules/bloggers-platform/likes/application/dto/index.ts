@@ -1,1 +1,1 @@
-export type { ICreateLikeDto } from './create-like.dto';
+export type { ICreateCommentLikeDto, ICreatePostLikeDto } from './create-like.dto';

@@ -52,7 +52,7 @@ export class CommentsController {
   @UpdateCommentContentSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateContent(
-    @Param('id', ObjectIdValidationPipe) id: string,
+    @Param('id', UUIDValidationPipe) id: string,
     @Body() dto: UpdateCommentContentRequestDto,
     @UserFromRequest() userDto: RequestUserDto
   ) {
@@ -65,7 +65,7 @@ export class CommentsController {
   @UpdateCommentLikeStatusSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikeStatus(
-    @Param('id', ObjectIdValidationPipe) id: string,
+    @Param('id', UUIDValidationPipe) id: string,
     @Body() dto: UpdateCommentLikeStatusRequestDto,
     @UserFromRequest() userDto: RequestUserDto
   ) {
