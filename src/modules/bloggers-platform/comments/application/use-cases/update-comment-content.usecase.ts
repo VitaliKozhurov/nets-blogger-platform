@@ -17,7 +17,7 @@ export class UpdateCommentContentUseCase implements ICommandHandler<UpdateCommen
     const isUpdated = await this.commentsRepository.update({
       commentId: id,
       content,
-      ownerId: userId,
+      userId,
     });
 
     if (!isUpdated) {

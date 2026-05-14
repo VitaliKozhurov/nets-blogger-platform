@@ -14,27 +14,26 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
   async execute({ dto }: DeleteCommentCommand): Promise<boolean> {
     const { id, userId } = dto;
 
-    const comment = await this.commentsRepository.getById(id);
+    const isDeleted = await this.commentsRepository.softDelete({
+      userId,
+      commentId: id,
+    });
 
-    if (!comment) {
-      throw new DomainException({
-        code: DomainExceptionCode.NOT_FOUND_ERROR,
-        message: 'Comment not found',
-      });
-    }
+    if (!isDeleted) {
+      const comment = await this.commentsRepository.getById(id);
 
-    const isDeniedPermissions = comment.commentatorInfo.userId !== userId;
+      if (!comment) {
+        throw new DomainException({
+          code: DomainExceptionCode.NOT_FOUND_ERROR,
+          message: 'Comment not found',
+        });
+      }
 
-    if (isDeniedPermissions) {
       throw new DomainException({
         code: DomainExceptionCode.FORBIDDEN_ERROR,
         message: 'Forbidden',
       });
     }
-
-    comment.softDelete();
-
-    await this.commentsRepository.save(comment);
 
     return true;
   }

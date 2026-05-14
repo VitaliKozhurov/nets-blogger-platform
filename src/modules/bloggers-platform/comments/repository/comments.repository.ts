@@ -26,17 +26,33 @@ export class CommentsRepository {
     return comment;
   }
 
-  async update(args: { ownerId: string; commentId: string; content: string }) {
-    const { ownerId, commentId, content } = args;
+  async update(args: { userId: string; commentId: string; content: string }) {
+    const { userId, commentId, content } = args;
 
     const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
           UPDATE "comments"
             SET "content" = $3
-            WHERE  id = $1 AND "ownerId" = $2 AND "deletedAt" IS NULL
+            WHERE  "ownerId" = $1 AND "id" = $2 AND "deletedAt" IS NULL
             RETURNING id
         `,
-      [commentId, ownerId, content]
+      [userId, commentId, content]
+    );
+
+    return rows.length > 0;
+  }
+
+  async softDelete(args: { userId: string; commentId: string }) {
+    const { userId, commentId } = args;
+
+    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
+      `
+          UPDATE "comments"
+            SET "deletedAt" = NOW()
+            WHERE  "ownerId" = $1 AND "id" = $2 AND "deletedAt" IS NULL
+            RETURNING id
+        `,
+      [userId, commentId]
     );
 
     return rows.length > 0;
