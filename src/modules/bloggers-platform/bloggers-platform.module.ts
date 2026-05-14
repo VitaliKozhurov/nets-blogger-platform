@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { MongooseModule } from '@nestjs/mongoose';
 import { UsersAccountModule } from '../users-account/users-account.module';
 import {
   BlogsController,
@@ -16,18 +15,17 @@ import {
   UpdateBlogUseCase,
 } from './blogs';
 import {
-  Comment,
-  CommentSchema,
   CommentsController,
   CommentsFactory,
   CommentsQueryRepository,
   CommentsRepository,
   CreateCommentUseCase,
   DeleteCommentUseCase,
+  GetCommentByIdHandler,
   UpdateCommentContentUseCase,
   UpdateCommentLikeStatusUseCase,
 } from './comments';
-import { Like, LikeSchema, LikesFactory, LikesRepository } from './likes';
+import { LikesFactory, LikesRepository } from './likes';
 import {
   CreatePostUseCase,
   DeletePostUseCase,
@@ -60,15 +58,11 @@ const queryHandlers = [
   GetPostsByBlogIdHandler,
   GetPostsHandler,
   GetPostsByIdHandler,
+  GetCommentByIdHandler,
 ];
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
-    MongooseModule.forFeature([{ name: Like.name, schema: LikeSchema }]),
-    JwtModule,
-    UsersAccountModule,
-  ],
+  imports: [JwtModule, UsersAccountModule],
   controllers: [SuperAdminBlogsController, BlogsController, PostsController, CommentsController],
   providers: [
     ...commandHandlers,

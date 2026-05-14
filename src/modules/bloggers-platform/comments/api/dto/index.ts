@@ -4,3 +4,4 @@ export { GetCommentsByPostIdQueryDto } from './get-comments-by-post-id-query.dto
 export type { IGetCommentsByPostIdQueryDto } from './get-comments-by-post-id-query.dto';
 export { UpdateCommentContentRequestDto } from './update-comment-content.dto';
 export { UpdateCommentLikeStatusRequestDto } from './update-comment-like-status.dto';
+export { type ICommentViewDto } from './comment-view.dto';

@@ -13,23 +13,23 @@ import {
   UpdateCommentContentSwagger,
   UpdateCommentLikeStatusSwagger,
 } from '@modules/bloggers-platform/comments/decorators/swagger';
-import { CommentsQueryRepository } from '@modules/bloggers-platform/comments/repository';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Put } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Public } from 'src/core/guards';
-import { ObjectIdValidationPipe, UUIDValidationPipe } from 'src/core/pipes';
+import { UUIDValidationPipe } from 'src/core/pipes';
 import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
 import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/optional-user-from-request.decorator';
 import { UseBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-bearer-guard.decorator';
 import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
 import { UserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/user-from-request.decorator';
+import { GetCommentByIdQuery } from '../application';
 
 @Controller('comments')
 @UseBearerGuard()
 export class CommentsController {
   constructor(
     private commandBus: CommandBus,
-    private commentsQueryRepository: CommentsQueryRepository
+    private queryBus: QueryBus
   ) {}
 
   @Get(':id')
@@ -45,7 +45,7 @@ export class CommentsController {
       userId: userDto?.userId ?? undefined,
     };
 
-    return this.commentsQueryRepository.findByIdOrThrow(queryCommandDto);
+    return this.queryBus.execute(new GetCommentByIdQuery(queryCommandDto));
   }
 
   @Put(':id')
@@ -78,7 +78,7 @@ export class CommentsController {
   @DeleteCommentSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
-    @Param('id', ObjectIdValidationPipe) id: string,
+    @Param('id', UUIDValidationPipe) id: string,
     @UserFromRequest() dto: RequestUserDto
   ) {
     return this.commandBus.execute(new DeleteCommentCommand({ id, ...dto }));
