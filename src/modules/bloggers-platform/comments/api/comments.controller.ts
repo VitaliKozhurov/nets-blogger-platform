@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Put } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
-import { ObjectIdValidationPipe, UUIDValidationPipe } from 'src/core/pipes';
+import {
+  UpdateCommentContentRequestDto,
+  UpdateCommentLikeStatusRequestDto,
+} from '@modules/bloggers-platform/comments/api/dto';
 import {
   DeleteCommentCommand,
   UpdateCommentContentCommand,
@@ -13,16 +14,15 @@ import {
   UpdateCommentLikeStatusSwagger,
 } from '@modules/bloggers-platform/comments/decorators/swagger';
 import { CommentsQueryRepository } from '@modules/bloggers-platform/comments/repository';
-import {
-  UpdateCommentContentRequestDto,
-  UpdateCommentLikeStatusRequestDto,
-} from '@modules/bloggers-platform/comments/api/dto';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Put } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+import { Public } from 'src/core/guards';
+import { ObjectIdValidationPipe, UUIDValidationPipe } from 'src/core/pipes';
 import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
 import { OptionalUserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/optional-user-from-request.decorator';
 import { UseBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-bearer-guard.decorator';
 import { UseOptionalBearerGuard } from 'src/modules/users-account/auth/decorators/bearer-auth/use-optional-bearer-guard.decorator';
 import { UserFromRequest } from 'src/modules/users-account/auth/decorators/bearer-auth/user-from-request.decorator';
-import { Public } from 'src/core/guards';
 
 @Controller('comments')
 @UseBearerGuard()
@@ -40,27 +40,12 @@ export class CommentsController {
     @Param('id', UUIDValidationPipe) id: string,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    return this.commentsQueryRepository.findByIdOrThrow({
+    const queryCommandDto = {
       commentId: id,
       userId: userDto?.userId ?? undefined,
-    });
-  }
+    };
 
-  @Put(':id/like-status')
-  @UpdateCommentLikeStatusSwagger()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updateLikeStatus(
-    @Param('id', ObjectIdValidationPipe) id: string,
-    @Body() dto: UpdateCommentLikeStatusRequestDto,
-    @UserFromRequest() userDto: RequestUserDto
-  ) {
-    return this.commandBus.execute(
-      new UpdateCommentLikeStatusCommand({
-        id,
-        ...dto,
-        ...userDto,
-      })
-    );
+    return this.commentsQueryRepository.findByIdOrThrow(queryCommandDto);
   }
 
   @Put(':id')
@@ -71,13 +56,22 @@ export class CommentsController {
     @Body() dto: UpdateCommentContentRequestDto,
     @UserFromRequest() userDto: RequestUserDto
   ) {
-    return this.commandBus.execute(
-      new UpdateCommentContentCommand({
-        id,
-        ...dto,
-        ...userDto,
-      })
-    );
+    const commandDto = { id, ...dto, ...userDto };
+
+    return this.commandBus.execute(new UpdateCommentContentCommand(commandDto));
+  }
+
+  @Put(':id/like-status')
+  @UpdateCommentLikeStatusSwagger()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateLikeStatus(
+    @Param('id', ObjectIdValidationPipe) id: string,
+    @Body() dto: UpdateCommentLikeStatusRequestDto,
+    @UserFromRequest() userDto: RequestUserDto
+  ) {
+    const commandDto = { id, ...dto, ...userDto };
+
+    return this.commandBus.execute(new UpdateCommentLikeStatusCommand(commandDto));
   }
 
   @Delete(':id')

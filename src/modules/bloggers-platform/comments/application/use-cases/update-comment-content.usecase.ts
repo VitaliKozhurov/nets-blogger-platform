@@ -1,7 +1,7 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '@modules/bloggers-platform/comments/repository';
-import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { IUpdateCommentContentDto } from '@modules/bloggers-platform/comments/application/dto';
+import { CommentsRepository } from '@modules/bloggers-platform/comments/repository';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 export class UpdateCommentContentCommand {
   constructor(public dto: IUpdateCommentContentDto) {}
@@ -14,27 +14,27 @@ export class UpdateCommentContentUseCase implements ICommandHandler<UpdateCommen
   async execute({ dto }: UpdateCommentContentCommand): Promise<boolean> {
     const { id, content, userId } = dto;
 
-    const comment = await this.commentsRepository.getById(id);
+    const isUpdated = await this.commentsRepository.update({
+      commentId: id,
+      content,
+      ownerId: userId,
+    });
 
-    if (!comment) {
-      throw new DomainException({
-        code: DomainExceptionCode.NOT_FOUND_ERROR,
-        message: 'Comment not found',
-      });
-    }
+    if (!isUpdated) {
+      const comment = await this.commentsRepository.getById(id);
 
-    const isDeniedPermissions = comment.commentatorInfo.userId !== userId;
+      if (!comment) {
+        throw new DomainException({
+          code: DomainExceptionCode.NOT_FOUND_ERROR,
+          message: 'Comment not found',
+        });
+      }
 
-    if (isDeniedPermissions) {
       throw new DomainException({
         code: DomainExceptionCode.FORBIDDEN_ERROR,
         message: 'Forbidden',
       });
     }
-
-    comment.updateContent(content);
-
-    await this.commentsRepository.save(comment);
 
     return true;
   }
