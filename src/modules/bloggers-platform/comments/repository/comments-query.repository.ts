@@ -44,14 +44,13 @@ export class CommentsQueryRepository {
               LIMIT $3
               OFFSET $4
         `,
-      [postId, userId ?? '', limit, skip]
+      [postId, userId, limit, skip]
     );
 
     const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
       `
           SELECT COUNT(*)
             FROM comments c
-            LEFT JOIN blogs b on p."blogId" = b."id"
             WHERE c."deletedAt" IS NULL AND c."postId" = $1 
           `,
       [postId]
@@ -95,7 +94,7 @@ export class CommentsQueryRepository {
               LEFT JOIN users u ON c."ownerId" = u."id"
               WHERE c."deletedAt" IS NULL AND c."id" = $1 
         `,
-      [commentId, userId ?? '']
+      [commentId, userId]
     );
 
     return comment ? CommentResponseMapperDto.mapToView(comment) : null;

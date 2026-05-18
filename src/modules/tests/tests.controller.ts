@@ -25,9 +25,15 @@ export class TestsController {
     await this.dataSource.query(
       `
        TRUNCATE TABLE 
-       "users", "user_device_sessions", 
-       "user_confirmations", "blogs", 
-       "posts", "user_recovery_codes"
+       "users", 
+       "user_device_sessions", 
+       "user_confirmations", 
+       "user_recovery_codes",
+       "blogs", 
+       "posts",
+       "comments",
+       "post_likes",
+       "comment_likes"
       `
     );
 

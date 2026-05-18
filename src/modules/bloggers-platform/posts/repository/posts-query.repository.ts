@@ -93,7 +93,7 @@ export class PostsQueryRepository {
     const items = posts.map(post =>
       PostResponseMapperDto.mapToView({
         post,
-        newestLikes: entries[post.id],
+        newestLikes: entries[post.id] ?? [],
       })
     );
 
@@ -188,7 +188,7 @@ export class PostsQueryRepository {
     const items = posts.map(post =>
       PostResponseMapperDto.mapToView({
         post,
-        newestLikes: entries[post.id],
+        newestLikes: entries[post.id] ?? [],
       })
     );
 
@@ -205,11 +205,11 @@ export class PostsQueryRepository {
 
     const newestLikes: INewestLike[] = await this.dataSource.query(
       `
-      SELECT "createdAt" as "addedAt", "userId", "login"
+      SELECT pl."createdAt" as "addedAt",pl. "userId", u."login"
           FROM post_likes pl
           LEFT JOIN users u ON pl."userId" = u."id"
           WHERE pl."postId" = $1 AND pl.status = 'Like'
-          ORDER BY "createdAt" DESC
+          ORDER BY pl."createdAt" DESC
           LIMIT 3
       `,
       [postId]
@@ -219,10 +219,10 @@ export class PostsQueryRepository {
       `
       SELECT p.*, 
           b."name" as "blogName", 
-          (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Like')::int as "likesCount",
-          (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Dislike')::int as "dislikesCount",
+          (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND pl.status = 'Like')::int as "likesCount",
+          (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND pl.status = 'Dislike')::int as "dislikesCount",
           COALESCE(
-          (SELECT status post_likes FROM pl WHERE pl."postId" = p."id" AND "userId" = $2 LIMIT 1),
+          (SELECT pl.status FROM post_likes pl WHERE pl."postId" = p."id" AND pl."userId" = $2 LIMIT 1),
           'None') as "myStatus"
             FROM posts p
             LEFT JOIN blogs b ON p."blogId" = b."id"

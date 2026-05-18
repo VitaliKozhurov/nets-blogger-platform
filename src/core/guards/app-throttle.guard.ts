@@ -7,6 +7,8 @@ import {
 } from '@nestjs/throttler';
 import { DomainException, DomainExceptionCode } from '../exceptions';
 import { Reflector } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
+import { EnvVariables, EnvVariablesType } from '../types/env.interface';
 
 export const APP_THROTTLE_META_KEY = 'app_throttle';
 
@@ -15,7 +17,8 @@ export class AppThrottleGuard extends ThrottlerGuard {
   constructor(
     protected readonly options: ThrottlerModuleOptions,
     protected readonly storageService: ThrottlerStorage,
-    protected readonly reflector: Reflector
+    protected readonly reflector: Reflector,
+    private configService: ConfigService<unknown, true>
   ) {
     super(options, storageService, reflector);
   }
@@ -28,6 +31,14 @@ export class AppThrottleGuard extends ThrottlerGuard {
   }
 
   protected async handleRequest(requestProps: ThrottlerRequest): Promise<boolean> {
+    const environment = this.configService.get(
+      EnvVariables.NODE_ENV
+    ) as EnvVariablesType['NODE_ENV'];
+
+    if (environment === 'staging') {
+      return true;
+    }
+
     const customConfig = this.reflector.getAllAndOverride(APP_THROTTLE_META_KEY, [
       requestProps.context.getHandler(),
       requestProps.context.getClass(),

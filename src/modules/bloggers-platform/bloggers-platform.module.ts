@@ -37,7 +37,7 @@ import {
   UpdatePostUseCase,
 } from './posts';
 import {
-  CreateCommentByPostCommand,
+  CreateCommentByPostUseCase,
   GetPostCommentsHandler,
   GetPostsByIdHandler,
   GetPostsHandler,
@@ -55,7 +55,7 @@ const commandHandlers = [
   CreateCommentUseCase,
   UpdatePostLikeStatusUseCase,
   UpdateCommentLikeStatusUseCase,
-  CreateCommentByPostCommand,
+  CreateCommentByPostUseCase,
 ];
 
 const queryHandlers = [

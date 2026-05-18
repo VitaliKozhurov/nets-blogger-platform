@@ -19,9 +19,9 @@ export class CommentsRepository {
 
   async getById(commentId: string) {
     const [comment]: RawCommentType[] = await this.dataSource.query(
-      `  SELECT c.*, 
+      `  SELECT c.* 
             FROM comments c
-            WHERE c."deletedAt" IS NULL 
+            WHERE c."id" = $1 AND c."deletedAt" IS NULL 
         `,
       [commentId]
     );
@@ -35,7 +35,7 @@ export class CommentsRepository {
     const [comment]: RawCommentType[] = await this.dataSource.query(
       `
           INSERT INTO "comments" ("ownerId", "postId", "content")
-            VALUES (value1, value2, value3)
+            VALUES ($1, $2, $3)
             RETURNING *
         `,
       [userId, postId, content]

@@ -6,7 +6,17 @@ import {
   GetPostSwagger,
   GetPostsSwagger,
 } from '@modules/bloggers-platform/posts/decorators/swagger';
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UUIDValidationPipe } from 'src/core/pipes';
@@ -66,7 +76,7 @@ export class PostsController {
     return this.commandBus.execute(new CreateCommentByPostCommand(commandDto));
   }
 
-  @Get(':id')
+  @Get(':id/comments')
   @GetPostSwagger()
   @UseOptionalBearerGuard()
   async getPostComments(
@@ -79,9 +89,10 @@ export class PostsController {
     return this.queryBus.execute(new GetPostCommentsQuery(commandQueryDto));
   }
 
-  @Put(':id')
+  @Put(':id/like-status')
   @ApiBearerAuth('bearerAuth')
   @UseBearerGuard()
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updatePostLikeStatus(
     @Param('id', UUIDValidationPipe) id: string,
     @Body() body: UpdatePostLikeStatusRequestDto,

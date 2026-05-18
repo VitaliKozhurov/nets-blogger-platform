@@ -3,6 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PostResponseMapperDto } from '../api';
 import { IPostRepository } from './dto/post-repository.dto';
+import { LikeStatus } from '../../likes';
 
 @Injectable()
 export class PostsRepository {
@@ -14,7 +15,7 @@ export class PostsRepository {
           SELECT *, b."name" as blogName
             FROM posts p
             LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE p."id" = $1 "deletedAt" IS NULL
+            WHERE p."id" = $1 AND p."deletedAt" IS NULL
           `,
       [postId]
     );
@@ -25,16 +26,20 @@ export class PostsRepository {
   async create(dto: { title: string; shortDescription: string; content: string; blogId: string }) {
     const { blogId, title, shortDescription, content } = dto;
 
-    const [post]: IPostRepository[] = await this.dataSource.query(
-      `
+    const [post]: Omit<IPostRepository, 'likesCount' | 'dislikesCount' | 'myStatus'>[] =
+      await this.dataSource.query(
+        `
           INSERT INTO "posts" ("blogId", title, "shortDescription", content)
             VALUES ($1, $2, $3, $4)
             RETURNING *, (SELECT name FROM blogs WHERE id = $1) as "blogName"
         `,
-      [blogId, title, shortDescription, content]
-    );
+        [blogId, title, shortDescription, content]
+      );
 
-    return PostResponseMapperDto.mapToView({ post, newestLikes: [] });
+    return PostResponseMapperDto.mapToView({
+      post: { ...post, likesCount: 0, dislikesCount: 0, myStatus: LikeStatus.None },
+      newestLikes: [],
+    });
   }
 
   async update(dto: {
