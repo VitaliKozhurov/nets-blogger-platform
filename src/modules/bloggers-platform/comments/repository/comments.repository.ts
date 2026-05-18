@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { LikeStatus } from '../../likes';
+import { CommentResponseMapperDto } from '../api/dto/comment.mapper';
 
 type RawCommentType = {
   id: string;
   content: string;
   postId: string;
   ownerId: string;
+  createdAt: Date;
   deletedAt: Date | null;
 };
 
@@ -24,6 +27,30 @@ export class CommentsRepository {
     );
 
     return comment;
+  }
+
+  async create(args: { userId: string; login: string; postId: string; content: string }) {
+    const { userId, login, postId, content } = args;
+
+    const [comment]: RawCommentType[] = await this.dataSource.query(
+      `
+          INSERT INTO "comments" ("ownerId", "postId", "content")
+            VALUES (value1, value2, value3)
+            RETURNING *
+        `,
+      [userId, postId, content]
+    );
+
+    return CommentResponseMapperDto.mapToView({
+      id: comment.id,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      likesCount: 0,
+      dislikesCount: 0,
+      myStatus: LikeStatus.None,
+      userId: comment.ownerId,
+      userLogin: login,
+    });
   }
 
   async update(args: { userId: string; commentId: string; content: string }) {

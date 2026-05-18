@@ -3,15 +3,20 @@ import {
   GetPostSwagger,
   GetPostsSwagger,
 } from '@modules/bloggers-platform/posts/decorators/swagger';
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { UUIDValidationPipe } from 'src/core/pipes';
 import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
 import {
   OptionalUserFromRequest,
+  UseBearerGuard,
   UseOptionalBearerGuard,
+  UserFromRequest,
 } from 'src/modules/users-account/auth/decorators';
+import { GetCommentsByPostIdQueryDto } from '../../comments';
 import { GetPostByIdQuery, GetPostsQuery } from '../application/queries';
+import { CreateCommentByPostRequestDto } from './dto/create-comment-by-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -24,9 +29,9 @@ export class PostsController {
     @Query() query: GetPostsQueryDto,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    return this.queryBus.execute(
-      new GetPostsQuery({ query, userId: userDto ? userDto.userId : undefined })
-    );
+    const queryCommandDto = { query, userId: userDto ? userDto.userId : undefined };
+
+    return this.queryBus.execute(new GetPostsQuery(queryCommandDto));
   }
 
   @Get(':id')
@@ -36,8 +41,34 @@ export class PostsController {
     @Param('id', UUIDValidationPipe) id: string,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    const commandQuery = { postId: id, userId: userDto ? userDto.userId : undefined };
+    const commandQueryDto = { postId: id, userId: userDto ? userDto.userId : undefined };
 
-    return this.queryBus.execute(new GetPostByIdQuery(commandQuery));
+    return this.queryBus.execute(new GetPostByIdQuery(commandQueryDto));
+  }
+
+  @Get(':id')
+  @GetPostSwagger()
+  @UseOptionalBearerGuard()
+  async getPostComments(
+    @Query() query: GetCommentsByPostIdQueryDto,
+    @Param('id', UUIDValidationPipe) id: string,
+    @OptionalUserFromRequest() userDto: RequestUserDto | null
+  ) {
+    const commandQueryDto = { postId: id, userId: userDto ? userDto.userId : undefined, query };
+
+    return this.queryBus.execute(new GetPostByIdQuery(commandQueryDto));
+  }
+
+  @Post(':id/comments')
+  @ApiBearerAuth('bearerAuth')
+  @UseBearerGuard()
+  async createCommentByPost(
+    @Param('id', UUIDValidationPipe) id: string,
+    @Body() body: CreateCommentByPostRequestDto,
+    @UserFromRequest() dto: RequestUserDto
+  ) {
+    const commandDto = { postId: id, userId: dto.userId, login: dto.login, content: body.content };
+
+    return this.queryBus.execute(new GetPostByIdQuery(commandDto));
   }
 }
