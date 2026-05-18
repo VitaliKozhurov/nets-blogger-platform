@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { LikeStatus } from '../../likes';
 import { PostResponseMapperDto } from '../api';
 import { IPostRepository } from './dto/post-repository.dto';
 
@@ -35,8 +34,7 @@ export class PostsRepository {
       [blogId, title, shortDescription, content]
     );
 
-    return PostResponseMapperDto.mapToView({ post, myStatus: LikeStatus.None, newestLikes: [] })
-     
+    return PostResponseMapperDto.mapToView({ post, newestLikes: [] });
   }
 
   async update(dto: {

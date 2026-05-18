@@ -1,3 +1,7 @@
+export {
+  CreateCommentByPostCommand,
+  CreateCommentByPostUseCase,
+} from './create-comment-by-post.usecase';
 export { CreatePostCommand, CreatePostUseCase } from './create-post.usecase';
 export { DeletePostCommand, DeletePostUseCase } from './delete-post.usecase';
 export {

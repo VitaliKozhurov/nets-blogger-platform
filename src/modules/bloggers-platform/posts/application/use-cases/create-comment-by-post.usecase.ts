@@ -1,8 +1,11 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ICreateCommentByPostDto } from '../dto/create-comment-by-post.dto';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { CommentsFactory } from 'src/modules/bloggers-platform/comments';
+import { CommentResponseMapperDto } from 'src/modules/bloggers-platform/comments/api/dto/comment.mapper';
+import { PostsRepository } from '../../repository';
+import { ICreateCommentByPostDto } from '../dto/create-comment-by-post.dto';
 
-export class CreateCommentByPostCommand extends Command<string> {
+export class CreateCommentByPostCommand extends Command<CommentResponseMapperDto> {
   constructor(public dto: ICreateCommentByPostDto) {
     super();
   }
@@ -11,29 +14,22 @@ export class CreateCommentByPostCommand extends Command<string> {
 @CommandHandler(CreateCommentByPostCommand)
 export class CreateCommentByPostUseCase implements ICommandHandler<CreateCommentByPostCommand> {
   constructor(
-    private commentsFactory: CommentsFactory,
     private postsRepository: PostsRepository,
-    private commentsRepository: CommentsRepository
+    private commentsFactory: CommentsFactory
   ) {}
 
-  async execute({ dto }: CreateCommentByPostCommand): Promise<string> {
-    const { postId, userId, content } = dto;
+  async execute({ dto }: CreateCommentByPostCommand): Promise<CommentResponseMapperDto> {
+    const post = await this.postsRepository.findById(dto.postId);
 
-    // const post = await this.postsRepository.getById(dto.id);
+    if (!post) {
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'Post not found',
+      });
+    }
 
-    // if (!post) {
-    //   throw new DomainException({
-    //     code: DomainExceptionCode.NOT_FOUND_ERROR,
-    //     message: 'Post not found',
-    //   });
-    // }
+    const createdComment = await this.commentsFactory.createComment(dto);
 
-    // const createdComment = await this.commentsFactory.createComment(dto);
-
-    // await this.commentsRepository.save(createdComment);
-
-    // return createdComment._id.toString();
-
-    return '';
+    return createdComment;
   }
 }

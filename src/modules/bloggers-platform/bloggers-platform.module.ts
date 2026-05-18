@@ -36,7 +36,12 @@ import {
   UpdatePostLikeStatusUseCase,
   UpdatePostUseCase,
 } from './posts';
-import { GetPostsByIdHandler, GetPostsHandler } from './posts/application';
+import {
+  CreateCommentByPostCommand,
+  GetPostCommentsHandler,
+  GetPostsByIdHandler,
+  GetPostsHandler,
+} from './posts/application';
 
 const commandHandlers = [
   CreateBlogUseCase,
@@ -50,6 +55,7 @@ const commandHandlers = [
   CreateCommentUseCase,
   UpdatePostLikeStatusUseCase,
   UpdateCommentLikeStatusUseCase,
+  CreateCommentByPostCommand,
 ];
 
 const queryHandlers = [
@@ -59,6 +65,7 @@ const queryHandlers = [
   GetPostsHandler,
   GetPostsByIdHandler,
   GetCommentByIdHandler,
+  GetPostCommentsHandler,
 ];
 
 @Module({

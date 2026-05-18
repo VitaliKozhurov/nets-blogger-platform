@@ -1,10 +1,13 @@
-import { GetPostsQueryDto } from '@modules/bloggers-platform/posts/api/dto';
+import {
+  GetPostsQueryDto,
+  UpdatePostLikeStatusRequestDto,
+} from '@modules/bloggers-platform/posts/api/dto';
 import {
   GetPostSwagger,
   GetPostsSwagger,
 } from '@modules/bloggers-platform/posts/decorators/swagger';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UUIDValidationPipe } from 'src/core/pipes';
 import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
@@ -15,12 +18,16 @@ import {
   UserFromRequest,
 } from 'src/modules/users-account/auth/decorators';
 import { GetCommentsByPostIdQueryDto } from '../../comments';
-import { GetPostByIdQuery, GetPostsQuery } from '../application/queries';
+import { CreateCommentByPostCommand, UpdatePostLikeStatusCommand } from '../application';
+import { GetPostByIdQuery, GetPostCommentsQuery, GetPostsQuery } from '../application/queries';
 import { CreateCommentByPostRequestDto } from './dto/create-comment-by-post.dto';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private queryBus: QueryBus) {}
+  constructor(
+    private commandBus: CommandBus,
+    private queryBus: QueryBus
+  ) {}
 
   @Get()
   @GetPostsSwagger()
@@ -46,19 +53,6 @@ export class PostsController {
     return this.queryBus.execute(new GetPostByIdQuery(commandQueryDto));
   }
 
-  @Get(':id')
-  @GetPostSwagger()
-  @UseOptionalBearerGuard()
-  async getPostComments(
-    @Query() query: GetCommentsByPostIdQueryDto,
-    @Param('id', UUIDValidationPipe) id: string,
-    @OptionalUserFromRequest() userDto: RequestUserDto | null
-  ) {
-    const commandQueryDto = { postId: id, userId: userDto ? userDto.userId : undefined, query };
-
-    return this.queryBus.execute(new GetPostByIdQuery(commandQueryDto));
-  }
-
   @Post(':id/comments')
   @ApiBearerAuth('bearerAuth')
   @UseBearerGuard()
@@ -69,6 +63,32 @@ export class PostsController {
   ) {
     const commandDto = { postId: id, userId: dto.userId, login: dto.login, content: body.content };
 
-    return this.queryBus.execute(new GetPostByIdQuery(commandDto));
+    return this.commandBus.execute(new CreateCommentByPostCommand(commandDto));
+  }
+
+  @Get(':id')
+  @GetPostSwagger()
+  @UseOptionalBearerGuard()
+  async getPostComments(
+    @Query() query: GetCommentsByPostIdQueryDto,
+    @Param('id', UUIDValidationPipe) id: string,
+    @OptionalUserFromRequest() userDto: RequestUserDto | null
+  ) {
+    const commandQueryDto = { postId: id, userId: userDto ? userDto.userId : undefined, query };
+
+    return this.queryBus.execute(new GetPostCommentsQuery(commandQueryDto));
+  }
+
+  @Put(':id')
+  @ApiBearerAuth('bearerAuth')
+  @UseBearerGuard()
+  async updatePostLikeStatus(
+    @Param('id', UUIDValidationPipe) id: string,
+    @Body() body: UpdatePostLikeStatusRequestDto,
+    @UserFromRequest() dto: RequestUserDto
+  ) {
+    const commandDto = { postId: id, userId: dto.userId, likeStatus: body.likeStatus };
+
+    return this.commandBus.execute(new UpdatePostLikeStatusCommand(commandDto));
   }
 }
