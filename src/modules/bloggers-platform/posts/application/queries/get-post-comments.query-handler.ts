@@ -1,5 +1,5 @@
 import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
-import { PaginationResponseMapperDto } from 'src/core/dto';
+import { PaginationViewMapper } from 'src/core/dto';
 import {
   CommentsQueryRepository,
   IGetCommentsByPostIdQueryDto,
@@ -15,7 +15,7 @@ interface GetPostCommentsDto {
 }
 
 export class GetPostCommentsQuery extends Query<
-  PaginationResponseMapperDto<CommentResponseMapperDto[]>
+  PaginationViewMapper<CommentResponseMapperDto[]>
 > {
   constructor(public dto: GetPostCommentsDto) {
     super();

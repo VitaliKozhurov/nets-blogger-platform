@@ -3,7 +3,7 @@ import type { ICreateUserByAdminDto } from '../dto/create-user-by-admin.dto';
 
 import { UsersFactory } from '../factories/users.factory';
 import { UsersService } from '../services/users.service';
-import type { IUserViewDto } from '../../api/dto/user-view.dto';
+import type { IUserViewDto } from '../dto';
 
 export class CreateUserByAdminCommand extends Command<IUserViewDto> {
   constructor(public dto: ICreateUserByAdminDto) {

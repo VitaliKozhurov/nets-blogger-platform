@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm';
 import { IConfirmationCodeRepositoryDto } from './dto/confirmation-code-repository.dto';
 import { IUserRepositoryDto } from './dto/user-repository.dto';
 import { IPasswordRecoveryRepositoryDto } from './dto/password-recovery-repository.dto';
-import { UserResponseMapperDto } from '../api/dto/user.mapper';
+import { UserViewMapper } from '../application/dto';
 
 @Injectable()
 export class UsersRepository {
@@ -74,7 +74,7 @@ export class UsersRepository {
       [userId]
     );
 
-    return UserResponseMapperDto.mapToView(user);
+    return UserViewMapper.mapToView(user);
   }
 
   async createWithUnconfirmedStatus(dto: {
@@ -105,7 +105,7 @@ export class UsersRepository {
       [userId, confirmationCode, expirationDate]
     );
 
-    return UserResponseMapperDto.mapToView(user);
+    return UserViewMapper.mapToView(user);
   }
 
   async softDelete(userId: string): Promise<boolean> {

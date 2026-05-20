@@ -4,10 +4,10 @@ type Args = {
 };
 
 export const getPaginationParams = ({ pageNumber, pageSize }: Args) => {
-  const skip = (pageNumber - 1) * pageSize;
+  const offset = (pageNumber - 1) * pageSize;
 
   return {
-    skip,
+    offset,
     limit: pageSize,
   };
 };

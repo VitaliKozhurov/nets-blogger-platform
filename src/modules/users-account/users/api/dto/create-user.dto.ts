@@ -3,7 +3,7 @@ import { Matches } from 'class-validator';
 import { EMAIL_REGEX, LOGIN_REGEX } from 'src/core/constants/regExp';
 import { IsStringWithTrim } from 'src/core/decorators';
 
-export class CreateUserByAdminRequestDto {
+export class CreateUserRequestDto {
   @ApiProperty({ type: String, description: 'User login', example: 'admin' })
   @IsStringWithTrim(3, 10)
   @Matches(LOGIN_REGEX)

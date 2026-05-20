@@ -1,6 +1,6 @@
 import { IPaginationResponseDto } from '../contracts/pagination-response.dto';
 
-export class PaginationResponseMapperDto<T> implements IPaginationResponseDto<T> {
+export class PaginationViewMapper<T> implements IPaginationResponseDto<T> {
   items: T;
   totalCount: number;
   pagesCount: number;
@@ -12,7 +12,7 @@ export class PaginationResponseMapperDto<T> implements IPaginationResponseDto<T>
     page: number;
     size: number;
     totalCount: number;
-  }): PaginationResponseMapperDto<T> {
+  }): PaginationViewMapper<T> {
     return {
       totalCount: data.totalCount,
       pagesCount: Math.ceil(data.totalCount / data.size),

@@ -3,7 +3,7 @@ import { IsEnum } from 'class-validator';
 import { IsOptionStringParam } from 'src/core/decorators';
 import { BaseQueryParamsDto } from 'src/core/dto';
 import { type Nullable } from 'src/core/types';
-import { UsersSortBy } from './users-sort-by.dto';
+import { UsersSortBy } from '../../domain/dto';
 
 export class GetUsersQueryDto extends BaseQueryParamsDto {
   @ApiPropertyOptional({

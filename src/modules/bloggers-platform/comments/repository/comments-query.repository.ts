@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { PaginationResponseMapperDto } from 'src/core/dto';
+import { PaginationViewMapper } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { getPaginationParams } from 'src/core/utils';
 import { DataSource } from 'typeorm';
@@ -16,7 +16,7 @@ export class CommentsQueryRepository {
     postId: string;
     userId?: string;
     query: IGetCommentsByPostIdQueryDto;
-  }): Promise<PaginationResponseMapperDto<CommentResponseMapperDto[]>> {
+  }): Promise<PaginationViewMapper<CommentResponseMapperDto[]>> {
     const { postId, userId, query } = args;
     const { skip, limit } = getPaginationParams(query);
     const { sortBy, sortDirection } = query;
@@ -62,7 +62,7 @@ export class CommentsQueryRepository {
       return CommentResponseMapperDto.mapToView(comment);
     });
 
-    return PaginationResponseMapperDto.mapToViewModel({
+    return PaginationViewMapper.mapToViewModel({
       items,
       totalCount: Number(countResult[0].count),
       page: query.pageNumber,

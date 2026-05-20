@@ -1,8 +1,9 @@
 import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
 import { UsersQueryRepository } from '../../repository/users-query.repository';
-import type { IGetUsersQueryDto } from '../dto/get-users-query.dto';
-import { IPaginationResponseDto } from 'src/core/dto';
-import type { IUserViewDto } from '../../api/dto/user-view.dto';
+import { IPaginationResponseDto, PaginationViewMapper } from 'src/core/dto';
+import { IGetUsersQueryDto, IUserViewDto, UserViewMapper } from '../dto';
+import { IGetUsersParamsDto } from '../../repository/dto';
+import { getPaginationParams } from 'src/core/utils';
 
 export class GetUsersQuery extends Query<IPaginationResponseDto<IUserViewDto[]>> {
   constructor(public dto: IGetUsersQueryDto) {
@@ -15,7 +16,28 @@ export class GetUsersHandler implements IQueryHandler<GetUsersQuery> {
   constructor(private usersQueryRepository: UsersQueryRepository) {}
 
   async execute({ dto }: GetUsersQuery) {
-    const result = await this.usersQueryRepository.findAll(dto);
+    const { offset, limit } = getPaginationParams({
+      pageNumber: dto.pageNumber,
+      pageSize: dto.pageSize,
+    });
+
+    const params: IGetUsersParamsDto = {
+      searchLoginTerm: dto.searchLoginTerm,
+      searchEmailTerm: dto.searchEmailTerm,
+      sortBy: dto.sortBy,
+      sortDirection: dto.sortDirection,
+      limit,
+      offset,
+    };
+
+    const { users, totalCount } = await this.usersQueryRepository.findAll(params);
+
+    const result = PaginationViewMapper.mapToViewModel({
+      items: users.map(UserViewMapper.mapToView),
+      totalCount,
+      page: dto.pageNumber,
+      size: dto.pageSize,
+    });
 
     return result;
   }

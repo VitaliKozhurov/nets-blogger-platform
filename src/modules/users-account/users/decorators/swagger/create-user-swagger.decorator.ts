@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
-import { CreateUserByAdminRequestDto } from '../../api/dto/create-user-by-admin.dto';
+import { CreateUserByAdminRequestDto } from '../../api/dto/create-user.dto';
 import { UserResponseDto } from '../../api/dto/user-response.dto';
 
 export const CreateUserByAdminSwagger = () => {

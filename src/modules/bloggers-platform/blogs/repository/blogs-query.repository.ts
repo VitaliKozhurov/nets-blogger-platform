@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PaginationResponseMapperDto } from 'src/core/dto';
+import { PaginationViewMapper } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { getPaginationParams } from 'src/core/utils';
 import { BlogResponseMapperDto } from '../api/dto/blog.mapper';
@@ -14,7 +14,7 @@ export class BlogsQueryRepository {
 
   async findAll(
     query: IGetBlogsQueryDto
-  ): Promise<PaginationResponseMapperDto<BlogResponseMapperDto[]>> {
+  ): Promise<PaginationViewMapper<BlogResponseMapperDto[]>> {
     const { searchNameTerm, sortBy, sortDirection } = query;
 
     const sortColumn = `"${sortBy}"`;
@@ -44,7 +44,7 @@ export class BlogsQueryRepository {
 
     const [items, countResult] = await Promise.all([blogsPromise, totalCountPromise]);
 
-    return PaginationResponseMapperDto.mapToViewModel({
+    return PaginationViewMapper.mapToViewModel({
       items: items.map(BlogResponseMapperDto.mapToView),
       totalCount: Number(countResult[0].count),
       page: query.pageNumber,

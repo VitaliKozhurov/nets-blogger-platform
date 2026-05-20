@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { PaginationResponseMapperDto } from 'src/core/dto';
+import { PaginationViewMapper } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { getPaginationParams } from 'src/core/utils';
 import { DataSource } from 'typeorm';
@@ -15,7 +15,7 @@ export class PostsQueryRepository {
   async findAll(args: {
     query: IGetPostsQueryDto;
     userId?: string;
-  }): Promise<PaginationResponseMapperDto<PostResponseMapperDto[]>> {
+  }): Promise<PaginationViewMapper<PostResponseMapperDto[]>> {
     const { query, userId } = args;
     const { skip, limit } = getPaginationParams(query);
     const { sortBy, sortDirection } = query;
@@ -97,7 +97,7 @@ export class PostsQueryRepository {
       })
     );
 
-    return PaginationResponseMapperDto.mapToViewModel({
+    return PaginationViewMapper.mapToViewModel({
       items,
       totalCount: Number(countResult[0].count),
       page: query.pageNumber,
@@ -109,7 +109,7 @@ export class PostsQueryRepository {
     blogId: string;
     userId?: string;
     query: IGetPostsQueryDto;
-  }): Promise<PaginationResponseMapperDto<PostResponseMapperDto[]>> {
+  }): Promise<PaginationViewMapper<PostResponseMapperDto[]>> {
     const { blogId, userId, query } = args;
 
     const { skip, limit } = getPaginationParams(query);
@@ -192,7 +192,7 @@ export class PostsQueryRepository {
       })
     );
 
-    return PaginationResponseMapperDto.mapToViewModel({
+    return PaginationViewMapper.mapToViewModel({
       items,
       page: query.pageNumber,
       size: query.pageSize,
