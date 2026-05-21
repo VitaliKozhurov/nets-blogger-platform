@@ -12,16 +12,16 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBasicAuth } from '@nestjs/swagger';
 
+import { UUIDValidationPipe } from 'src/core/pipes';
+import { UseBasicGuard } from '../../auth/decorators';
 import { GetUsersQuery } from '../application/queries';
-import { CreateUserByAdminCommand, DeleteUserByAdminCommand } from '../application/use-cases';
+import { CreateUserCommand, DeleteUserByAdminCommand } from '../application/use-cases';
 import {
   CreateUserByAdminSwagger,
   DeleteUserSwagger,
   GetUsersSwagger,
 } from '../decorators/swagger';
-import { UseBasicGuard } from '../../auth/decorators';
-import { UUIDValidationPipe } from 'src/core/pipes';
-import { GetUsersQueryDto, CreateUserRequestDto } from './dto';
+import { CreateUserRequestDto, GetUsersQueryDto } from './dto';
 
 @Controller('sa/users')
 @UseBasicGuard()
@@ -42,8 +42,8 @@ export class UsersController {
 
   @Post()
   @CreateUserByAdminSwagger()
-  async create(@Body() dto: CreateUserRequestDto) {
-    const createdUser = await this.commandBus.execute(new CreateUserByAdminCommand(dto));
+  async createUser(@Body() dto: CreateUserRequestDto) {
+    const createdUser = await this.commandBus.execute(new CreateUserCommand(dto));
 
     return createdUser;
   }

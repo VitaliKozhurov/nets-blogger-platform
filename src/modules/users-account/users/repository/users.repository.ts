@@ -2,17 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { DataSource } from 'typeorm';
+import { IUserEntityDto } from '../domain/dto';
 import { IConfirmationCodeRepositoryDto } from './dto/confirmation-code-repository.dto';
-import { IUserRepositoryDto } from './dto/user-repository.dto';
+import { CreateUserDto } from './dto/create-user.params.dto';
 import { IPasswordRecoveryRepositoryDto } from './dto/password-recovery-repository.dto';
-import { UserViewMapper } from '../application/dto';
 
 @Injectable()
 export class UsersRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findById(id: string) {
-    const [user]: IUserRepositoryDto[] = await this.dataSource.query(
+  async findById(id: string): Promise<IUserEntityDto | null> {
+    const [user]: IUserEntityDto[] = await this.dataSource.query(
       `
       SELECT *
         FROM users
@@ -24,7 +24,7 @@ export class UsersRepository {
     return user || null;
   }
 
-  async findByIdOrThrow(id: string) {
+  async findByIdOrThrow(id: string): Promise<IUserEntityDto> {
     const user = await this.findById(id);
 
     if (!user) {
@@ -37,8 +37,8 @@ export class UsersRepository {
     return user;
   }
 
-  async findByLoginOrEmail(loginOrEmail: string) {
-    const [user]: IUserRepositoryDto[] = await this.dataSource.query(
+  async findByLoginOrEmail(loginOrEmail: string): Promise<IUserEntityDto | null> {
+    const [user]: IUserEntityDto[] = await this.dataSource.query(
       `
       SELECT *
         FROM users
@@ -50,10 +50,10 @@ export class UsersRepository {
     return user || null;
   }
 
-  async createWithConfirmedStatus(dto: { login: string; email: string; passwordHash: string }) {
-    const { login, email, passwordHash } = dto;
+  private async create(dto: CreateUserDto) {
+    const { login, email, passwordHash, isConfirmed } = dto;
 
-    const res: IUserRepositoryDto[] = await this.dataSource.query(
+    const [user]: IUserEntityDto[] = await this.dataSource.query(
       `
         INSERT INTO users (login, email, "passwordHash")
           VALUES ($1, $2, $3)
@@ -62,50 +62,43 @@ export class UsersRepository {
       [login, email, passwordHash]
     );
 
-    const [user] = res;
-
-    const userId = user.id;
-
-    await this.dataSource.query(
-      `
+    if (isConfirmed) {
+      await this.dataSource.query(
+        `
         INSERT INTO user_confirmations ("userId", "isConfirmed")
           VALUES ($1, true)
       `,
-      [userId]
-    );
+        [user.id]
+      );
+    } else {
+      await this.dataSource.query(
+        `
+        INSERT INTO user_confirmations ("userId", "isConfirmed", code, "expirationDate")
+          VALUES ($1, false, $2, $3)
+      `,
+        [user.id, dto.confirmationCode, dto.expirationDate]
+      );
+    }
 
-    return UserViewMapper.mapToView(user);
+    return user;
   }
 
-  async createWithUnconfirmedStatus(dto: {
+  async createConfirmedUser(dto: { login: string; email: string; passwordHash: string }) {
+    const user = await this.create({ ...dto, isConfirmed: true });
+
+    return user;
+  }
+
+  async createUnconfirmedUser(dto: {
     login: string;
     email: string;
     passwordHash: string;
     confirmationCode: string;
     expirationDate: Date;
   }) {
-    const { login, email, passwordHash, confirmationCode, expirationDate } = dto;
+    const user = await this.create({ ...dto, isConfirmed: false });
 
-    const [user]: IUserRepositoryDto[] = await this.dataSource.query(
-      `
-        INSERT INTO users (login, email, "passwordHash")
-          VALUES ($1, $2, $3)
-          RETURNING *
-      `,
-      [login, email, passwordHash]
-    );
-
-    const userId = user.id;
-
-    await this.dataSource.query(
-      `
-        INSERT INTO user_confirmations ("userId", "isConfirmed", code, "expirationDate")
-          VALUES ($1, false, $2, $3)
-      `,
-      [userId, confirmationCode, expirationDate]
-    );
-
-    return UserViewMapper.mapToView(user);
+    return user;
   }
 
   async softDelete(userId: string): Promise<boolean> {

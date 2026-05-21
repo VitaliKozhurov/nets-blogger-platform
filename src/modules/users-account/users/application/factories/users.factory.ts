@@ -3,7 +3,8 @@ import { randomUUID } from 'crypto';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import type { IRegistrationDto } from '../../../auth/application/dto/registration.dto';
 import { UsersRepository } from '../../repository/users.repository';
-import type { ICreateUserByAdminDto } from '../dto/create-user-by-admin.dto';
+import { IUserViewDto, UserViewMapper } from '../dto';
+import type { ICreateUserDto } from '../dto/create-user.dto';
 
 @Injectable()
 export class UsersFactory {
@@ -12,14 +13,30 @@ export class UsersFactory {
     private passwordHasherService: PasswordHasherService
   ) {}
 
-  async createUnconfirmedUser(dto: IRegistrationDto) {
+  async createConfirmedUser(dto: ICreateUserDto): Promise<IUserViewDto> {
+    const { login, email, password } = dto;
+
+    const passwordHash = await this.passwordHasherService.createHash(password);
+
+    const createdUser = await this.usersRepository.createConfirmedUser({
+      login,
+      email,
+      passwordHash,
+    });
+
+    return UserViewMapper.mapToView(createdUser);
+  }
+
+  async createUnconfirmedUser(
+    dto: IRegistrationDto
+  ): Promise<{ user: IUserViewDto; confirmationCode: string }> {
     const { login, email, password } = dto;
 
     const passwordHash = await this.passwordHasherService.createHash(password);
     const confirmationCode = randomUUID();
     const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
 
-    const createdUser = await this.usersRepository.createWithUnconfirmedStatus({
+    const createdUser = await this.usersRepository.createUnconfirmedUser({
       login,
       email,
       passwordHash,
@@ -27,20 +44,6 @@ export class UsersFactory {
       expirationDate,
     });
 
-    return { createdUser, confirmationCode };
-  }
-
-  async createUserByAdmin(dto: ICreateUserByAdminDto) {
-    const { login, email, password } = dto;
-
-    const passwordHash = await this.passwordHasherService.createHash(password);
-
-    const createdUser = await this.usersRepository.createWithConfirmedStatus({
-      login,
-      email,
-      passwordHash,
-    });
-
-    return createdUser;
+    return { user: UserViewMapper.mapToView(createdUser), confirmationCode };
   }
 }

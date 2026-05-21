@@ -13,13 +13,13 @@ import { RefreshTokenUseCase } from './auth/application/use-cases/refresh-token.
 import { RegistrationConfirmationUseCase } from './auth/application/use-cases/registration-confirmation.usecase';
 import { RegistrationEmailResendingUseCase } from './auth/application/use-cases/registration-email-resending.usecase';
 import { RegistrationUseCase } from './auth/application/use-cases/registration.usecase';
+import { BearerAuthGuard } from './auth/guards/bearer-auth/bearer-auth.guard';
 import { jwtConfigProviders } from './config/jwt-config.provider';
 import { UsersAccountConfig } from './config/users-account-config';
 import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from './constants/injection-tokens';
-import { BearerAuthGuard } from './auth/guards/bearer-auth/bearer-auth.guard';
 import { DeviceSessionController } from './device-session/api/device-session.controller';
 import { GetDeviceSessionsHandler } from './device-session/application/queries/get-device-session.query-handler';
 import { DeleteAllDeviceSessionsExceptCurrentUseCase } from './device-session/application/use-cases/delete-all-device-sessions-except-current.usecase';
@@ -30,7 +30,7 @@ import { UsersController } from './users/api/users.controller';
 import { UsersFactory } from './users/application/factories/users.factory';
 import { GetUsersHandler } from './users/application/queries/get-users.query-handler';
 import { UsersService } from './users/application/services/users.service';
-import { CreateUserByAdminUseCase } from './users/application/use-cases/create-user-by-admin.usecase';
+import { CreateUserUseCase } from './users/application/use-cases/create-user.usecase';
 import { DeleteUserByAdminUseCase } from './users/application/use-cases/delete-user-by-admin.usecase';
 import { UsersQueryRepository } from './users/repository/users-query.repository';
 import { UsersRepository } from './users/repository/users.repository';
@@ -41,7 +41,7 @@ const commandHandlers = [
   RegistrationEmailResendingUseCase,
   PasswordRecoveryUseCase,
   NewUserPasswordUseCase,
-  CreateUserByAdminUseCase,
+  CreateUserUseCase,
   DeleteUserByAdminUseCase,
   RefreshTokenUseCase,
   LoginUseCase,
