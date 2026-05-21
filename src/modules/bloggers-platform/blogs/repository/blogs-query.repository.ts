@@ -12,14 +12,12 @@ import { IBlogRepositoryDto } from './dto/blog-repository.dto';
 export class BlogsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findAll(
-    query: IGetBlogsQueryDto
-  ): Promise<PaginationViewMapper<BlogResponseMapperDto[]>> {
+  async findAll(query: IGetBlogsQueryDto): Promise<PaginationViewMapper<BlogResponseMapperDto[]>> {
     const { searchNameTerm, sortBy, sortDirection } = query;
 
     const sortColumn = `"${sortBy}"`;
 
-    const { skip, limit } = getPaginationParams(query);
+    const { offset, limit } = getPaginationParams(query);
 
     const blogsPromise: Promise<IBlogRepositoryDto[]> = this.dataSource.query(
       `
@@ -30,7 +28,7 @@ export class BlogsQueryRepository {
         LIMIT $2
         OFFSET $3
       `,
-      [`%${searchNameTerm ?? ''}%`, limit, skip]
+      [`%${searchNameTerm ?? ''}%`, limit, offset]
     );
 
     const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(

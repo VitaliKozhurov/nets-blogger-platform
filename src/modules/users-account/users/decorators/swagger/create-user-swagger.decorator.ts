@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
-import { CreateUserByAdminRequestDto } from '../../api/dto/create-user.dto';
+import { CreateUserRequestDto } from '../../api/dto/create-user.dto';
 import { UserResponseDto } from '../../api/dto/user-response.dto';
 
 export const CreateUserByAdminSwagger = () => {
@@ -11,7 +11,7 @@ export const CreateUserByAdminSwagger = () => {
         'Creates a new user account with the provided information. Returns the created user data.',
     }),
     ApiBody({
-      type: CreateUserByAdminRequestDto,
+      type: CreateUserRequestDto,
       description: 'User registration data including email, password, and profile information',
     }),
     ApiCreatedResponse({

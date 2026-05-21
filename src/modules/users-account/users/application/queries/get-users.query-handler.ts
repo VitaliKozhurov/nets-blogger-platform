@@ -2,8 +2,9 @@ import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
 import { UsersQueryRepository } from '../../repository/users-query.repository';
 import { IPaginationResponseDto, PaginationViewMapper } from 'src/core/dto';
 import { IGetUsersQueryDto, IUserViewDto, UserViewMapper } from '../dto';
-import { IGetUsersParamsDto } from '../../repository/dto';
+
 import { getPaginationParams } from 'src/core/utils';
+import { IGetUsersParamsDto } from '../../repository/dto/get-users.params.dto';
 
 export class GetUsersQuery extends Query<IPaginationResponseDto<IUserViewDto[]>> {
   constructor(public dto: IGetUsersQueryDto) {

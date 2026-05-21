@@ -18,7 +18,7 @@ export class CommentsQueryRepository {
     query: IGetCommentsByPostIdQueryDto;
   }): Promise<PaginationViewMapper<CommentResponseMapperDto[]>> {
     const { postId, userId, query } = args;
-    const { skip, limit } = getPaginationParams(query);
+    const { offset, limit } = getPaginationParams(query);
     const { sortBy, sortDirection } = query;
 
     const sortColumn = `"${sortBy}"`;
@@ -44,7 +44,7 @@ export class CommentsQueryRepository {
               LIMIT $3
               OFFSET $4
         `,
-      [postId, userId, limit, skip]
+      [postId, userId, limit, offset]
     );
 
     const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(

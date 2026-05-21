@@ -141,8 +141,6 @@ describe('E2E Controller  /sa/users', () => {
 
       const code = errorResponse.body.code;
 
-      console.log(errorResponse.body);
-
       expect(code).toBe(DomainExceptionCode.NOT_FOUND_ERROR);
     });
 

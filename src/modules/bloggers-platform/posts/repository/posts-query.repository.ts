@@ -17,7 +17,7 @@ export class PostsQueryRepository {
     userId?: string;
   }): Promise<PaginationViewMapper<PostResponseMapperDto[]>> {
     const { query, userId } = args;
-    const { skip, limit } = getPaginationParams(query);
+    const { offset, limit } = getPaginationParams(query);
     const { sortBy, sortDirection } = query;
 
     const sortColumn = `"${sortBy}"`;
@@ -38,7 +38,7 @@ export class PostsQueryRepository {
             LIMIT $1
             OFFSET $2
           `,
-      [limit, skip, userId ?? null]
+      [limit, offset, userId ?? null]
     );
 
     const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
@@ -112,7 +112,7 @@ export class PostsQueryRepository {
   }): Promise<PaginationViewMapper<PostResponseMapperDto[]>> {
     const { blogId, userId, query } = args;
 
-    const { skip, limit } = getPaginationParams(query);
+    const { offset, limit } = getPaginationParams(query);
     const { sortBy, sortDirection } = query;
 
     const sortColumn = `"${sortBy}"`;
@@ -133,7 +133,7 @@ export class PostsQueryRepository {
             LIMIT $1
             OFFSET $2
           `,
-      [limit, skip, userId ?? null, blogId]
+      [limit, offset, userId ?? null, blogId]
     );
 
     const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
