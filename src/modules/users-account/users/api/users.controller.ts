@@ -15,7 +15,7 @@ import { ApiBasicAuth } from '@nestjs/swagger';
 import { UUIDValidationPipe } from 'src/core/pipes';
 import { UseBasicGuard } from '../../auth/decorators';
 import { GetUsersQuery } from '../application/queries';
-import { CreateUserCommand, DeleteUserByAdminCommand } from '../application/use-cases';
+import { CreateUserCommand, DeleteUserCommand } from '../application/use-cases';
 import {
   CreateUserByAdminSwagger,
   DeleteUserSwagger,
@@ -52,6 +52,6 @@ export class UsersController {
   @DeleteUserSwagger()
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', UUIDValidationPipe) id: string) {
-    return this.commandBus.execute(new DeleteUserByAdminCommand(id));
+    return this.commandBus.execute(new DeleteUserCommand(id));
   }
 }

@@ -2,15 +2,15 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UsersRepository } from '../../repository/users.repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
-export class DeleteUserByAdminCommand {
+export class DeleteUserCommand {
   constructor(public id: string) {}
 }
 
-@CommandHandler(DeleteUserByAdminCommand)
-export class DeleteUserByAdminUseCase implements ICommandHandler<DeleteUserByAdminCommand> {
+@CommandHandler(DeleteUserCommand)
+export class DeleteUserUseCase implements ICommandHandler<DeleteUserCommand> {
   constructor(private usersRepository: UsersRepository) {}
 
-  async execute({ id }: DeleteUserByAdminCommand): Promise<boolean> {
+  async execute({ id }: DeleteUserCommand): Promise<boolean> {
     const isDeleted = await this.usersRepository.softDelete(id);
 
     if (!isDeleted) {

@@ -30,8 +30,7 @@ import { UsersController } from './users/api/users.controller';
 import { UsersFactory } from './users/application/factories/users.factory';
 import { GetUsersHandler } from './users/application/queries/get-users.query-handler';
 import { UsersService } from './users/application/services/users.service';
-import { CreateUserUseCase } from './users/application/use-cases/create-user.usecase';
-import { DeleteUserByAdminUseCase } from './users/application/use-cases/delete-user-by-admin.usecase';
+import { CreateUserUseCase, DeleteUserUseCase } from './users/application/use-cases';
 import { UsersQueryRepository } from './users/repository/users-query.repository';
 import { UsersRepository } from './users/repository/users.repository';
 
@@ -42,7 +41,7 @@ const commandHandlers = [
   PasswordRecoveryUseCase,
   NewUserPasswordUseCase,
   CreateUserUseCase,
-  DeleteUserByAdminUseCase,
+  DeleteUserUseCase,
   RefreshTokenUseCase,
   LoginUseCase,
   LogoutUseCase,
