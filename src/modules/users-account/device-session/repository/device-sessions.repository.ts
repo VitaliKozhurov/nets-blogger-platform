@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ICreateSessionParamsDto } from './dto/create-session.params.dto';
-import { IDeviceSessionRepositoryDto } from './dto/device-session-repository.dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { IUpdateSessionParamsDto } from './dto/update-session.params.dto';
+import { IDeleteSessionParamsDto } from './dto/delete-session.params.dto';
+import { IDeviceSessionEntityDto } from '../domain/dto';
 
 @Injectable()
 export class DeviceSessionsRepository {
@@ -39,7 +40,7 @@ export class DeviceSessionsRepository {
     return rows.length > 0;
   }
 
-  async deleteSession(dto: { userId: string; deviceId: string; iat: number }) {
+  async deleteSession(dto: IDeleteSessionParamsDto) {
     const { userId, deviceId, iat } = dto;
 
     const [rows]: [{ id: string }[], number] = await this.dataSource.query(
@@ -54,21 +55,23 @@ export class DeviceSessionsRepository {
     return rows.length > 0;
   }
 
-  async deleteAllSessionsExceptCurrent(deviceId: string) {
+  async deleteAllUserSessionsExceptCurrent(dto: { userId: string; deviceId: string }) {
+    const { userId, deviceId } = dto;
+
     const [rows]: [{ id: string }[], number] = await this.dataSource.query(
       `
       DELETE FROM "user_device_sessions"
-        WHERE "deviceId" != $1
+        WHERE "userId" = $1 AND "deviceId" != $2
         RETURNING id
       `,
-      [deviceId]
+      [userId, deviceId]
     );
 
     return rows.length > 0;
   }
 
-  async findByIdOrThrow(deviceId: string): Promise<IDeviceSessionRepositoryDto> {
-    const [session]: IDeviceSessionRepositoryDto[] = await this.dataSource.query(
+  async findByIdOrThrow(deviceId: string): Promise<IDeviceSessionEntityDto> {
+    const [session]: IDeviceSessionEntityDto[] = await this.dataSource.query(
       `
       SELECT * 
         FROM "user_device_sessions"

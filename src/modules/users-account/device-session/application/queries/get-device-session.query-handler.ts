@@ -1,7 +1,7 @@
 import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { TokenService } from '../../../auth/application/services/token.service';
-import { DeviceSessionMapperDto } from '../../api/dto/device-session.mapper';
+import { DeviceSessionMapperDto } from '../dto/device-session.mapper';
 import { DeviceSessionsQueryRepository } from '../../repository/device-sessions-query.repository';
 
 export class GetDeviceSessionsQuery extends Query<DeviceSessionMapperDto[]> {
@@ -27,8 +27,8 @@ export class GetDeviceSessionsHandler implements IQueryHandler<GetDeviceSessions
       });
     }
 
-    const result = await this.deviceSessionsQueryRepository.findAllByUser(tokenData.userId);
+    const sessions = await this.deviceSessionsQueryRepository.findAllByUser(tokenData.userId);
 
-    return result;
+    return sessions.map(DeviceSessionMapperDto.mapToView);
   }
 }

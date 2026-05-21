@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { DeviceSessionMapperDto } from '../api/dto/device-session.mapper';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { IDeviceSessionRepositoryDto } from './dto/device-session-repository.dto';
+import { IDeviceSessionEntityDto } from '../domain/dto';
 
 @Injectable()
 export class DeviceSessionsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findAllByUser(userId: string) {
-    const sessions: IDeviceSessionRepositoryDto[] = await this.dataSource.query(
+    const sessions: IDeviceSessionEntityDto[] = await this.dataSource.query(
       `
           SELECT *
             FROM "user_device_sessions"
@@ -18,6 +17,6 @@ export class DeviceSessionsQueryRepository {
       [userId]
     );
 
-    return sessions.map(DeviceSessionMapperDto.mapToView);
+    return sessions;
   }
 }

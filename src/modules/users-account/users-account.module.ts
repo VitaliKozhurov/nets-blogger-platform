@@ -23,9 +23,11 @@ import {
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from './constants/injection-tokens';
 import { DeviceSessionController } from './device-session/api/device-session.controller';
-import { GetDeviceSessionsHandler } from './device-session/application/queries/get-device-session.query-handler';
-import { DeleteAllDeviceSessionsExceptCurrentUseCase } from './device-session/application/use-cases/delete-all-device-sessions-except-current.usecase';
-import { DeleteCurrentDeviceSessionUseCase } from './device-session/application/use-cases/delete-current-device-session.usecase';
+import { GetDeviceSessionsHandler } from './device-session/application/queries';
+import {
+  DeleteAllUserDeviceSessionsExceptCurrentUseCase,
+  DeleteCurrentDeviceSessionUseCase,
+} from './device-session/application/use-cases';
 import { DeviceSessionsQueryRepository } from './device-session/repository/device-sessions-query.repository';
 import { DeviceSessionsRepository } from './device-session/repository/device-sessions.repository';
 import { UsersController } from './users/api/users.controller';
@@ -48,7 +50,7 @@ const commandHandlers = [
   LoginUseCase,
   LogoutUseCase,
   DeleteCurrentDeviceSessionUseCase,
-  DeleteAllDeviceSessionsExceptCurrentUseCase,
+  DeleteAllUserDeviceSessionsExceptCurrentUseCase,
 ];
 
 const queryHandlers = [GetUsersHandler, GetDeviceSessionsHandler];

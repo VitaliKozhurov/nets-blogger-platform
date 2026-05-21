@@ -1,4 +1,4 @@
-import { IDeviceSessionRepositoryDto } from '../../repository/dto/device-session-repository.dto';
+import { IDeviceSessionEntityDto } from '../../domain/dto';
 
 export class DeviceSessionMapperDto {
   ip: string;
@@ -6,7 +6,7 @@ export class DeviceSessionMapperDto {
   lastActiveDate: string;
   deviceId: string;
 
-  static mapToView(session: IDeviceSessionRepositoryDto): DeviceSessionMapperDto {
+  static mapToView(session: IDeviceSessionEntityDto): DeviceSessionMapperDto {
     const dto = new DeviceSessionMapperDto();
 
     dto.ip = session.ip;

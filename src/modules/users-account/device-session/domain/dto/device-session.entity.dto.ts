@@ -1,4 +1,4 @@
-export interface IDeviceSessionRepositoryDto {
+export interface IDeviceSessionEntityDto {
   userId: string;
   deviceId: string;
   ip: string;

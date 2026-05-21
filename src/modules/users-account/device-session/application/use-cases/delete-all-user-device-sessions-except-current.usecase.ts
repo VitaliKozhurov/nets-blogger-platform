@@ -3,18 +3,18 @@ import { TokenService } from '../../../auth/application/services/token.service';
 import { DeviceSessionsRepository } from '../../repository/device-sessions.repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
-export class DeleteAllDeviceSessionsExceptCurrentCommand {
+export class DeleteAllUserDeviceSessionsExceptCurrentCommand {
   constructor(public refreshToken: string) {}
 }
 
-@CommandHandler(DeleteAllDeviceSessionsExceptCurrentCommand)
-export class DeleteAllDeviceSessionsExceptCurrentUseCase implements ICommandHandler<DeleteAllDeviceSessionsExceptCurrentCommand> {
+@CommandHandler(DeleteAllUserDeviceSessionsExceptCurrentCommand)
+export class DeleteAllUserDeviceSessionsExceptCurrentUseCase implements ICommandHandler<DeleteAllUserDeviceSessionsExceptCurrentCommand> {
   constructor(
     private tokenService: TokenService,
     private deviceSessionRepository: DeviceSessionsRepository
   ) {}
 
-  async execute({ refreshToken }: DeleteAllDeviceSessionsExceptCurrentCommand): Promise<boolean> {
+  async execute({ refreshToken }: DeleteAllUserDeviceSessionsExceptCurrentCommand): Promise<boolean> {
     const tokenData = await this.tokenService.verifyRefreshToken(refreshToken);
 
     if (!tokenData) {
@@ -24,7 +24,10 @@ export class DeleteAllDeviceSessionsExceptCurrentUseCase implements ICommandHand
       });
     }
 
-    await this.deviceSessionRepository.deleteAllSessionsExceptCurrent(tokenData.deviceId);
+    await this.deviceSessionRepository.deleteAllUserSessionsExceptCurrent({
+      userId: tokenData.userId,
+      deviceId: tokenData.deviceId,
+    });
 
     return true;
   }
