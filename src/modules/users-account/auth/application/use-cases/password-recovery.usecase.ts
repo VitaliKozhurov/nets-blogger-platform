@@ -22,7 +22,7 @@ export class PasswordRecoveryUseCase implements ICommandHandler<PasswordRecovery
       const recoveryCode = randomUUID();
       const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
 
-      await this.usersRepository.upsertPasswordRecoveryByUserId({
+      await this.usersRepository.upsertPasswordRecoveryData({
         userId: user.id,
         code: recoveryCode,
         expirationDate,

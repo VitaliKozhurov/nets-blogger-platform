@@ -17,14 +17,15 @@ export class RegistrationUseCase implements ICommandHandler<RegistrationCommand>
   ) {}
 
   async execute({ dto }: RegistrationCommand): Promise<boolean> {
-    const { login, email } = dto;
+    await this.usersService.ensureUserIsAvailable(dto);
 
-    await this.usersService.ensureUserIsAvailable({ login, email });
-
-    const { createdUser, confirmationCode } = await this.usersFactory.createUnconfirmedUser(dto);
+    const { user, confirmationCode } = await this.usersFactory.createUnconfirmedUser(dto);
 
     this.eventBus.publish(
-      new UserRegistrationEvent({ email: createdUser.email, confirmationCode })
+      new UserRegistrationEvent({
+        email: user.email,
+        confirmationCode,
+      })
     );
 
     return true;

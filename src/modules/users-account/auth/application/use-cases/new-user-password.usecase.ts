@@ -16,7 +16,7 @@ export class NewUserPasswordUseCase implements ICommandHandler<NewUserPasswordCo
   ) {}
 
   async execute({ dto }: NewUserPasswordCommand): Promise<boolean> {
-    const passwordRecoveryData = await this.usersRepository.findPasswordRecoveryByCode(
+    const passwordRecoveryData = await this.usersRepository.findPasswordRecoveryData(
       dto.recoveryCode
     );
 
@@ -53,7 +53,7 @@ export class NewUserPasswordUseCase implements ICommandHandler<NewUserPasswordCo
       });
     }
 
-    await this.usersRepository.deletePasswordRecoveryByUserId(passwordRecoveryData.userId);
+    await this.usersRepository.deletePasswordRecoveryData(passwordRecoveryData.userId);
 
     return true;
   }

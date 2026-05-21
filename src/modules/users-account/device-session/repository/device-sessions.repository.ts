@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { ICreateSessionDto } from './dto/create-session.dto';
+import { ICreateSessionParamsDto } from './dto/create-session.params.dto';
 import { IDeviceSessionRepositoryDto } from './dto/device-session-repository.dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { IUpdateSessionParamsDto } from './dto/update-session.params.dto';
 
 @Injectable()
 export class DeviceSessionsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createSession(dto: ICreateSessionDto) {
+  async createSession(dto: ICreateSessionParamsDto) {
     const { userId, deviceId, deviceName, ip, iat, expirationAt } = dto;
 
     await this.dataSource.query(
@@ -22,13 +23,7 @@ export class DeviceSessionsRepository {
     );
   }
 
-  async updateSession(dto: {
-    userId: string;
-    deviceId: string;
-    iat: number;
-    newIat: number;
-    newExpirationAt: number;
-  }) {
+  async updateSession(dto: IUpdateSessionParamsDto) {
     const { userId, deviceId, iat, newIat, newExpirationAt } = dto;
 
     const [rows]: [{ id: string }[], number] = await this.dataSource.query(

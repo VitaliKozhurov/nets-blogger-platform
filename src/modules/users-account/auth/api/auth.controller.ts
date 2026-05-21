@@ -2,7 +2,12 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
-import { AppThrottle, ClientMeta, Cookies, type ClientMetaDto } from 'src/core/decorators';
+import {
+  AppThrottle,
+  ClientDeviceMeta,
+  Cookies,
+  type ClientDeviceMetaDto,
+} from 'src/core/decorators';
 import { LoginCommand } from '../application/use-cases/login.usecase';
 import { LogoutCommand } from '../application/use-cases/logout.usecase';
 import { NewUserPasswordCommand } from '../application/use-cases/new-user-password.usecase';
@@ -10,7 +15,7 @@ import { PasswordRecoveryCommand } from '../application/use-cases/password-recov
 import { RefreshTokenCommand } from '../application/use-cases/refresh-token.usecase';
 import { RegistrationConfirmationCommand } from '../application/use-cases/registration-confirmation.usecase';
 import { RegistrationEmailResendingCommand } from '../application/use-cases/registration-email-resending.usecase';
-import { RegistrationCommand } from '../application/use-cases/registration.usecase';
+import { RegistrationCommand } from '../application/use-cases';
 import {
   LoginSwagger,
   LogoutSwagger,
@@ -30,9 +35,11 @@ import { UseBearerGuard } from '../decorators/bearer-auth/use-bearer-guard.decor
 import { LoginRequestDto } from './dto/login.dto';
 import { NewPasswordRequestDto } from './dto/new-password.dto';
 import { PasswordRecoveryRequestDto } from './dto/password-recovery.dto';
-import { RegistrationConfirmationRequestDto } from './dto/registration-confirmation.dto';
-import { RegistrationEmailResendingRequestDto } from './dto/registration-email-resending.dto';
-import { RegistrationRequestDto } from './dto/registration.dto';
+import {
+  RegistrationRequestDto,
+  RegistrationConfirmationRequestDto,
+  RegistrationEmailResendingRequestDto,
+} from './dto';
 
 @AppThrottle({ limit: 5, ttl: 10_000 })
 @Controller('auth')
@@ -65,12 +72,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginRequestDto,
-    @ClientMeta() clientMeta: ClientMetaDto,
+    @ClientDeviceMeta() clientMeta: ClientDeviceMetaDto,
     @Res() response: Response
   ) {
-    const { accessToken, refreshToken } = await this.commandBus.execute(
-      new LoginCommand({ ...dto, ...clientMeta })
-    );
+    const commandDto = { ...dto, ...clientMeta };
+
+    const result = await this.commandBus.execute(new LoginCommand(commandDto));
+
+    const { accessToken, refreshToken } = result;
 
     response.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -92,14 +101,19 @@ export class AuthController {
   @Post('refresh-token')
   @RefreshTokenSwagger()
   @HttpCode(HttpStatus.OK)
-  async refreshToken(@Cookies('refreshToken') refreshToken: string, @Res() response: Response) {
-    const result = await this.commandBus.execute(new RefreshTokenCommand(refreshToken));
+  async refreshToken(
+    @Cookies('refreshToken') requestRefreshToken: string,
+    @Res() response: Response
+  ) {
+    const result = await this.commandBus.execute(new RefreshTokenCommand(requestRefreshToken));
 
-    response.cookie('refreshToken', result.refreshToken, {
+    const { accessToken, refreshToken } = result;
+
+    response.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
     });
-    response.send({ accessToken: result.accessToken });
+    response.send({ accessToken });
   }
 
   @Post('password-recovery')

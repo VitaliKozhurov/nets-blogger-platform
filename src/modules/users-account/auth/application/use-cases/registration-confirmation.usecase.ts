@@ -12,7 +12,7 @@ export class RegistrationConfirmationUseCase implements ICommandHandler<Registra
   constructor(private usersRepository: UsersRepository) {}
 
   async execute({ dto }: RegistrationConfirmationCommand) {
-    const isUpdating = await this.usersRepository.confirmUserRegistrationByCode(dto.code);
+    const isUpdating = await this.usersRepository.confirmRegistrationByCode(dto.code);
 
     if (!isUpdating) {
       throw new DomainException({

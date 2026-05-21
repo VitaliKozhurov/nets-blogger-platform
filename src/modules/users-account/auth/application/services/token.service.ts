@@ -27,6 +27,11 @@ export class TokenService {
     return refreshToken;
   }
 
+  /**
+   * Создает refresh token и возвращает его вместе с метаданными.
+   * Декодирование необходимо для получения iat/exp, которые
+   * автоматически устанавливаются JWT библиотекой при подписи.
+   */
   async createRefreshTokenWithMeta(dto: { userId: string; deviceId: string; login: string }) {
     const refreshToken = await this.createRefreshToken(dto);
     const decoded = this.refreshJwtService.decode(refreshToken) as RefreshTokenPayload | null;

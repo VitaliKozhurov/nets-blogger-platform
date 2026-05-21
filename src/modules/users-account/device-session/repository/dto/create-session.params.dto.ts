@@ -1,4 +1,4 @@
-export interface ICreateSessionDto {
+export interface ICreateSessionParamsDto {
   userId: string;
   deviceId: string;
   ip: string;

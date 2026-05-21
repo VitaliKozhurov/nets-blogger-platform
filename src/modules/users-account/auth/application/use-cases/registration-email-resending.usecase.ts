@@ -27,7 +27,7 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
       });
     }
 
-    const prevConfirmationData = await this.usersRepository.findRegistrationConfirmationByUserId(
+    const prevConfirmationData = await this.usersRepository.findRegistrationConfirmationData(
       user.id
     );
 
@@ -50,7 +50,7 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
     const confirmationCode = randomUUID();
     const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
 
-    await this.usersRepository.updateRegistrationConfirmation({
+    await this.usersRepository.updateRegistrationConfirmationData({
       userId: user.id,
       confirmationCode,
       expirationDate,

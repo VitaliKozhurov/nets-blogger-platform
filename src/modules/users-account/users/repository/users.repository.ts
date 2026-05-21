@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { DataSource } from 'typeorm';
-import { IUserEntityDto } from '../domain/dto';
-import { IConfirmationCodeRepositoryDto } from './dto/confirmation-code-repository.dto';
+import {
+  IPasswordRecoveryEntityDto,
+  IUserConfirmationEntityDto,
+  IUserEntityDto,
+} from '../domain/dto';
 import { CreateUserDto } from './dto/create-user.params.dto';
-import { IPasswordRecoveryRepositoryDto } from './dto/password-recovery-repository.dto';
 
 @Injectable()
 export class UsersRepository {
@@ -124,7 +126,7 @@ export class UsersRepository {
       `
       UPDATE users
         SET "passwordHash" = $2
-        WHERE users.id = $1
+        WHERE id = $1
         RETURNING id
       `,
       [userId, passwordHash]
@@ -133,10 +135,10 @@ export class UsersRepository {
     return rows.length > 0;
   }
 
-  async findRegistrationConfirmationByUserId(
+  async findRegistrationConfirmationData(
     userId: string
-  ): Promise<IConfirmationCodeRepositoryDto | null> {
-    const [confirmationData]: IConfirmationCodeRepositoryDto[] = await this.dataSource.query(
+  ): Promise<IUserConfirmationEntityDto | null> {
+    const [confirmationData]: IUserConfirmationEntityDto[] = await this.dataSource.query(
       `SELECT * 
         FROM "user_confirmations" 
         WHERE "userId" = $1`,
@@ -146,32 +148,12 @@ export class UsersRepository {
     return confirmationData || null;
   }
 
-  async updateRegistrationConfirmation(dto: {
-    userId: string;
-    confirmationCode: string;
-    expirationDate: Date;
-  }) {
-    const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
-      `
-      UPDATE "user_confirmations"
-        SET code = $1, "expirationDate" = $2
-        WHERE "userId" = $3 
-        RETURNING "userId"
-      `,
-      [dto.confirmationCode, dto.expirationDate, dto.userId]
-    );
-
-    return rows.length > 0;
-  }
-
-  async confirmUserRegistrationByCode(code: string) {
+  async confirmRegistrationByCode(code: string) {
     const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
       `
       UPDATE "user_confirmations"
         SET "isConfirmed" = true, code = NULL, "expirationDate" = NULL
-        WHERE code = $1 
-        AND "isConfirmed" = false 
-        AND "expirationDate" > NOW()
+        WHERE code = $1 AND "isConfirmed" = false AND "expirationDate" > NOW()
         RETURNING "userId"
       `,
       [code]
@@ -180,8 +162,26 @@ export class UsersRepository {
     return rows.length > 0;
   }
 
-  async findPasswordRecoveryByCode(code: string): Promise<IPasswordRecoveryRepositoryDto | null> {
-    const [recoveryInfo]: IPasswordRecoveryRepositoryDto[] = await this.dataSource.query(
+  async updateRegistrationConfirmationData(dto: {
+    userId: string;
+    confirmationCode: string;
+    expirationDate: Date;
+  }) {
+    const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
+      `
+      UPDATE "user_confirmations"
+        SET code = $2, "expirationDate" = $3
+        WHERE "userId" = $1 
+        RETURNING "userId"
+      `,
+      [dto.userId, dto.confirmationCode, dto.expirationDate]
+    );
+
+    return rows.length > 0;
+  }
+
+  async findPasswordRecoveryData(code: string): Promise<IPasswordRecoveryEntityDto | null> {
+    const [recoveryData]: IPasswordRecoveryEntityDto[] = await this.dataSource.query(
       `
       SELECT *
         FROM user_recovery_codes
@@ -190,10 +190,10 @@ export class UsersRepository {
       [code]
     );
 
-    return recoveryInfo || null;
+    return recoveryData || null;
   }
 
-  async upsertPasswordRecoveryByUserId(dto: IPasswordRecoveryRepositoryDto) {
+  async upsertPasswordRecoveryData(dto: IPasswordRecoveryEntityDto) {
     const { userId, code, expirationDate } = dto;
 
     const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
@@ -212,7 +212,7 @@ export class UsersRepository {
     return rows.length > 0;
   }
 
-  async deletePasswordRecoveryByUserId(userId: string) {
+  async deletePasswordRecoveryData(userId: string) {
     const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
       `
     DELETE FROM "user_recovery_codes"

@@ -1,4 +1,4 @@
-export interface IConfirmationCodeRepositoryDto {
+export interface IUserConfirmationEntityDto {
   userId: string;
   isConfirmed: boolean;
   confirmationCode: string | null;

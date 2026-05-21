@@ -1,13 +1,13 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
 
-export type ClientMetaDto = {
+export type ClientDeviceMetaDto = {
   ip: string;
   deviceName: string;
 };
 
-export const ClientMeta = createParamDecorator(
-  (_: unknown, ctx: ExecutionContext): ClientMetaDto => {
+export const ClientDeviceMeta = createParamDecorator(
+  (_: unknown, ctx: ExecutionContext): ClientDeviceMetaDto => {
     const request = ctx.switchToHttp().getRequest<Request>();
 
     const headerDevice = request.headers['x-device-name'];

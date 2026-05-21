@@ -5,14 +5,16 @@ import { CryptoModule } from '../crypto/crypto.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { AuthController } from './auth/api/auth.controller';
 import { TokenService } from './auth/application/services/token.service';
-import { LoginUseCase } from './auth/application/use-cases/login.usecase';
-import { LogoutUseCase } from './auth/application/use-cases/logout.usecase';
-import { NewUserPasswordUseCase } from './auth/application/use-cases/new-user-password.usecase';
-import { PasswordRecoveryUseCase } from './auth/application/use-cases/password-recovery.usecase';
-import { RefreshTokenUseCase } from './auth/application/use-cases/refresh-token.usecase';
-import { RegistrationConfirmationUseCase } from './auth/application/use-cases/registration-confirmation.usecase';
-import { RegistrationEmailResendingUseCase } from './auth/application/use-cases/registration-email-resending.usecase';
-import { RegistrationUseCase } from './auth/application/use-cases/registration.usecase';
+import {
+  RegistrationUseCase,
+  RegistrationConfirmationUseCase,
+  RegistrationEmailResendingUseCase,
+  LoginUseCase,
+  LogoutUseCase,
+  RefreshTokenUseCase,
+  PasswordRecoveryUseCase,
+  NewUserPasswordUseCase,
+} from './auth/application/use-cases';
 import { BearerAuthGuard } from './auth/guards/bearer-auth/bearer-auth.guard';
 import { jwtConfigProviders } from './config/jwt-config.provider';
 import { UsersAccountConfig } from './config/users-account-config';
