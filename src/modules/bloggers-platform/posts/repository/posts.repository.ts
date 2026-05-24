@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PostResponseMapperDto } from '../api';
-import { IPostRepository } from './dto/post-repository.dto';
+import { IPostRepository } from './dto/post-with-details.dto';
 import { LikeStatus } from '../../likes';
 
 @Injectable()

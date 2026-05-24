@@ -1,9 +1,15 @@
-import { LikeStatus } from '@modules/bloggers-platform/likes/domain';
-import { IPostRepository } from '../../repository';
 import { INewestLike } from '../../repository/dto/newest-like.dto';
-import { IPostViewDto } from './post-view.dto';
+import { LikeStatus } from '../../../likes/domain/dto';
+import { IPostEntityDto } from '../../domain/dto';
 
-export class PostResponseMapperDto {
+export interface IPostWithDetails extends IPostEntityDto {
+  blogName: string;
+  likesCount: number;
+  dislikesCount: number;
+  myStatus: LikeStatus;
+}
+
+export class PostViewMapper {
   id: string;
   title: string;
   shortDescription: string;
@@ -18,8 +24,8 @@ export class PostResponseMapperDto {
     newestLikes: { addedAt: string; userId: string; login: string }[];
   };
 
-  static mapToView(args: { post: IPostRepository; newestLikes: INewestLike[] }): IPostViewDto {
-    const dto = new PostResponseMapperDto();
+  static mapToView(args: { post: IPostWithDetails; newestLikes: INewestLike[] }): PostViewMapper {
+    const dto = new PostViewMapper();
     const { post, newestLikes } = args;
 
     dto.id = post.id;
@@ -43,4 +49,20 @@ export class PostResponseMapperDto {
 
     return dto;
   }
+}
+
+export interface IPostViewDto {
+  id: string;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  blogName: string;
+  createdAt: string;
+  extendedLikesInfo: {
+    likesCount: number;
+    dislikesCount: number;
+    myStatus: LikeStatus;
+    newestLikes: { addedAt: string; userId: string; login: string }[];
+  };
 }

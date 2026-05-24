@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { BaseQueryParamsDto, IBaseQueryParamsDto } from 'src/core/dto';
-import { PostsSortBy } from './posts-sort-by.dto';
+import { PostsSortBy } from '../../domain/dto';
 
 export class GetPostsQueryDto extends BaseQueryParamsDto {
   @ApiProperty({

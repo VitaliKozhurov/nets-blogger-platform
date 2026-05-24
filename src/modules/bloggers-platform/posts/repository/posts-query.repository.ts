@@ -6,7 +6,8 @@ import { getPaginationParams } from 'src/core/utils';
 import { DataSource } from 'typeorm';
 import { IGetPostsQueryDto, PostResponseMapperDto } from '../api/dto';
 import { INewestLike } from './dto/newest-like.dto';
-import { IPostRepository } from './dto/post-repository.dto';
+import { IPostWithDetails } from './dto/post-with-details.dto';
+import { IGetPostsParamsDto } from './dto/get-posts.params.dto';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -105,35 +106,31 @@ export class PostsQueryRepository {
     });
   }
 
-  async findAllForBlogId(args: {
-    blogId: string;
-    userId?: string;
-    query: IGetPostsQueryDto;
-  }): Promise<PaginationViewMapper<PostResponseMapperDto[]>> {
+  async findAllForBlogId(args: IGetPostsParamsDto): Promise<{
+    posts: { post: IPostWithDetails; newestLikes: INewestLike[] }[];
+    totalCount: number;
+  }> {
     const { blogId, userId, query } = args;
 
-    const { offset, limit } = getPaginationParams(query);
-    const { sortBy, sortDirection } = query;
+    const { sortBy, sortDirection, limit, offset } = query;
 
-    const sortColumn = `"${sortBy}"`;
-
-    const postsPromise: Promise<IPostRepository[]> = this.dataSource.query(
+    const postsPromise: Promise<IPostWithDetails[]> = this.dataSource.query(
       `
           SELECT p.*, 
             b."name" as "blogName",
             (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Like')::int as "likesCount",
             (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Dislike')::int as "dislikesCount",
             COALESCE(
-            (SELECT status FROM post_likes pl WHERE pl."postId" = p."id" AND "userId" = $3 LIMIT 1),
+            (SELECT status FROM post_likes pl WHERE pl."postId" = p."id" AND "userId" = $1 LIMIT 1),
             'None') as "myStatus"
             FROM posts p
             LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE p."blogId" = $4 AND p."deletedAt" IS NULL
-            ORDER BY ${sortColumn} ${sortDirection}
-            LIMIT $1
-            OFFSET $2
+            WHERE p."blogId" = $3 AND p."deletedAt" IS NULL
+            ORDER BY ${`"${sortBy}"`} ${sortDirection}
+            LIMIT $3
+            OFFSET $4
           `,
-      [limit, offset, userId ?? null, blogId]
+      [userId ?? null, blogId, limit, offset]
     );
 
     const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
@@ -185,19 +182,12 @@ export class PostsQueryRepository {
       return acc;
     }, {});
 
-    const items = posts.map(post =>
-      PostResponseMapperDto.mapToView({
-        post,
-        newestLikes: entries[post.id] ?? [],
-      })
-    );
+    const rawPosts = posts.map(post => ({
+      post,
+      newestLikes: entries[post.id] ?? [],
+    }));
 
-    return PaginationViewMapper.mapToViewModel({
-      items,
-      page: query.pageNumber,
-      size: query.pageSize,
-      totalCount: Number(countResult[0].count),
-    });
+    return { posts: rawPosts, totalCount: Number(countResult[0].count) };
   }
 
   async findById(args: { postId: string; userId?: string }): Promise<PostResponseMapperDto | null> {

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { BlogViewMapper } from '../application/dto/blog.mapper';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { IBlogRepositoryDto } from './dto/blog-repository.dto';
@@ -46,8 +45,8 @@ export class BlogsQueryRepository {
     };
   }
 
-  async findByIdOrThrow(id: string): Promise<BlogViewMapper> {
-    const [blog]: IBlogRepositoryDto[] = await this.dataSource.query(
+  async findByIdOrThrow(id: string): Promise<IBlogEntityDto> {
+    const [blog]: IBlogEntityDto[] = await this.dataSource.query(
       `
       SELECT *
         FROM blogs
@@ -63,6 +62,6 @@ export class BlogsQueryRepository {
       });
     }
 
-    return BlogViewMapper.mapToView(blog);
+    return blog;
   }
 }
