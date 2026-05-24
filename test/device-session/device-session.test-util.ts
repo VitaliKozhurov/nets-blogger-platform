@@ -8,6 +8,10 @@ export class DeviceSessionTestUtil {
     private readonly dataSource: DataSource
   ) {}
 
+  getSessionsForUser() {
+    return request(this.app.getHttpServer()).get('/security/devices');
+  }
+
   getAllSessions() {
     return this.dataSource.query(`
       SELECT *
@@ -19,5 +23,17 @@ export class DeviceSessionTestUtil {
     return request(this.app.getHttpServer())
       .get('/security/devices')
       .set('Cookie', `refreshToken=${refreshToken}`);
+  }
+
+  deleteUserSessionsExpectCurrent(refreshToken: string) {
+    return request(this.app.getHttpServer())
+      .delete('/security/devices')
+      .set('Cookie', `refreshToken=${refreshToken}`);
+  }
+
+  deleteSessionByDeviceId(args: { deviceId: string; refreshToken: string }) {
+    return request(this.app.getHttpServer())
+      .delete(`/security/devices/${args.deviceId}`)
+      .set('Cookie', `refreshToken=${args.refreshToken}`);
   }
 }
