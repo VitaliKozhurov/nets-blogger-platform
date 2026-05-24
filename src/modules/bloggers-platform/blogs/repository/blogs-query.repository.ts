@@ -1,30 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { PaginationViewMapper } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { getPaginationParams } from 'src/core/utils';
-import { BlogResponseMapperDto } from '../api/dto/blog.mapper';
-import { IGetBlogsQueryDto } from '../api/dto/get-blogs-query.dto';
+import { BlogViewMapper } from '../application/dto/blog.mapper';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { IBlogRepositoryDto } from './dto/blog-repository.dto';
+import { IGetBlogsParamsDto } from './dto/get-blogs.params.dto';
+import { IBlogEntityDto } from '../domain/dto';
 
 @Injectable()
 export class BlogsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findAll(query: IGetBlogsQueryDto): Promise<PaginationViewMapper<BlogResponseMapperDto[]>> {
-    const { searchNameTerm, sortBy, sortDirection } = query;
-
-    const sortColumn = `"${sortBy}"`;
-
-    const { offset, limit } = getPaginationParams(query);
+  async findAll(query: IGetBlogsParamsDto): Promise<{
+    blogs: IBlogEntityDto[];
+    totalCount: number;
+  }> {
+    const { searchNameTerm, sortBy, sortDirection, limit, offset } = query;
 
     const blogsPromise: Promise<IBlogRepositoryDto[]> = this.dataSource.query(
       `
       SELECT *
         FROM blogs
         WHERE (name ILIKE $1) AND "deletedAt" IS NULL
-        ORDER BY ${sortColumn} ${sortDirection}
+        ORDER BY ${`"${sortBy}"`} ${sortDirection}
         LIMIT $2
         OFFSET $3
       `,
@@ -40,17 +38,15 @@ export class BlogsQueryRepository {
       [`%${searchNameTerm ?? ''}%`]
     );
 
-    const [items, countResult] = await Promise.all([blogsPromise, totalCountPromise]);
+    const [blogsResult, countResult] = await Promise.all([blogsPromise, totalCountPromise]);
 
-    return PaginationViewMapper.mapToViewModel({
-      items: items.map(BlogResponseMapperDto.mapToView),
+    return {
+      blogs: blogsResult,
       totalCount: Number(countResult[0].count),
-      page: query.pageNumber,
-      size: query.pageSize,
-    });
+    };
   }
 
-  async findByIdOrThrow(id: string): Promise<BlogResponseMapperDto> {
+  async findByIdOrThrow(id: string): Promise<BlogViewMapper> {
     const [blog]: IBlogRepositoryDto[] = await this.dataSource.query(
       `
       SELECT *
@@ -67,6 +63,6 @@ export class BlogsQueryRepository {
       });
     }
 
-    return BlogResponseMapperDto.mapToView(blog);
+    return BlogViewMapper.mapToView(blog);
   }
 }

@@ -1,6 +1,6 @@
-import { IBlogRepositoryDto } from '../../repository';
+import { IBlogEntityDto } from '../../domain/dto';
 
-export class BlogResponseMapperDto {
+export class BlogViewMapper {
   id: string;
   name: string;
   description: string;
@@ -8,8 +8,8 @@ export class BlogResponseMapperDto {
   createdAt: string;
   isMembership: boolean;
 
-  static mapToView(dbBlog: IBlogRepositoryDto): BlogResponseMapperDto {
-    const dto = new BlogResponseMapperDto();
+  static mapToView(dbBlog: IBlogEntityDto): BlogViewMapper {
+    const dto = new BlogViewMapper();
 
     dto.id = dbBlog.id;
     dto.name = dbBlog.name;
@@ -20,4 +20,13 @@ export class BlogResponseMapperDto {
 
     return dto;
   }
+}
+
+export interface IBlogViewDto {
+  id: string;
+  name: string;
+  description: string;
+  websiteUrl: string;
+  createdAt: string;
+  isMembership: boolean;
 }

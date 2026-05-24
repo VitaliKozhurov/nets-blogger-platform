@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IBlogRepositoryDto } from './dto/blog-repository.dto';
-import { BlogResponseMapperDto } from '../api';
+import { BlogViewMapper } from '../api';
 
 @Injectable()
 export class BlogsRepository {
@@ -33,7 +33,7 @@ export class BlogsRepository {
       [name, description, websiteUrl]
     );
 
-    return BlogResponseMapperDto.mapToView(blog);
+    return BlogViewMapper.mapToView(blog);
   }
 
   async update(dto: { blogId: string; name: string; description: string; websiteUrl: string }) {

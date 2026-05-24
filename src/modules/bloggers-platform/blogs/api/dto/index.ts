@@ -1,5 +1,4 @@
 export { BlogResponseDto } from './blog-response.dto';
-export { BlogResponseMapperDto } from './blog.mapper';
 export { BlogsSortBy } from './blogs-sort-by.dto';
 export { CreateBlogRequestDto } from './create-blog.dto';
 export { CreatePostByBlogRequestDto } from './create-post-by-blog.dto';
