@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { PaginationViewMapper } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { getPaginationParams } from 'src/core/utils';
 import { DataSource } from 'typeorm';
-import { IGetPostsQueryDto, PostResponseMapperDto } from '../api/dto';
 import { INewestLike } from './dto/newest-like.dto';
 import { IPostWithDetails } from './dto/post-with-details.dto';
 import { IGetPostsParamsDto } from './dto/get-posts.params.dto';
@@ -13,33 +10,30 @@ import { IGetPostsParamsDto } from './dto/get-posts.params.dto';
 export class PostsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findAll(args: {
-    query: IGetPostsQueryDto;
-    userId?: string;
-  }): Promise<PaginationViewMapper<PostResponseMapperDto[]>> {
+  async findAll(args: Omit<IGetPostsParamsDto, 'blogId'>): Promise<{
+    posts: { post: IPostWithDetails; newestLikes: INewestLike[] }[];
+    totalCount: number;
+  }> {
     const { query, userId } = args;
-    const { offset, limit } = getPaginationParams(query);
-    const { sortBy, sortDirection } = query;
+    const { sortBy, sortDirection, limit, offset } = query;
 
-    const sortColumn = `"${sortBy}"`;
-
-    const postsPromise: Promise<IPostRepository[]> = this.dataSource.query(
+    const postsPromise: Promise<IPostWithDetails[]> = this.dataSource.query(
       `
           SELECT p.*, 
             b."name" as "blogName",
             (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Like')::int as "likesCount",
             (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Dislike')::int as "dislikesCount",
             COALESCE(
-            (SELECT status FROM post_likes pl WHERE pl."postId" = p."id" AND "userId" = $3 LIMIT 1),
+            (SELECT status FROM post_likes pl WHERE pl."postId" = p."id" AND "userId" = $1 LIMIT 1),
             'None') as "myStatus"
             FROM posts p
             LEFT JOIN blogs b on p."blogId" = b."id"
             WHERE p."deletedAt" IS NULL
-            ORDER BY ${sortColumn} ${sortDirection}
-            LIMIT $1
-            OFFSET $2
+            ORDER BY ${`"${sortBy}"`} ${sortDirection}
+            LIMIT $2
+            OFFSET $3
           `,
-      [limit, offset, userId ?? null]
+      [userId ?? null, limit, offset]
     );
 
     const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
@@ -91,19 +85,12 @@ export class PostsQueryRepository {
       return acc;
     }, {});
 
-    const items = posts.map(post =>
-      PostResponseMapperDto.mapToView({
-        post,
-        newestLikes: entries[post.id] ?? [],
-      })
-    );
+    const rawPosts = posts.map(post => ({
+      post,
+      newestLikes: entries[post.id] ?? [],
+    }));
 
-    return PaginationViewMapper.mapToViewModel({
-      items,
-      totalCount: Number(countResult[0].count),
-      page: query.pageNumber,
-      size: query.pageSize,
-    });
+    return { posts: rawPosts, totalCount: Number(countResult[0].count) };
   }
 
   async findAllForBlogId(args: IGetPostsParamsDto): Promise<{
