@@ -1,6 +1,6 @@
 import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
-import { IPostViewDto } from '../../api';
 import { PostsQueryRepository } from '../../repository';
+import { IPostViewDto, PostViewMapper } from '../dto';
 
 interface GetPostByIdDto {
   postId: string;
@@ -18,8 +18,8 @@ export class GetPostsByIdHandler implements IQueryHandler<GetPostByIdQuery> {
   constructor(private postsQueryRepository: PostsQueryRepository) {}
 
   async execute({ dto }: GetPostByIdQuery) {
-    const result = await this.postsQueryRepository.findByIdOrThrow(dto);
+    const { post, newestLikes } = await this.postsQueryRepository.findByIdOrThrow(dto);
 
-    return result;
+    return PostViewMapper.mapToView({ post, newestLikes });
   }
 }

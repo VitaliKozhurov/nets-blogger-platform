@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { LikeStatus } from '../../likes';
-import { CommentResponseMapperDto } from '../api/dto/comment.mapper';
+import { ICreateCommentParamsDto } from './dto/create-comment.params.dto';
+import { ICommentEntityDto } from '../domain/dto';
 
 type RawCommentType = {
   id: string;
@@ -29,10 +29,10 @@ export class CommentsRepository {
     return comment;
   }
 
-  async create(args: { userId: string; login: string; postId: string; content: string }) {
-    const { userId, login, postId, content } = args;
+  async create(args: ICreateCommentParamsDto): Promise<ICommentEntityDto> {
+    const { userId, postId, content } = args;
 
-    const [comment]: RawCommentType[] = await this.dataSource.query(
+    const [comment]: ICommentEntityDto[] = await this.dataSource.query(
       `
           INSERT INTO "comments" ("ownerId", "postId", "content")
             VALUES ($1, $2, $3)
@@ -41,16 +41,7 @@ export class CommentsRepository {
       [userId, postId, content]
     );
 
-    return CommentResponseMapperDto.mapToView({
-      id: comment.id,
-      content: comment.content,
-      createdAt: comment.createdAt,
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: LikeStatus.None,
-      userId: comment.ownerId,
-      userLogin: login,
-    });
+    return comment;
   }
 
   async update(args: { userId: string; commentId: string; content: string }) {

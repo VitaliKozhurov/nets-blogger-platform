@@ -5,7 +5,7 @@ import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { getPaginationParams } from 'src/core/utils';
 import { DataSource } from 'typeorm';
 import { IGetCommentsByPostIdQueryDto } from '../api/dto';
-import { CommentResponseMapperDto } from '../api/dto/comment.mapper';
+import { CommentResponseMapperDto } from '../application/dto/comment.mapper';
 import { ICommentRepositoryDto } from './dto/comment-repository.dto';
 
 @Injectable()

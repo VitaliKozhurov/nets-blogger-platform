@@ -46,7 +46,10 @@ export class PostsController {
     @Query() query: GetPostsQueryDto,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    const queryCommandDto = { query, userId: userDto ? userDto.userId : undefined };
+    const queryCommandDto = {
+      query,
+      userId: userDto ? userDto.userId : undefined,
+    };
 
     return this.queryBus.execute(new GetPostsQuery(queryCommandDto));
   }
@@ -58,7 +61,10 @@ export class PostsController {
     @Param('id', UUIDValidationPipe) id: string,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    const commandQueryDto = { postId: id, userId: userDto ? userDto.userId : undefined };
+    const commandQueryDto = {
+      postId: id,
+      userId: userDto ? userDto.userId : undefined,
+    };
 
     return this.queryBus.execute(new GetPostByIdQuery(commandQueryDto));
   }
@@ -71,7 +77,12 @@ export class PostsController {
     @Body() body: CreateCommentByPostRequestDto,
     @UserFromRequest() dto: RequestUserDto
   ) {
-    const commandDto = { postId: id, userId: dto.userId, login: dto.login, content: body.content };
+    const commandDto = {
+      postId: id,
+      userId: dto.userId,
+      login: dto.login,
+      content: body.content,
+    };
 
     return this.commandBus.execute(new CreateCommentByPostCommand(commandDto));
   }
@@ -84,7 +95,11 @@ export class PostsController {
     @Param('id', UUIDValidationPipe) id: string,
     @OptionalUserFromRequest() userDto: RequestUserDto | null
   ) {
-    const commandQueryDto = { postId: id, userId: userDto ? userDto.userId : undefined, query };
+    const commandQueryDto = {
+      postId: id,
+      userId: userDto ? userDto.userId : undefined,
+      query,
+    };
 
     return this.queryBus.execute(new GetPostCommentsQuery(commandQueryDto));
   }

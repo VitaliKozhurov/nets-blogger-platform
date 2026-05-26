@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { INewestLike } from './dto/newest-like.dto';
 import { IPostWithDetails } from './dto/post-with-details.dto';
 import { IGetPostsParamsDto } from './dto/get-posts.params.dto';
+import { IGetPostParamsDto } from './dto/get-post.params.dto';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -177,22 +178,12 @@ export class PostsQueryRepository {
     return { posts: rawPosts, totalCount: Number(countResult[0].count) };
   }
 
-  async findById(args: { postId: string; userId?: string }): Promise<PostResponseMapperDto | null> {
+  async findById(
+    args: IGetPostParamsDto
+  ): Promise<{ post: IPostWithDetails; newestLikes: INewestLike[] } | null> {
     const { postId, userId } = args;
 
-    const newestLikes: INewestLike[] = await this.dataSource.query(
-      `
-      SELECT pl."createdAt" as "addedAt",pl. "userId", u."login"
-          FROM post_likes pl
-          LEFT JOIN users u ON pl."userId" = u."id"
-          WHERE pl."postId" = $1 AND pl.status = 'Like'
-          ORDER BY pl."createdAt" DESC
-          LIMIT 3
-      `,
-      [postId]
-    );
-
-    const [post]: IPostRepository[] = await this.dataSource.query(
+    const [post]: IPostWithDetails[] = await this.dataSource.query(
       `
       SELECT p.*, 
           b."name" as "blogName", 
@@ -208,10 +199,24 @@ export class PostsQueryRepository {
       [postId, userId ?? null]
     );
 
-    return post ? PostResponseMapperDto.mapToView({ post, newestLikes }) : null;
+    const newestLikes: INewestLike[] = await this.dataSource.query(
+      `
+      SELECT pl."createdAt" as "addedAt",pl. "userId", u."login"
+          FROM post_likes pl
+          LEFT JOIN users u ON pl."userId" = u."id"
+          WHERE pl."postId" = $1 AND pl.status = 'Like'
+          ORDER BY pl."createdAt" DESC
+          LIMIT 3
+      `,
+      [postId]
+    );
+
+    return post ? { post, newestLikes } : null;
   }
 
-  async findByIdOrThrow(args: { postId: string; userId?: string }): Promise<PostResponseMapperDto> {
+  async findByIdOrThrow(
+    args: IGetPostParamsDto
+  ): Promise<{ post: IPostWithDetails; newestLikes: INewestLike[] }> {
     const post = await this.findById(args);
 
     if (!post) {

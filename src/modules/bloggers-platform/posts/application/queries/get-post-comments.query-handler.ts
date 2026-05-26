@@ -4,9 +4,9 @@ import {
   CommentsQueryRepository,
   IGetCommentsByPostIdQueryDto,
 } from 'src/modules/bloggers-platform/comments';
-import { CommentResponseMapperDto } from 'src/modules/bloggers-platform/comments/api/dto/comment.mapper';
 import { PostsRepository } from '../../repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { CommentViewMapper } from 'src/modules/bloggers-platform/comments/application/dto/comment.mapper';
 
 interface GetPostCommentsDto {
   postId: string;
@@ -14,9 +14,7 @@ interface GetPostCommentsDto {
   query: IGetCommentsByPostIdQueryDto;
 }
 
-export class GetPostCommentsQuery extends Query<
-  PaginationViewMapper<CommentResponseMapperDto[]>
-> {
+export class GetPostCommentsQuery extends Query<PaginationViewMapper<CommentViewMapper[]>> {
   constructor(public dto: GetPostCommentsDto) {
     super();
   }

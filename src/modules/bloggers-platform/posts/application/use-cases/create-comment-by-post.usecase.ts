@@ -1,11 +1,11 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { CommentsFactory } from 'src/modules/bloggers-platform/comments';
-import { CommentResponseMapperDto } from 'src/modules/bloggers-platform/comments/api/dto/comment.mapper';
 import { PostsRepository } from '../../repository';
 import { ICreateCommentByPostDto } from '../dto/create-comment-by-post.dto';
+import { CommentViewMapper } from 'src/modules/bloggers-platform/comments/application/dto/comment.mapper';
 
-export class CreateCommentByPostCommand extends Command<CommentResponseMapperDto> {
+export class CreateCommentByPostCommand extends Command<CommentViewMapper> {
   constructor(public dto: ICreateCommentByPostDto) {
     super();
   }
@@ -18,7 +18,7 @@ export class CreateCommentByPostUseCase implements ICommandHandler<CreateComment
     private commentsFactory: CommentsFactory
   ) {}
 
-  async execute({ dto }: CreateCommentByPostCommand): Promise<CommentResponseMapperDto> {
+  async execute({ dto }: CreateCommentByPostCommand): Promise<CommentViewMapper> {
     const post = await this.postsRepository.findById(dto.postId);
 
     if (!post) {
@@ -28,8 +28,6 @@ export class CreateCommentByPostUseCase implements ICommandHandler<CreateComment
       });
     }
 
-    const createdComment = await this.commentsFactory.createComment(dto);
-
-    return createdComment;
+    return this.commentsFactory.createComment(dto);
   }
 }
