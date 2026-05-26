@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { IsOptionStringParam } from 'src/core/decorators';
-import { BaseQueryParamsDto, IBaseQueryParamsDto } from 'src/core/dto';
+import { BaseQueryParamsDto } from 'src/core/dto';
 import { type Nullable } from 'src/core/types';
-import { BlogsSortBy } from './blogs-sort-by.dto';
+import { BlogsSortBy } from '../../api/dto/blogs-sort-by.dto';
 
 export class GetBlogsQueryDto extends BaseQueryParamsDto {
   @ApiPropertyOptional({
@@ -23,9 +23,4 @@ export class GetBlogsQueryDto extends BaseQueryParamsDto {
   })
   @IsEnum(BlogsSortBy)
   sortBy: BlogsSortBy = BlogsSortBy.CreatedAt;
-}
-
-export interface IGetBlogsQueryDto extends IBaseQueryParamsDto {
-  searchNameTerm: Nullable<string>;
-  sortBy: BlogsSortBy;
 }

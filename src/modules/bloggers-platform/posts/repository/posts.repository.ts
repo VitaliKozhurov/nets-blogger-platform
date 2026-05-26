@@ -1,16 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { PostResponseMapperDto } from '../api';
-import { IPostRepository } from './dto/post-with-details.dto';
-import { LikeStatus } from '../../likes';
+import { IPostEntityDto } from '../domain/dto';
+import { ICreatePostParamsDto } from './dto/create-post.params.dto';
+import { IUpdatePostParamsDto } from './dto/update-post.params.dto';
+import { IDeletePostParamsDto } from './dto/delete-post.params.dto';
 
 @Injectable()
 export class PostsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findById(postId: string): Promise<IPostRepository | null> {
-    const [post]: IPostRepository[] = await this.dataSource.query(
+  async findById(postId: string): Promise<(IPostEntityDto & { blogName: string }) | null> {
+    const [post]: (IPostEntityDto & { blogName: string })[] = await this.dataSource.query(
       `
           SELECT *, b."name" as blogName
             FROM posts p
@@ -23,32 +24,22 @@ export class PostsRepository {
     return post || null;
   }
 
-  async create(dto: { title: string; shortDescription: string; content: string; blogId: string }) {
+  async create(dto: ICreatePostParamsDto): Promise<IPostEntityDto & { blogName: string }> {
     const { blogId, title, shortDescription, content } = dto;
 
-    const [post]: Omit<IPostRepository, 'likesCount' | 'dislikesCount' | 'myStatus'>[] =
-      await this.dataSource.query(
-        `
+    const [post]: (IPostEntityDto & { blogName: string })[] = await this.dataSource.query(
+      `
           INSERT INTO "posts" ("blogId", title, "shortDescription", content)
             VALUES ($1, $2, $3, $4)
             RETURNING *, (SELECT name FROM blogs WHERE id = $1) as "blogName"
         `,
-        [blogId, title, shortDescription, content]
-      );
+      [blogId, title, shortDescription, content]
+    );
 
-    return PostResponseMapperDto.mapToView({
-      post: { ...post, likesCount: 0, dislikesCount: 0, myStatus: LikeStatus.None },
-      newestLikes: [],
-    });
+    return post;
   }
 
-  async update(dto: {
-    blogId: string;
-    postId: string;
-    title: string;
-    shortDescription: string;
-    content: string;
-  }) {
+  async update(dto: IUpdatePostParamsDto) {
     const { blogId, postId, title, shortDescription, content } = dto;
 
     const [rows]: [{ id: string }[], number] = await this.dataSource.query(
@@ -66,7 +57,7 @@ export class PostsRepository {
     return rows.length > 0;
   }
 
-  async delete(dto: { blogId: string; postId: string }) {
+  async delete(dto: IDeletePostParamsDto) {
     const { blogId, postId } = dto;
 
     const [rows]: [{ id: string }[], number] = await this.dataSource.query(

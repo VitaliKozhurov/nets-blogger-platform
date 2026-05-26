@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ICreateBlogDto } from '../dto';
 import { BlogsRepository } from '../../repository';
+import { BlogViewMapper } from '../dto/blog.mapper';
 
 @Injectable()
 export class BlogsFactory {
@@ -9,6 +10,6 @@ export class BlogsFactory {
   async createBlog(dto: ICreateBlogDto) {
     const newBlog = await this.blogsRepository.create(dto);
 
-    return newBlog;
+    return BlogViewMapper.mapToView(newBlog);
   }
 }

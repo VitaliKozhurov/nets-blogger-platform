@@ -1,7 +1,7 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ICreateBlogDto } from '../dto';
 import { BlogsFactory } from '../factories';
-import { IBlogViewDto } from '../../api/dto/blog-view.dto';
+import { IBlogViewDto } from '../dto/blog.mapper';
 
 export class CreateBlogCommand extends Command<IBlogViewDto> {
   constructor(public dto: ICreateBlogDto) {
@@ -14,8 +14,6 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   constructor(private blogsFactory: BlogsFactory) {}
 
   async execute({ dto }: CreateBlogCommand) {
-    const createdBlog = await this.blogsFactory.createBlog(dto);
-
-    return createdBlog;
+    return this.blogsFactory.createBlog(dto);
   }
 }

@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ICreatePostDto } from '@modules/bloggers-platform/posts/application/dto';
 import { PostsFactory } from '@modules/bloggers-platform/posts/application/factories';
-import { BlogsQueryRepository } from 'src/modules/bloggers-platform/blogs/repository/blogs-query.repository';
+import { BlogsQueryRepository } from '@modules/bloggers-platform/blogs/repository/blogs-query.repository';
 
 export class CreatePostCommand {
   constructor(public dto: ICreatePostDto) {}
@@ -18,8 +18,6 @@ export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
   async execute({ dto }: CreatePostCommand) {
     await this.blogsQueryRepository.findByIdOrThrow(dto.blogId);
 
-    const createdPost = await this.postsFactory.createPost(dto);
-
-    return createdPost;
+    return this.postsFactory.createPost(dto);
   }
 }

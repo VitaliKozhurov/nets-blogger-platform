@@ -58,9 +58,7 @@ export class SuperAdminBlogsController {
   @Post()
   @CreateBlogSwagger()
   async create(@Body() dto: CreateBlogRequestDto) {
-    const createdBlog = await this.commandBus.execute(new CreateBlogCommand(dto));
-
-    return createdBlog;
+    return this.commandBus.execute(new CreateBlogCommand(dto));
   }
 
   @Put(':id')

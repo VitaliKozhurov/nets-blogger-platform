@@ -1,10 +1,10 @@
 import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
-import { IGetBlogsQueryDto } from '../../api';
 import { BlogsQueryRepository } from '../../repository';
 import { IPaginationResponseDto, PaginationViewMapper } from 'src/core/dto/';
 import { getPaginationParams } from 'src/core/utils';
 import { IGetBlogsParamsDto } from '../../repository/dto/get-blogs.params.dto';
 import { BlogViewMapper, IBlogViewDto } from '../dto/blog.mapper';
+import { IGetBlogsQueryDto } from '../dto';
 
 export class GetBlogsQuery extends Query<IPaginationResponseDto<IBlogViewDto[]>> {
   constructor(public dto: IGetBlogsQueryDto) {

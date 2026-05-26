@@ -14,9 +14,9 @@ export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
   constructor(private blogRepository: BlogsRepository) {}
 
   async execute({ dto }: UpdateBlogCommand): Promise<boolean> {
-    const updatedBlog = await this.blogRepository.update(dto);
+    const isUpdated = await this.blogRepository.update(dto);
 
-    if (!updatedBlog) {
+    if (!isUpdated) {
       throw new DomainException({
         code: DomainExceptionCode.NOT_FOUND_ERROR,
         message: 'Blog not found',

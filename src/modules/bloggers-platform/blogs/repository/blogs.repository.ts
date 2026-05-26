@@ -2,14 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IBlogRepositoryDto } from './dto/blog-repository.dto';
-import { BlogViewMapper } from '../api';
+import { IBlogEntityDto } from '../domain/dto';
+import { ICreateBlogParamsDto } from './dto/create-blog.params.dto';
+import { IUpdateBlogParamsDto } from './dto/update-blog.params.dto';
 
 @Injectable()
 export class BlogsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findById(id: string): Promise<IBlogRepositoryDto | null> {
-    const [blog]: IBlogRepositoryDto[] = await this.dataSource.query(
+  async findById(id: string): Promise<IBlogEntityDto | null> {
+    const [blog]: IBlogEntityDto[] = await this.dataSource.query(
       `
           SELECT *
             FROM blogs
@@ -21,7 +23,7 @@ export class BlogsRepository {
     return blog || null;
   }
 
-  async create(dto: { name: string; description: string; websiteUrl: string }) {
+  async create(dto: ICreateBlogParamsDto): Promise<IBlogEntityDto> {
     const { name, description, websiteUrl } = dto;
 
     const [blog]: IBlogRepositoryDto[] = await this.dataSource.query(
@@ -33,10 +35,10 @@ export class BlogsRepository {
       [name, description, websiteUrl]
     );
 
-    return BlogViewMapper.mapToView(blog);
+    return blog;
   }
 
-  async update(dto: { blogId: string; name: string; description: string; websiteUrl: string }) {
+  async update(dto: IUpdateBlogParamsDto): Promise<boolean> {
     const { blogId, name, description, websiteUrl } = dto;
 
     const [rows]: [{ id: string }[], number] = await this.dataSource.query(
