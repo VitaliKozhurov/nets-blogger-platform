@@ -1,29 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { PaginationViewMapper } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { getPaginationParams } from 'src/core/utils';
 import { DataSource } from 'typeorm';
-import { IGetCommentsByPostIdQueryDto } from '../api/dto';
-import { CommentResponseMapperDto } from '../application/dto/comment.mapper';
-import { ICommentRepositoryDto } from './dto/comment-repository.dto';
+import { ICommentsWithDetailsDto } from './dto/comment-with-details.dto';
+import { IGetCommentsByPostParamsDto } from './dto/get-comments-by-post.dto';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async getAllByPostId(args: {
-    postId: string;
-    userId?: string;
-    query: IGetCommentsByPostIdQueryDto;
-  }): Promise<PaginationViewMapper<CommentResponseMapperDto[]>> {
+  async getAllByPostId(
+    args: IGetCommentsByPostParamsDto
+  ): Promise<{ comments: ICommentsWithDetailsDto[]; totalCount: number }> {
     const { postId, userId, query } = args;
-    const { offset, limit } = getPaginationParams(query);
-    const { sortBy, sortDirection } = query;
+    const { sortBy, sortDirection, limit, offset } = query;
 
-    const sortColumn = `"${sortBy}"`;
-
-    const commentsPromise: Promise<ICommentRepositoryDto[]> = this.dataSource.query(
+    const commentsPromise: Promise<ICommentsWithDetailsDto[]> = this.dataSource.query(
       `
           SELECT 
             c."id", 
@@ -36,15 +28,15 @@ export class CommentsQueryRepository {
               (SELECT COUNT(*) FROM comment_likes 
               WHERE comment_likes."commentId" =  c."id" AND comment_likes."status" = 'Dislike')::int as "dislikesCount",
               COALESCE((SELECT status FROM comment_likes 
-              WHERE comment_likes."commentId" =  c."id" AND comment_likes."userId" = $2 LIMIT 1), 'None') as "myStatus"
+              WHERE comment_likes."commentId" =  c."id" AND comment_likes."userId" = $1 LIMIT 1), 'None') as "myStatus"
               FROM comments c
               LEFT JOIN users u ON c."ownerId" = u."id"
-              WHERE c."deletedAt" IS NULL AND c."postId" = $1 
-              ORDER BY ${sortColumn} ${sortDirection}
+              WHERE c."deletedAt" IS NULL AND c."postId" = $2 
+              ORDER BY ${`"${sortBy}"`} ${sortDirection}
               LIMIT $3
               OFFSET $4
         `,
-      [postId, userId, limit, offset]
+      [userId ?? null, postId, limit, offset]
     );
 
     const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
@@ -58,25 +50,19 @@ export class CommentsQueryRepository {
 
     const [comments, countResult] = await Promise.all([commentsPromise, totalCountPromise]);
 
-    const items = comments.map(comment => {
-      return CommentResponseMapperDto.mapToView(comment);
-    });
-
-    return PaginationViewMapper.mapToViewModel({
-      items,
+    return {
+      comments,
       totalCount: Number(countResult[0].count),
-      page: query.pageNumber,
-      size: query.pageSize,
-    });
+    };
   }
 
   async findById(args: {
     commentId: string;
     userId?: string;
-  }): Promise<CommentResponseMapperDto | null> {
-    const { commentId, userId } = args;
+  }): Promise<ICommentsWithDetailsDto | null> {
+    const { userId, commentId } = args;
 
-    const [comment]: ICommentRepositoryDto[] = await this.dataSource.query(
+    const [comment]: ICommentsWithDetailsDto[] = await this.dataSource.query(
       `
           SELECT 
             c."id", 
@@ -89,21 +75,21 @@ export class CommentsQueryRepository {
               (SELECT COUNT(*) FROM comment_likes 
               WHERE comment_likes."commentId" =  c."id" AND comment_likes."status" = 'Dislike')::int as "dislikesCount",
               COALESCE((SELECT status FROM comment_likes 
-              WHERE comment_likes."commentId" =  c."id" AND comment_likes."userId" = $2 LIMIT 1), 'None') as "myStatus"
+              WHERE comment_likes."commentId" =  c."id" AND comment_likes."userId" = $1 LIMIT 1), 'None') as "myStatus"
               FROM comments c
               LEFT JOIN users u ON c."ownerId" = u."id"
-              WHERE c."deletedAt" IS NULL AND c."id" = $1 
+              WHERE c."deletedAt" IS NULL AND c."id" = $2 
         `,
-      [commentId, userId]
+      [userId ?? null, commentId]
     );
 
-    return comment ? CommentResponseMapperDto.mapToView(comment) : null;
+    return comment ? comment : null;
   }
 
   async findByIdOrThrow(args: {
     commentId: string;
     userId?: string;
-  }): Promise<CommentResponseMapperDto> {
+  }): Promise<ICommentsWithDetailsDto> {
     const { commentId, userId } = args;
 
     const comment = await this.findById({ commentId, userId });

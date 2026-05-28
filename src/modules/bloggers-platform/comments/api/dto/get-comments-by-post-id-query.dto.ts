@@ -1,6 +1,6 @@
 import { IsEnum } from 'class-validator';
 import { BaseQueryParamsDto, IBaseQueryParamsDto } from 'src/core/dto';
-import { CommentsSortBy } from './comment-sort-by.dto';
+import { CommentsSortBy } from '../../domain/dto/comment-sort-by.dto';
 
 export class GetCommentsByPostIdQueryDto extends BaseQueryParamsDto {
   @IsEnum(CommentsSortBy)

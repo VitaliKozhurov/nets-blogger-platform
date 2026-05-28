@@ -7,6 +7,8 @@ import {
 import { PostsRepository } from '../../repository';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { CommentViewMapper } from 'src/modules/bloggers-platform/comments/application/dto/comment.mapper';
+import { getPaginationParams } from 'src/core/utils';
+import { IGetCommentsByPostParamsDto } from 'src/modules/bloggers-platform/comments/repository/dto/get-comments-by-post.dto';
 
 interface GetPostCommentsDto {
   postId: string;
@@ -28,7 +30,9 @@ export class GetPostCommentsHandler implements IQueryHandler<GetPostCommentsQuer
   ) {}
 
   async execute({ dto }: GetPostCommentsQuery) {
-    const post = await this.postsRepository.findById(dto.postId);
+    const { postId, query, userId } = dto;
+
+    const post = await this.postsRepository.findById(postId);
 
     if (!post) {
       throw new DomainException({
@@ -37,8 +41,31 @@ export class GetPostCommentsHandler implements IQueryHandler<GetPostCommentsQuer
       });
     }
 
-    const result = await this.commentsQueryRepository.getAllByPostId(dto);
+    const { offset, limit } = getPaginationParams({
+      pageNumber: query.pageNumber,
+      pageSize: query.pageSize,
+    });
 
-    return result;
+    const params: IGetCommentsByPostParamsDto = {
+      postId,
+      userId,
+      query: {
+        limit,
+        offset,
+        sortBy: query.sortBy,
+        sortDirection: query.sortDirection,
+      },
+    };
+
+    const commentsData = await this.commentsQueryRepository.getAllByPostId(params);
+
+    const items = commentsData.comments.map(item => CommentViewMapper.mapToView(item));
+
+    return PaginationViewMapper.mapToViewModel({
+      items,
+      totalCount: commentsData.totalCount,
+      page: query.pageNumber,
+      size: query.pageSize,
+    });
   }
 }

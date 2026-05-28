@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-import { LikeStatus } from '@modules/bloggers-platform/likes/domain';
-import { IPostViewDto } from './post-view.dto';
+import { LikeStatus } from 'src/modules/bloggers-platform/likes/domain/dto';
+import { IPostViewDto } from '../../application';
 
 class NewestLike {
   @ApiProperty({

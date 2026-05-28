@@ -28,8 +28,13 @@ import {
   UserFromRequest,
 } from 'src/modules/users-account/auth/decorators';
 import { GetCommentsByPostIdQueryDto } from '../../comments';
-import { CreateCommentByPostCommand, UpdatePostLikeStatusCommand } from '../application';
-import { GetPostByIdQuery, GetPostCommentsQuery, GetPostsQuery } from '../application/queries';
+import {
+  CreateCommentByPostCommand,
+  UpdatePostLikeStatusCommand,
+  GetPostByIdQuery,
+  GetPostCommentsQuery,
+  GetPostsQuery,
+} from '../application';
 import { CreateCommentByPostRequestDto } from './dto/create-comment-by-post.dto';
 
 @Controller('posts')
@@ -113,7 +118,11 @@ export class PostsController {
     @Body() body: UpdatePostLikeStatusRequestDto,
     @UserFromRequest() dto: RequestUserDto
   ) {
-    const commandDto = { postId: id, userId: dto.userId, likeStatus: body.likeStatus };
+    const commandDto = {
+      postId: id,
+      userId: dto.userId,
+      likeStatus: body.likeStatus,
+    };
 
     return this.commandBus.execute(new UpdatePostLikeStatusCommand(commandDto));
   }

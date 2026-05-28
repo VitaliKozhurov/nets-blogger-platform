@@ -1,4 +1,4 @@
-import { LikeStatus } from '@modules/bloggers-platform/likes/domain';
+import { LikeStatus } from 'src/modules/bloggers-platform/likes/domain/dto';
 import type { RequestUserDto } from 'src/modules/users-account/auth/application/dto/request-user.dto';
 
 export interface IUpdateCommentLikeStatusDto extends RequestUserDto {

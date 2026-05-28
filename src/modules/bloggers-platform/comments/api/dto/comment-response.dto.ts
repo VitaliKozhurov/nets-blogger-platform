@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ICommentResponseDto } from '@modules/bloggers-platform/comments/application/dto';
-import { LikeStatus } from '@modules/bloggers-platform/likes/domain';
+import { LikeStatus } from '@modules/bloggers-platform/likes/domain/dto';
 
 class CommentatorInfo {
   @ApiProperty({

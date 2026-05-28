@@ -6,7 +6,7 @@ import {
   DeleteCommentCommand,
   UpdateCommentContentCommand,
   UpdateCommentLikeStatusCommand,
-} from '@modules/bloggers-platform/comments/application/use-cases';
+} from '@modules/bloggers-platform/comments/application';
 import {
   DeleteCommentSwagger,
   GetCommentSwagger,

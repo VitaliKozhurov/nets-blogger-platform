@@ -4,21 +4,12 @@ import { DataSource } from 'typeorm';
 import { ICreateCommentParamsDto } from './dto/create-comment.params.dto';
 import { ICommentEntityDto } from '../domain/dto';
 
-type RawCommentType = {
-  id: string;
-  content: string;
-  postId: string;
-  ownerId: string;
-  createdAt: Date;
-  deletedAt: Date | null;
-};
-
 @Injectable()
 export class CommentsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async getById(commentId: string) {
-    const [comment]: RawCommentType[] = await this.dataSource.query(
+    const [comment]: ICommentEntityDto[] = await this.dataSource.query(
       `  SELECT c.* 
             FROM comments c
             WHERE c."id" = $1 AND c."deletedAt" IS NULL 

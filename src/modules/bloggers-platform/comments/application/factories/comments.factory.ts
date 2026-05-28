@@ -12,7 +12,10 @@ export class CommentsFactory {
     const newComment = await this.commentsRepository.create(dto);
 
     return CommentViewMapper.mapToView({
-      ...newComment,
+      id: newComment.id,
+      userId: newComment.ownerId,
+      content: newComment.content,
+      createdAt: newComment.createdAt,
       likesCount: 0,
       dislikesCount: 0,
       myStatus: LikeStatus.None,

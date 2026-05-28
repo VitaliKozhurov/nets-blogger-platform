@@ -1,4 +1,3 @@
-import { LikesFactory } from '@modules/bloggers-platform/likes/application/factories';
 import { LikesRepository } from '@modules/bloggers-platform/likes/repository';
 import { IUpdatePostLikeStatusDto } from '@modules/bloggers-platform/posts/application/dto';
 import { PostsRepository } from '@modules/bloggers-platform/posts/repository';
@@ -12,7 +11,6 @@ export class UpdatePostLikeStatusCommand {
 @CommandHandler(UpdatePostLikeStatusCommand)
 export class UpdatePostLikeStatusUseCase implements ICommandHandler<UpdatePostLikeStatusCommand> {
   constructor(
-    private likesFactory: LikesFactory,
     private postsRepository: PostsRepository,
     private likesRepository: LikesRepository
   ) {}

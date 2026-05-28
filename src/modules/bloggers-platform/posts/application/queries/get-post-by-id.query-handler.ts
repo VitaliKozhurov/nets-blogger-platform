@@ -18,8 +18,8 @@ export class GetPostsByIdHandler implements IQueryHandler<GetPostByIdQuery> {
   constructor(private postsQueryRepository: PostsQueryRepository) {}
 
   async execute({ dto }: GetPostByIdQuery) {
-    const { post, newestLikes } = await this.postsQueryRepository.findByIdOrThrow(dto);
+    const result = await this.postsQueryRepository.findByIdOrThrow(dto);
 
-    return PostViewMapper.mapToView({ post, newestLikes });
+    return PostViewMapper.mapToView(result);
   }
 }

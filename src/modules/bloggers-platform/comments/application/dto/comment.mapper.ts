@@ -1,5 +1,5 @@
 import { LikeStatus } from '@modules/bloggers-platform/likes/domain/dto';
-import { ICommentEntityDto } from '../../domain/dto';
+import { ICommentsWithDetailsDto } from '../../repository/dto/comment-with-details.dto';
 
 export class CommentViewMapper {
   id: string;
@@ -12,18 +12,11 @@ export class CommentViewMapper {
     myStatus: LikeStatus;
   };
 
-  static mapToView(
-    comment: ICommentEntityDto & {
-      likesCount: number;
-      dislikesCount: number;
-      myStatus: LikeStatus;
-      userLogin: string;
-    }
-  ): CommentViewMapper {
+  static mapToView(comment: ICommentsWithDetailsDto): CommentViewMapper {
     const dto = new CommentViewMapper();
 
     const commentatorInfo = {
-      userId: comment.ownerId,
+      userId: comment.userId,
       userLogin: comment.userLogin,
     };
     const likesInfo = {
@@ -40,4 +33,19 @@ export class CommentViewMapper {
 
     return dto;
   }
+}
+
+export interface ICommentViewDto {
+  id: string;
+  content: string;
+  createdAt: string;
+  commentatorInfo: {
+    userId: string;
+    userLogin: string;
+  };
+  likesInfo: {
+    likesCount: number;
+    dislikesCount: number;
+    myStatus: LikeStatus;
+  };
 }

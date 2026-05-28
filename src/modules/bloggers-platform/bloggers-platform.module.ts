@@ -25,7 +25,7 @@ import {
   UpdateCommentContentUseCase,
   UpdateCommentLikeStatusUseCase,
 } from './comments';
-import { LikesFactory, LikesRepository } from './likes';
+import { LikesRepository } from './likes';
 import {
   CreatePostUseCase,
   DeletePostUseCase,
@@ -83,7 +83,6 @@ const queryHandlers = [
     CommentsFactory,
     CommentsRepository,
     CommentsQueryRepository,
-    LikesFactory,
     LikesRepository,
   ],
   exports: [],

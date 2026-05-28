@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { LikeStatus } from 'src/modules/bloggers-platform/likes';
 import { DataSource } from 'typeorm';
-import { ICommentLikeRepository, IPostLikeRepository } from './dto/like-repository.dto';
+import { ICommentLikeEntityDto, IPostLikeEntityDto } from '../domain/dto/like-entity.dto';
+import { LikeStatus } from '../domain/dto';
 
 @Injectable()
 export class LikesRepository {
@@ -11,7 +11,7 @@ export class LikesRepository {
   async getPostLike(args: { userId: string; postId: string }) {
     const { userId, postId } = args;
 
-    const [like]: IPostLikeRepository[] = await this.dataSource.query(
+    const [like]: IPostLikeEntityDto[] = await this.dataSource.query(
       `
           SELECT *
             FROM "post_likes" 
@@ -27,10 +27,10 @@ export class LikesRepository {
     userId: string;
     postId: string;
     likeStatus: LikeStatus;
-  }): Promise<IPostLikeRepository> {
+  }): Promise<IPostLikeEntityDto> {
     const { userId, postId, likeStatus } = dto;
 
-    const [like]: IPostLikeRepository[] = await this.dataSource.query(
+    const [like]: IPostLikeEntityDto[] = await this.dataSource.query(
       `
            INSERT INTO "post_likes" 
             ("userId", "postId", "status")
@@ -47,10 +47,10 @@ export class LikesRepository {
     userId: string;
     postId: string;
     likeStatus: LikeStatus;
-  }): Promise<ICommentLikeRepository> {
+  }): Promise<ICommentLikeEntityDto> {
     const { userId, postId, likeStatus } = dto;
 
-    const [like]: IPostLikeRepository[] = await this.dataSource.query(
+    const [like]: IPostLikeEntityDto[] = await this.dataSource.query(
       `
            INSERT INTO "post_likes" 
             ("userId", "postId", "status")
@@ -68,7 +68,7 @@ export class LikesRepository {
   async getCommentLike(args: { userId: string; commentId: string }) {
     const { userId, commentId } = args;
 
-    const [like]: IPostLikeRepository[] = await this.dataSource.query(
+    const [like]: IPostLikeEntityDto[] = await this.dataSource.query(
       `
           SELECT *
             FROM "comment_likes" 
@@ -84,10 +84,10 @@ export class LikesRepository {
     userId: string;
     commentId: string;
     likeStatus: LikeStatus;
-  }): Promise<ICommentLikeRepository> {
+  }): Promise<ICommentLikeEntityDto> {
     const { userId, commentId, likeStatus } = dto;
 
-    const [like]: ICommentLikeRepository[] = await this.dataSource.query(
+    const [like]: ICommentLikeEntityDto[] = await this.dataSource.query(
       `
            INSERT INTO "comment_likes" 
               ("userId", "commentId", "status")
@@ -104,10 +104,10 @@ export class LikesRepository {
     userId: string;
     commentId: string;
     likeStatus: LikeStatus;
-  }): Promise<ICommentLikeRepository> {
+  }): Promise<ICommentLikeEntityDto> {
     const { userId, commentId, likeStatus } = dto;
 
-    const [like]: ICommentLikeRepository[] = await this.dataSource.query(
+    const [like]: ICommentLikeEntityDto[] = await this.dataSource.query(
       `
            INSERT INTO "comment_likes" 
             ("userId", "commentId", "status")

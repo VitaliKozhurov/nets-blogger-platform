@@ -1,12 +1,12 @@
-import { LikeStatus } from '../../domain';
+import { LikeStatus } from '.';
 
-export interface IPostLikeRepository {
+export interface IPostLikeEntityDto {
   userId: string;
   postId: string;
   likeStatus: LikeStatus;
 }
 
-export interface ICommentLikeRepository {
+export interface ICommentLikeEntityDto {
   userId: string;
   postId: string;
   likeStatus: LikeStatus;

@@ -1,6 +1,6 @@
 import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
 import { CommentsQueryRepository } from '../../repository';
-import { ICommentViewDto } from '../../api';
+import { CommentViewMapper, ICommentViewDto } from '../dto/comment.mapper';
 
 export class GetCommentByIdQuery extends Query<ICommentViewDto> {
   constructor(public dto: { commentId: string; userId?: string }) {
@@ -13,8 +13,8 @@ export class GetCommentByIdHandler implements IQueryHandler<GetCommentByIdQuery>
   constructor(private commentsQueryRepository: CommentsQueryRepository) {}
 
   async execute({ dto }: GetCommentByIdQuery) {
-    const result = await this.commentsQueryRepository.findByIdOrThrow(dto);
+    const comment = await this.commentsQueryRepository.findByIdOrThrow(dto);
 
-    return result;
+    return CommentViewMapper.mapToView(comment);
   }
 }

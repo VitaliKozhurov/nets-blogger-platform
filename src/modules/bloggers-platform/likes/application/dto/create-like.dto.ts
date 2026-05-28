@@ -1,4 +1,4 @@
-import { LikeStatus } from '../../domain';
+import { LikeStatus } from '../../domain/dto';
 
 export interface ICreateCommentLikeDto {
   userId: string;
