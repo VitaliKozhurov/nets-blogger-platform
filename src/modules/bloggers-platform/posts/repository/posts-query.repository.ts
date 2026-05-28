@@ -113,7 +113,7 @@ export class PostsQueryRepository {
             'None') as "myStatus"
             FROM posts p
             LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE p."blogId" = $3 AND p."deletedAt" IS NULL
+            WHERE p."blogId" = $2 AND p."deletedAt" IS NULL
             ORDER BY ${`"${sortBy}"`} ${sortDirection}
             LIMIT $3
             OFFSET $4
