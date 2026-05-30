@@ -41,6 +41,16 @@ export class AuthTestUtil {
     });
   }
 
+  async loginByRegisteredUser(): Promise<{
+    accessToken: string;
+  }> {
+    await this.registerUser();
+
+    const response = await this.login('login', 'password');
+
+    return { accessToken: response.body.accessToken };
+  }
+
   logout() {
     return request(this.app.getHttpServer()).post('/auth/logout');
   }
