@@ -1,7 +1,8 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
+import request from 'supertest';
 
-const COMMENT_POST_DTO = {
-  content: 'Comment content',
+const COMMENT_DTO = {
+  content: 'New valid comment content',
 };
 
 export class CommentsTestUtil {
@@ -19,7 +20,7 @@ export class CommentsTestUtil {
   //   return request(this.app.getHttpServer()).get('/posts');
   // }
 
-  // getPost(postId: string) {
-  //   return request(this.app.getHttpServer()).get(`/posts/${postId}`);
-  // }
+  getComment(commentId: string) {
+    return request(this.app.getHttpServer()).get(`/comments/${commentId}`);
+  }
 }
