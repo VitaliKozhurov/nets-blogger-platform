@@ -3,6 +3,7 @@ import { ICreateCommentDto } from 'src/modules/bloggers-platform/comments';
 import { ICreatePostDto } from 'src/modules/bloggers-platform/posts';
 import request from 'supertest';
 import { VALID_BASIC_HEADER } from '../utils/constants';
+import { LikeStatus } from 'src/modules/bloggers-platform/likes/domain/dto';
 
 const TEST_POST_DTO = {
   title: 'New post',
@@ -33,15 +34,25 @@ export class PostsTestUtil {
     return request(this.app.getHttpServer()).get(`/posts/${postId}`);
   }
 
+  getCommentsByPost(postId: string) {
+    return request(this.app.getHttpServer()).get(`/posts/${postId}/comments`);
+  }
+
   createCommentForPost(
     postId: string,
     accessToken: string,
-    commentDto?: Partial<ICreateCommentDto>
+    commentDto: Partial<ICreateCommentDto> = {}
   ) {
     return request(this.app.getHttpServer())
       .post(`/posts/${postId}/comments`)
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ ...TEST_COMMENT_DTO, ...commentDto })
-      .expect(201);
+      .send({ ...TEST_COMMENT_DTO, ...commentDto });
+  }
+
+  updatePostLikeStatus(postId: string, accessToken: string, likeStatus: LikeStatus) {
+    return request(this.app.getHttpServer())
+      .put(`/posts/${postId}/like-status`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ likeStatus });
   }
 }
