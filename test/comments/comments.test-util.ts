@@ -1,26 +1,41 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { LikeStatus } from 'src/modules/bloggers-platform/likes/domain/dto';
 import request from 'supertest';
 
 const COMMENT_DTO = {
-  content: 'New valid comment content',
+  content: 'Update comment content value dto',
 };
 
 export class CommentsTestUtil {
   constructor(private readonly app: NestExpressApplication) {}
 
-  // createPost(blogId: string, postDto: Partial<ICreateCommentDto> = {}) {
-  //   return request(this.app.getHttpServer())
-  //     .post(`/posts/${blogId}/posts`)
-  //     .set('Authorization', VALID_BASIC_HEADER)
-  //     .send({ ...COMMENT_POST_DTO, ...postDto })
-  //     .expect(201);
-  // }
+  getComment(commentId: string, accessToken?: string) {
+    if (accessToken) {
+      return request(this.app.getHttpServer())
+        .get(`/comments/${commentId}`)
+        .set('Authorization', `Bearer ${accessToken}`);
+    }
 
-  // getPosts() {
-  //   return request(this.app.getHttpServer()).get('/posts');
-  // }
-
-  getComment(commentId: string) {
     return request(this.app.getHttpServer()).get(`/comments/${commentId}`);
+  }
+
+  updateComment(commentId: string, accessToken: string, commentDto = COMMENT_DTO) {
+    return request(this.app.getHttpServer())
+      .put(`/comments/${commentId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send(commentDto);
+  }
+
+  updateCommentLikeStatus(commentId: string, accessToken: string, likeStatus: LikeStatus) {
+    return request(this.app.getHttpServer())
+      .put(`/comments/${commentId}/like-status`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ likeStatus });
+  }
+
+  deleteComment(commentId: string, accessToken: string) {
+    return request(this.app.getHttpServer())
+      .delete(`/comments/${commentId}`)
+      .set('Authorization', `Bearer ${accessToken}`);
   }
 }
