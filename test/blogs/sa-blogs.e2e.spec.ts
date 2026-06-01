@@ -164,4 +164,208 @@ describe('E2E Controller /blogs', () => {
       await blogsTestUtils.getBlog(response.body.id).expect(404);
     });
   });
+
+  describe('POST /blogs/:id/posts', () => {
+    it('should return 401 status code if not auth headers', async () => {
+      const blogId = randomUUID();
+
+      await blogsTestUtils.createPostForBlog(blogId, 'fakeHeader').expect(401);
+    });
+
+    it('should return 400 status code if blog id is incorrect', async () => {
+      const blogId = 'fakeId';
+
+      await blogsTestUtils.createPostForBlog(blogId, VALID_BASIC_HEADER).expect(400);
+    });
+
+    it('should return 404 status code if blog not exist', async () => {
+      const blogId = randomUUID();
+
+      await blogsTestUtils.createPostForBlog(blogId, VALID_BASIC_HEADER).expect(404);
+    });
+
+    it('should return 400 status code if post data is incorrect', async () => {
+      const blogId = randomUUID();
+
+      const response = await blogsTestUtils
+        .createPostForBlog(blogId, VALID_BASIC_HEADER, {
+          content: '',
+          shortDescription: '',
+          title: '',
+        })
+        .expect(400);
+
+      expect(response.body.extensions.length).toBe(3);
+    });
+
+    it('should return 201 status code and created post', async () => {
+      const createBlogResponse = await blogsTestUtils.createBlog();
+
+      const createPostResponse = await blogsTestUtils
+        .createPostForBlog(createBlogResponse.body.id, VALID_BASIC_HEADER)
+        .expect(201);
+
+      const { body } = await postsTestUtils.getPost(createPostResponse.body.id);
+
+      expect(body).toEqual(createPostResponse.body);
+    });
+  });
+
+  describe('GET /blogs/:id/posts', () => {
+    it('should return 401 status code if not auth headers', async () => {
+      const blogId = randomUUID();
+
+      await blogsTestUtils.getPostsForBlog(blogId, 'fakeHeader').expect(401);
+    });
+
+    it('should return 400 status code if blog id is incorrect', async () => {
+      const blogId = 'fakeId';
+
+      await blogsTestUtils.getPostsForBlog(blogId, VALID_BASIC_HEADER).expect(400);
+    });
+
+    it('should return 404 status code if blog not exist', async () => {
+      const blogId = randomUUID();
+
+      await blogsTestUtils.getPostsForBlog(blogId, VALID_BASIC_HEADER).expect(404);
+    });
+
+    it('should return 200 status code and array of posts', async () => {
+      const createBlogResponse = await blogsTestUtils.createBlog();
+
+      const responseBefore = await blogsTestUtils
+        .getPostsForBlog(createBlogResponse.body.id, VALID_BASIC_HEADER)
+        .expect(200);
+
+      expect(responseBefore.body.items.length).toBe(0);
+
+      const createPostResponse = await blogsTestUtils
+        .createPostForBlog(createBlogResponse.body.id, VALID_BASIC_HEADER)
+        .expect(201);
+
+      const responseAfter = await blogsTestUtils
+        .getPostsForBlog(createBlogResponse.body.id, VALID_BASIC_HEADER)
+        .expect(200);
+
+      expect(responseAfter.body.items.length).toBe(1);
+
+      expect(createPostResponse.body).toEqual(responseAfter.body.items[0]);
+    });
+  });
+
+  describe('PUT /blogs/:blogId/posts/:postId', () => {
+    it('should return 401 status code if not auth headers', async () => {
+      const blogId = randomUUID();
+      const postId = randomUUID();
+
+      await blogsTestUtils.updatePostForBlog(blogId, postId, 'fakeHeader').expect(401);
+    });
+
+    it('should return 400 status code if blog id is incorrect', async () => {
+      const blogId = 'fakeId';
+      const postId = 'fakeId';
+
+      await blogsTestUtils.updatePostForBlog(blogId, postId, VALID_BASIC_HEADER).expect(400);
+    });
+
+    it('should return 404 status code if blog is not exist', async () => {
+      const blogId = randomUUID();
+      const postId = randomUUID();
+
+      await blogsTestUtils.updatePostForBlog(blogId, postId, VALID_BASIC_HEADER).expect(404);
+    });
+
+    it('should return 404 status code if post is not exist', async () => {
+      const createBlogResponse = await blogsTestUtils.createBlog();
+      const postId = randomUUID();
+
+      await blogsTestUtils
+        .updatePostForBlog(createBlogResponse.body.id, postId, VALID_BASIC_HEADER)
+        .expect(404);
+    });
+
+    it('should return 400 status code if post data is incorrect', async () => {
+      const createBlogResponse = await blogsTestUtils.createBlog();
+      const blogId = createBlogResponse.body.id;
+      const createPostResponse = await blogsTestUtils.createPostForBlog(blogId, VALID_BASIC_HEADER);
+      const postId = createPostResponse.body.id;
+
+      const response = await blogsTestUtils
+        .updatePostForBlog(blogId, postId, VALID_BASIC_HEADER, {
+          content: '',
+          shortDescription: '',
+          title: '',
+        })
+        .expect(400);
+
+      expect(response.body.extensions.length).toBe(3);
+    });
+
+    it('should return 204 status code and update post', async () => {
+      const createBlogResponse = await blogsTestUtils.createBlog();
+      const blogId = createBlogResponse.body.id;
+      const createPostResponse = await blogsTestUtils.createPostForBlog(blogId, VALID_BASIC_HEADER);
+      const postId = createPostResponse.body.id;
+
+      await blogsTestUtils
+        .updatePostForBlog(blogId, postId, VALID_BASIC_HEADER, {
+          title: 'Updated title',
+        })
+        .expect(204);
+
+      const { body } = await postsTestUtils.getPost(createPostResponse.body.id);
+
+      expect(body.title).toBe('Updated title');
+    });
+  });
+
+  describe('POST /blogs/:id/posts', () => {
+    it('should return 401 status code if not auth headers', async () => {
+      const blogId = randomUUID();
+      const postId = randomUUID();
+
+      await blogsTestUtils.deletePostForBlog(blogId, postId, 'fakeHeader').expect(401);
+    });
+
+    it('should return 400 status code if blog id is incorrect', async () => {
+      const blogId = 'fakeId';
+      const postId = randomUUID();
+
+      await blogsTestUtils.deletePostForBlog(blogId, postId, VALID_BASIC_HEADER).expect(400);
+    });
+
+    it('should return 400 status code if post id is incorrect', async () => {
+      const blogId = randomUUID();
+      const postId = 'fakeId';
+
+      await blogsTestUtils.deletePostForBlog(blogId, postId, VALID_BASIC_HEADER).expect(400);
+    });
+
+    it('should return 404 status code if blog is not exist', async () => {
+      const blogId = randomUUID();
+      const postId = randomUUID();
+
+      await blogsTestUtils.deletePostForBlog(blogId, postId, VALID_BASIC_HEADER).expect(404);
+    });
+
+    it('should return 404 status code if post is not exist', async () => {
+      const createBlogResponse = await blogsTestUtils.createBlog();
+      const postId = randomUUID();
+
+      await blogsTestUtils
+        .deletePostForBlog(createBlogResponse.body.id, postId, VALID_BASIC_HEADER)
+        .expect(404);
+    });
+
+    it('should return 204 status code and delete post', async () => {
+      const createBlogResponse = await blogsTestUtils.createBlog();
+      const blogId = createBlogResponse.body.id;
+      const createPostResponse = await blogsTestUtils.createPostForBlog(blogId, VALID_BASIC_HEADER);
+      const postId = createPostResponse.body.id;
+
+      await blogsTestUtils.deletePostForBlog(blogId, postId, VALID_BASIC_HEADER).expect(204);
+
+      await postsTestUtils.getPost(createPostResponse.body.id).expect(404);
+    });
+  });
 });
