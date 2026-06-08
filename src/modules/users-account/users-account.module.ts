@@ -37,6 +37,8 @@ import { UsersService } from './users/application/services/users.service';
 import { CreateUserUseCase, DeleteUserUseCase } from './users/application/use-cases';
 import { UsersQueryRepository } from './users/repository/users-query.repository';
 import { UsersRepository } from './users/repository/users.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity } from './users/domain/user.entity';
 
 const commandHandlers = [
   RegistrationUseCase,
@@ -57,6 +59,7 @@ const queryHandlers = [GetUsersHandler, GetDeviceSessionsHandler];
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([UserEntity]),
     CryptoModule,
     JwtModule,
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 10000, limit: 5 }] }),

@@ -11,8 +11,10 @@ export const getDatabaseProviders = () => [
         username: configService.postgresUser,
         password: configService.postgresPassword,
         database: configService.postgresDB,
-        autoLoadEntities: false,
-        synchronize: false,
+        schema: 'public',
+        autoLoadEntities: true,
+        // synchronize: true,
+        logging: true,
       };
     },
     inject: [CoreConfig],

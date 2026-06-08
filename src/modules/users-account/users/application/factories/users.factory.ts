@@ -5,6 +5,7 @@ import type { IRegistrationDto } from '../../../auth/application/dto/registratio
 import { UsersRepository } from '../../repository/users.repository';
 import { IUserViewDto, UserViewMapper } from '../dto';
 import type { ICreateUserDto } from '../dto/create-user.dto';
+import { UserEntity } from '../../domain/user.entity';
 
 @Injectable()
 export class UsersFactory {
@@ -18,11 +19,13 @@ export class UsersFactory {
 
     const passwordHash = await this.passwordHasherService.createHash(password);
 
-    const createdUser = await this.usersRepository.createConfirmedUser({
+    const createdUser = UserEntity.createConfirmedUser({
       login,
       email,
       passwordHash,
     });
+
+    await this.usersRepository.save(createdUser);
 
     return UserViewMapper.mapToView(createdUser);
   }

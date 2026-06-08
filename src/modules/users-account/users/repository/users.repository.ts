@@ -1,17 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import {
   IPasswordRecoveryEntityDto,
   IUserConfirmationEntityDto,
   IUserEntityDto,
 } from '../domain/dto';
 import { CreateUserDto } from './dto/create-user.params.dto';
+import { UserEntity } from '../domain/user.entity';
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(UserEntity) private usersRepo: Repository<UserEntity>,
+    @InjectDataSource() protected dataSource: DataSource
+  ) {}
+
+  async save(user: UserEntity) {
+    await this.usersRepo.save(user);
+  }
 
   async findById(id: string): Promise<IUserEntityDto | null> {
     const [user]: IUserEntityDto[] = await this.dataSource.query(
