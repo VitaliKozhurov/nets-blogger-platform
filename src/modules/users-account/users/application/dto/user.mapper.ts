@@ -1,4 +1,13 @@
-import { IUserEntityDto } from '../../domain/dto';
+import { UserEntity } from '../../domain/user.entity';
+
+export interface IUserViewDto {
+  id: string;
+  login: string;
+  email: string;
+  createdAt: string;
+}
+
+type InputUserType = Pick<UserEntity, 'id' | 'login' | 'email' | 'createdAt'>;
 
 export class UserViewMapper {
   id: string;
@@ -6,7 +15,7 @@ export class UserViewMapper {
   email: string;
   createdAt: string;
 
-  static mapToView(user: IUserEntityDto): UserViewMapper {
+  static mapToView(user: InputUserType): UserViewMapper {
     const dto = new UserViewMapper();
 
     dto.id = user.id;
@@ -16,11 +25,4 @@ export class UserViewMapper {
 
     return dto;
   }
-}
-
-export interface IUserViewDto {
-  id: string;
-  login: string;
-  email: string;
-  createdAt: string;
 }

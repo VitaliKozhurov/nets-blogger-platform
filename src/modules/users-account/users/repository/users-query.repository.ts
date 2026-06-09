@@ -1,43 +1,47 @@
 import { Injectable } from '@nestjs/common';
 
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { IUserEntityDto } from '../domain/dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FindOperator, ILike, Repository } from 'typeorm';
 import { IGetUsersParamsDto } from './dto/get-users.params.dto';
+import { UserEntity } from '../domain/user.entity';
+import { IUserQueryDto } from './dto/user-query.dto';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(@InjectRepository(UserEntity) private usersRepo: Repository<UserEntity>) {}
 
   async findAll(query: IGetUsersParamsDto): Promise<{
-    users: IUserEntityDto[];
+    items: IUserQueryDto[];
     totalCount: number;
   }> {
     const { searchEmailTerm, searchLoginTerm, sortBy, sortDirection, limit, offset } = query;
 
-    const usersPromise: Promise<IUserEntityDto[]> = this.dataSource.query(
-      `
-      SELECT *
-        FROM users
-        WHERE (email ILIKE $1 OR login ILIKE $2) AND "deletedAt" IS NULL
-        ORDER BY ${`"${sortBy}"`} ${sortDirection}
-        LIMIT $3
-        OFFSET $4
-      `,
-      [`%${searchEmailTerm ?? ''}%`, `%${searchLoginTerm ?? ''}%`, limit, offset]
-    );
+    const orWhereConditions: Record<string, FindOperator<string>>[] = [];
 
-    const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
-      `
-      SELECT COUNT(*) AS count
-        FROM users
-        WHERE (email ILIKE $1 OR login ILIKE $2) AND "deletedAt" IS NULL
-      `,
-      [`%${searchEmailTerm ?? ''}%`, `%${searchLoginTerm ?? ''}%`]
-    );
+    if (searchLoginTerm) {
+      orWhereConditions.push({ login: ILike(`%${searchLoginTerm}%`) });
+    }
 
-    const [usersResult, countResult] = await Promise.all([usersPromise, totalCountPromise]);
+    if (searchEmailTerm) {
+      orWhereConditions.push({ email: ILike(`%${searchEmailTerm}%`) });
+    }
 
-    return { users: usersResult, totalCount: Number(countResult[0].count) };
+    const where = orWhereConditions.length > 0 ? orWhereConditions : undefined;
+
+    const result = await this.usersRepo.findAndCount({
+      select: {
+        id: true,
+        login: true,
+        email: true,
+        createdAt: true,
+      },
+      where,
+      withDeleted: false,
+      order: { [sortBy]: sortDirection },
+      skip: offset,
+      take: limit,
+    });
+
+    return { items: result[0], totalCount: result[1] };
   }
 }

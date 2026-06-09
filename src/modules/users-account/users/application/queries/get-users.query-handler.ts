@@ -31,10 +31,10 @@ export class GetUsersHandler implements IQueryHandler<GetUsersQuery> {
       offset,
     };
 
-    const { users, totalCount } = await this.usersQueryRepository.findAll(params);
+    const { items, totalCount } = await this.usersQueryRepository.findAll(params);
 
     const result = PaginationViewMapper.mapToViewModel({
-      items: users.map(UserViewMapper.mapToView),
+      items: items.map(UserViewMapper.mapToView),
       totalCount,
       page: dto.pageNumber,
       size: dto.pageSize,
