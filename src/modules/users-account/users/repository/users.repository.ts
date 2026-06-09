@@ -18,7 +18,7 @@ export class UsersRepository {
   ) {}
 
   async save(user: UserEntity) {
-    await this.usersRepo.save(user);
+    return await this.usersRepo.save(user);
   }
 
   async findById(id: string): Promise<IUserEntityDto | null> {
@@ -112,19 +112,9 @@ export class UsersRepository {
   }
 
   async softDelete(userId: string): Promise<boolean> {
-    const deletedAt = new Date();
+    const { affected } = await this.usersRepo.softDelete({ id: userId });
 
-    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
-      `
-      UPDATE users
-        SET "deletedAt" = $1
-        WHERE users.id = $2 AND "deletedAt" IS NULL
-        RETURNING id
-      `,
-      [deletedAt, userId]
-    );
-
-    return rows.length > 0;
+    return affected === 1;
   }
 
   async updateUserPassword(dto: { userId: string; passwordHash: string }) {

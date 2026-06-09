@@ -25,9 +25,14 @@ export class UsersFactory {
       passwordHash,
     });
 
-    await this.usersRepository.save(createdUser);
+    const savedUser = await this.usersRepository.save(createdUser);
 
-    return UserViewMapper.mapToView(createdUser);
+    return UserViewMapper.mapToView({
+      id: savedUser.id,
+      login: savedUser.login,
+      email: savedUser.email,
+      createdAt: savedUser.createdAt,
+    });
   }
 
   async createUnconfirmedUser(
