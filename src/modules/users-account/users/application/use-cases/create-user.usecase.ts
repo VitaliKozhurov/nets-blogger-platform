@@ -3,6 +3,7 @@ import type { ICreateUserDto } from '../dto/create-user.dto';
 
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { isUniqueEntityError } from 'src/core/utils/predicates/isUniqueEntityError';
+import { USER_UNIQUE_CONSTRAINTS } from '../../domain/user.constraint';
 import type { IUserViewDto } from '../dto';
 import { UsersFactory } from '../factories/users.factory';
 
@@ -22,18 +23,17 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
 
       return newUser;
     } catch (error) {
-      console.log('ERROR: ', error);
-
       if (isUniqueEntityError(error)) {
+        const constraint = error.driverError.constraint as keyof typeof USER_UNIQUE_CONSTRAINTS;
+
+        if (!USER_UNIQUE_CONSTRAINTS[constraint]) {
+          throw error;
+        }
+
         throw new DomainException({
           code: DomainExceptionCode.BAD_REQUEST_ERROR,
-          message: 'User with the given email already exists',
-          extensions: [
-            {
-              field: 'email',
-              message: 'User with this email already exists',
-            },
-          ],
+          message: 'User with provided credentials already exists',
+          extensions: [USER_UNIQUE_CONSTRAINTS[constraint]],
         });
       }
 
