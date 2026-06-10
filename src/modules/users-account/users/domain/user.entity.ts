@@ -1,13 +1,15 @@
 import { BaseDBEntity } from 'src/core/db';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Unique } from 'typeorm';
 import { ICreateUserDto } from './dto/create-user.dto';
 
 @Entity({ name: 'users' })
+@Unique('UQ_USER_LOGIN', ['login'])
+@Unique('UQ_USER_EMAIL', ['email'])
 export class UserEntity extends BaseDBEntity {
   @Column({ type: 'varchar', length: 50 })
   login: string;
 
-  @Column({ type: 'varchar', length: 50, unique: true })
+  @Column({ type: 'varchar', length: 50 })
   email: string;
 
   @Column({ type: 'text' })

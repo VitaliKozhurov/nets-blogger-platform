@@ -1,10 +1,10 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import type { ICreateUserDto } from '../dto/create-user.dto';
 
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
+import { isUniqueEntityError } from 'src/core/utils/predicates/isUniqueEntityError';
 import type { IUserViewDto } from '../dto';
 import { UsersFactory } from '../factories/users.factory';
-import { isUniqueEntityError } from 'src/core/utils/predicates/isUniqueEntityError';
-import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 export class CreateUserCommand extends Command<IUserViewDto> {
   constructor(public dto: ICreateUserDto) {
@@ -22,6 +22,8 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
 
       return newUser;
     } catch (error) {
+      console.log('ERROR: ', error);
+
       if (isUniqueEntityError(error)) {
         throw new DomainException({
           code: DomainExceptionCode.BAD_REQUEST_ERROR,
