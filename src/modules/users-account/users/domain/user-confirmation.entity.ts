@@ -9,7 +9,7 @@ import { UserEntity } from './user.entity';
 )
 export class UserConfirmationEntity extends BaseDBEntity {
   @Column({ type: 'uuid' })
-  userId: number;
+  userId: string;
 
   @Column({ type: 'boolean' })
   isConfirmed: boolean;

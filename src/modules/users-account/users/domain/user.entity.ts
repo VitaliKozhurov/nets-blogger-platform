@@ -1,8 +1,9 @@
 import { BaseDBEntity } from 'src/core/db';
-import { Column, Entity, OneToOne, Unique } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne, Unique } from 'typeorm';
 import { ICreateVerifiedUserDto } from './dto/create-verified-user.dto';
 import { UserConfirmationEntity } from './user-confirmation.entity';
 import { ICreateUnverifiedUserDto } from './dto/create-unverified-user.dto';
+import { UserPasswordRecoveryEntity } from './user-password-recovery.entity';
 
 @Entity({ name: 'users' })
 @Unique('UQ_USER_LOGIN', ['login'])
@@ -22,6 +23,12 @@ export class UserEntity extends BaseDBEntity {
     onDelete: 'CASCADE', // для удаления связанных сущностей при удалении родительской
   })
   confirmation: UserConfirmationEntity;
+
+  @OneToMany(() => UserPasswordRecoveryEntity, recoveryCodes => recoveryCodes.user, {
+    cascade: true, // для сохранения связанных сущностей
+    onDelete: 'CASCADE', // для удаления связанных сущностей при удалении родительской
+  })
+  recoveryCodes: UserPasswordRecoveryEntity[];
 
   static createVerifiedUser(dto: ICreateVerifiedUserDto) {
     const newUser = new UserEntity();
