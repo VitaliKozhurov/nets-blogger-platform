@@ -1,4 +1,4 @@
-export interface ICreateUserDto {
+export interface ICreateVerifiedUserDto {
   login: string;
   email: string;
   passwordHash: string;

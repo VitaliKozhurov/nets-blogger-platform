@@ -1,5 +1,5 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import type { ICreateUserDto } from '../dto/create-user.dto';
+import type { ICreateUserCommandDto } from '../dto/create-user-command.dto';
 
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { isUniqueEntityError } from 'src/core/utils/predicates/isUniqueEntityError';
@@ -8,7 +8,7 @@ import type { IUserViewDto } from '../dto';
 import { UsersFactory } from '../factories/users.factory';
 
 export class CreateUserCommand extends Command<IUserViewDto> {
-  constructor(public dto: ICreateUserDto) {
+  constructor(public dto: ICreateUserCommandDto) {
     super();
   }
 }
@@ -19,7 +19,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
 
   async execute({ dto }: CreateUserCommand): Promise<IUserViewDto> {
     try {
-      const newUser = await this.usersFactory.createConfirmedUser(dto);
+      const newUser = await this.usersFactory.createVerifiedUser(dto);
 
       return newUser;
     } catch (error) {

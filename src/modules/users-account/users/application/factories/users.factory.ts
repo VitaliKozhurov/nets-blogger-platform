@@ -3,8 +3,7 @@ import { randomUUID } from 'crypto';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import type { IRegistrationDto } from '../../../auth/application/dto/registration.dto';
 import { UsersRepository } from '../../repository/users.repository';
-import { IUserViewDto, UserViewMapper } from '../dto';
-import type { ICreateUserDto } from '../dto/create-user.dto';
+import { ICreateUserCommandDto, IUserViewDto, UserViewMapper } from '../dto';
 import { UserEntity } from '../../domain/user.entity';
 
 @Injectable()
@@ -14,12 +13,12 @@ export class UsersFactory {
     private passwordHasherService: PasswordHasherService
   ) {}
 
-  async createConfirmedUser(dto: ICreateUserDto): Promise<IUserViewDto> {
+  async createVerifiedUser(dto: ICreateUserCommandDto): Promise<IUserViewDto> {
     const { login, email, password } = dto;
 
     const passwordHash = await this.passwordHasherService.createHash(password);
 
-    const createdUser = UserEntity.createConfirmedUser({
+    const createdUser = UserEntity.createVerifiedUser({
       login,
       email,
       passwordHash,
