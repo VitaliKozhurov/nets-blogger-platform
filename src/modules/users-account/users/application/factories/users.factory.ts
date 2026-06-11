@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import type { IRegistrationDto } from '../../../auth/application/dto/registration.dto';
+import { UserEntity } from '../../domain/user.entity';
 import { UsersRepository } from '../../repository/users.repository';
 import { ICreateUserCommandDto, IUserViewDto, UserViewMapper } from '../dto';
-import { UserEntity } from '../../domain/user.entity';
 
 @Injectable()
 export class UsersFactory {
@@ -34,23 +34,23 @@ export class UsersFactory {
     });
   }
 
-  async createUnconfirmedUser(
+  async createUnverifiedUser(
     dto: IRegistrationDto
-  ): Promise<{ user: IUserViewDto; confirmationCode: string }> {
+  ): Promise<{ confirmationCode: string; email: string }> {
     const { login, email, password } = dto;
 
     const passwordHash = await this.passwordHasherService.createHash(password);
     const confirmationCode = randomUUID();
-    const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
 
-    const createdUser = await this.usersRepository.createUnconfirmedUser({
+    const createdUser = UserEntity.createUnverifiedUser({
       login,
       email,
       passwordHash,
-      confirmationCode,
-      expirationDate,
+      code: confirmationCode,
     });
 
-    return { user: UserViewMapper.mapToView(createdUser), confirmationCode };
+    const savedUser = await this.usersRepository.save(createdUser);
+
+    return { confirmationCode, email: savedUser.email };
   }
 }

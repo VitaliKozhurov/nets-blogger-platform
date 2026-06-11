@@ -7,7 +7,6 @@ import {
   IUserConfirmationEntityDto,
   IUserEntityDto,
 } from '../domain/dto';
-import { CreateUserDto } from './dto/create-user.params.dto';
 import { UserEntity } from '../domain/user.entity';
 
 @Injectable()
@@ -60,56 +59,50 @@ export class UsersRepository {
     return user || null;
   }
 
-  private async create(dto: CreateUserDto) {
-    const { login, email, passwordHash, isConfirmed } = dto;
+  // private async create(dto: CreateUserDto) {
+  //   const { login, email, passwordHash, isConfirmed } = dto;
 
-    const [user]: IUserEntityDto[] = await this.dataSource.query(
-      `
-        INSERT INTO users (login, email, "passwordHash")
-          VALUES ($1, $2, $3)
-          RETURNING *
-      `,
-      [login, email, passwordHash]
-    );
+  //   const [user]: IUserEntityDto[] = await this.dataSource.query(
+  //     `
+  //       INSERT INTO users (login, email, "passwordHash")
+  //         VALUES ($1, $2, $3)
+  //         RETURNING *
+  //     `,
+  //     [login, email, passwordHash]
+  //   );
 
-    if (isConfirmed) {
-      await this.dataSource.query(
-        `
-        INSERT INTO user_confirmations ("userId", "isConfirmed")
-          VALUES ($1, true)
-      `,
-        [user.id]
-      );
-    } else {
-      await this.dataSource.query(
-        `
-        INSERT INTO user_confirmations ("userId", "isConfirmed", code, "expirationDate")
-          VALUES ($1, false, $2, $3)
-      `,
-        [user.id, dto.confirmationCode, dto.expirationDate]
-      );
-    }
+  //   if (isConfirmed) {
+  //     await this.dataSource.query(
+  //       `
+  //       INSERT INTO user_confirmations ("userId", "isConfirmed")
+  //         VALUES ($1, true)
+  //     `,
+  //       [user.id]
+  //     );
+  //   } else {
+  //     await this.dataSource.query(
+  //       `
+  //       INSERT INTO user_confirmations ("userId", "isConfirmed", code, "expirationDate")
+  //         VALUES ($1, false, $2, $3)
+  //     `,
+  //       [user.id, dto.confirmationCode, dto.expirationDate]
+  //     );
+  //   }
 
-    return user;
-  }
+  //   return user;
+  // }
 
-  async createConfirmedUser(dto: { login: string; email: string; passwordHash: string }) {
-    const user = await this.create({ ...dto, isConfirmed: true });
+  // async createUnconfirmedUser(dto: {
+  //   login: string;
+  //   email: string;
+  //   passwordHash: string;
+  //   confirmationCode: string;
+  //   expirationDate: Date;
+  // }) {
+  //   const user = await this.create({ ...dto, isConfirmed: false });
 
-    return user;
-  }
-
-  async createUnconfirmedUser(dto: {
-    login: string;
-    email: string;
-    passwordHash: string;
-    confirmationCode: string;
-    expirationDate: Date;
-  }) {
-    const user = await this.create({ ...dto, isConfirmed: false });
-
-    return user;
-  }
+  //   return user;
+  // }
 
   async softDelete(userId: string): Promise<boolean> {
     const { affected } = await this.usersRepo.softDelete({ id: userId });

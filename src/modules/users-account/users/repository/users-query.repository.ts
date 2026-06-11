@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOperator, ILike, Repository } from 'typeorm';
-import { IGetUsersParamsDto } from './dto/get-users.params.dto';
 import { UserEntity } from '../domain/user.entity';
+import { IGetUsersParamsDto } from './dto/get-users.params.dto';
 import { IUserQueryDto } from './dto/user-query.dto';
 
 @Injectable()
