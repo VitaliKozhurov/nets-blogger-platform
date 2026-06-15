@@ -19,14 +19,9 @@ export class RegistrationUseCase implements ICommandHandler<RegistrationCommand>
   async execute({ dto }: RegistrationCommand): Promise<boolean> {
     await this.usersService.ensureUserIsAvailable(dto);
 
-    const { user, confirmationCode } = await this.usersFactory.createUnconfirmedUser(dto);
+    const payload = await this.usersFactory.createUnconfirmedUser(dto);
 
-    this.eventBus.publish(
-      new UserRegistrationEvent({
-        email: user.email,
-        confirmationCode,
-      })
-    );
+    this.eventBus.publish(new UserRegistrationEvent(payload));
 
     return true;
   }

@@ -20,7 +20,9 @@ export class UserConfirmationEntity extends BaseDBEntity {
   @Column({ type: 'timestamp with time zone', nullable: true })
   expirationDate: Date | null;
 
-  @OneToOne(() => UserEntity, user => user.confirmation)
+  @OneToOne(() => UserEntity, user => user.confirmation, {
+    onDelete: 'CASCADE', // для удаления связанных сущностей при удалении родительской
+  })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 }

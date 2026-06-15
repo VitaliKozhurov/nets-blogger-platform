@@ -27,7 +27,6 @@ import {
   RegistrationEmailResendingSwagger,
   RegistrationSwagger,
 } from '../decorators/swagger';
-
 import { type Response } from 'express';
 import type { RequestUserDto } from '../application/dto/request-user.dto';
 import { UserFromRequest } from '../decorators/bearer-auth/user-from-request.decorator';

@@ -13,7 +13,9 @@ export class UserPasswordRecoveryEntity extends BaseDBEntity {
   @Column({ type: 'timestamp with time zone' })
   expirationDate: Date;
 
-  @ManyToOne(() => UserEntity, user => user.recoveryCodes)
+  @ManyToOne(() => UserEntity, user => user.recoveryCodes, {
+    onDelete: 'CASCADE', // для удаления связанных сущностей при удалении родительской
+  })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 }
