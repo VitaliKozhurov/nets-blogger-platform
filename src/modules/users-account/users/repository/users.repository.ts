@@ -2,11 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { DataSource, Repository } from 'typeorm';
-import {
-  IPasswordRecoveryEntityDto,
-  IUserConfirmationEntityDto,
-  IUserEntityDto,
-} from '../domain/dto';
+import { IPasswordRecoveryEntityDto, IUserEntityDto } from '../domain/dto';
 import { UserEntity } from '../domain/user.entity';
 import { UserConfirmationEntity } from '../domain/user-confirmation.entity';
 
@@ -55,7 +51,7 @@ export class UsersRepository {
       withDeleted: false,
       relations: {
         confirmation: true,
-        recoveryCodes: true,
+        recoveryCode: true,
       },
     });
 
@@ -82,19 +78,6 @@ export class UsersRepository {
     );
 
     return rows.length > 0;
-  }
-
-  async findRegistrationConfirmationData(
-    userId: string
-  ): Promise<IUserConfirmationEntityDto | null> {
-    const [confirmationData]: IUserConfirmationEntityDto[] = await this.dataSource.query(
-      `SELECT * 
-        FROM "user_confirmations" 
-        WHERE "userId" = $1`,
-      [userId]
-    );
-
-    return confirmationData || null;
   }
 
   async confirmRegistrationByCode(code: string) {

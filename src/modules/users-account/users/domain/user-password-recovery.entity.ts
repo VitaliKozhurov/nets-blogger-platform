@@ -1,10 +1,17 @@
-import { BaseDBEntity } from 'src/core/db';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  UpdateDateColumn,
+  VersionColumn,
+} from 'typeorm';
 import { UserEntity } from './user.entity';
 
 @Entity({ name: 'user_password_recovery_codes' })
-export class UserPasswordRecoveryEntity extends BaseDBEntity {
-  @Column({ type: 'uuid' })
+export class UserPasswordRecoveryEntity {
+  @Column({ type: 'uuid', primary: true })
   userId: string;
 
   @Column({ type: 'uuid' })
@@ -13,9 +20,18 @@ export class UserPasswordRecoveryEntity extends BaseDBEntity {
   @Column({ type: 'timestamp with time zone' })
   expirationDate: Date;
 
-  @ManyToOne(() => UserEntity, user => user.recoveryCodes, {
+  @OneToOne(() => UserEntity, user => user.recoveryCode, {
     onDelete: 'CASCADE', // для удаления связанных сущностей при удалении родительской
   })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @VersionColumn()
+  version: number;
 }

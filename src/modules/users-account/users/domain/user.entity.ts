@@ -1,5 +1,5 @@
 import { BaseDBEntity } from 'src/core/db';
-import { Column, Entity, OneToMany, OneToOne, Unique } from 'typeorm';
+import { Column, Entity, OneToOne, Unique } from 'typeorm';
 import { ICreateVerifiedUserDto } from './dto/create-verified-user.dto';
 import { UserConfirmationEntity } from './user-confirmation.entity';
 import { ICreateUnverifiedUserDto } from './dto/create-unverified-user.dto';
@@ -24,10 +24,11 @@ export class UserEntity extends BaseDBEntity {
   })
   confirmation: UserConfirmationEntity;
 
-  @OneToMany(() => UserPasswordRecoveryEntity, recoveryCodes => recoveryCodes.user, {
+  @OneToOne(() => UserPasswordRecoveryEntity, recoveryCodes => recoveryCodes.user, {
     cascade: true, // для сохранения связанных сущностей
+    nullable: true,
   })
-  recoveryCodes: UserPasswordRecoveryEntity[];
+  recoveryCode: UserPasswordRecoveryEntity | null;
 
   static createVerifiedUser(dto: ICreateVerifiedUserDto) {
     const newUser = new UserEntity();
@@ -78,6 +79,19 @@ export class UserEntity extends BaseDBEntity {
 
     this.confirmation.code = confirmationCode;
     this.confirmation.expirationDate = expirationDate;
+
+    return this;
+  }
+
+  generatePasswordRecoveryCode() {
+    const recoveryData = new UserPasswordRecoveryEntity();
+    const recoveryCode = randomUUID();
+    const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
+
+    recoveryData.code = recoveryCode;
+    recoveryData.expirationDate = expirationDate;
+
+    this.recoveryCode = recoveryData;
 
     return this;
   }
