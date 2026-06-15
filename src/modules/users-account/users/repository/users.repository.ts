@@ -78,8 +78,8 @@ export class UsersRepository {
 
     user.confirmation.isConfirmed = false;
 
-    return user;
-  }
+  //   return user;
+  // }
 
   async softDelete(userId: string): Promise<boolean> {
     const { affected } = await this.usersRepo.softDelete({ id: userId });

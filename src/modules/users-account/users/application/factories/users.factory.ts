@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PasswordHasherService } from 'src/modules/crypto/password-hasher.service';
 import type { IRegistrationDto } from '../../../auth/application/dto/registration.dto';
+import { UserEntity } from '../../domain/user.entity';
 import { UsersRepository } from '../../repository/users.repository';
 import { ICreateUserCommandDto, IUserViewDto, UserViewMapper } from '../dto';
-import { UserEntity } from '../../domain/user.entity';
 
 @Injectable()
 export class UsersFactory {
@@ -33,7 +33,7 @@ export class UsersFactory {
     });
   }
 
-  async createUnconfirmedUser(
+  async createUnverifiedUser(
     dto: IRegistrationDto
   ): Promise<{ email: string; confirmationCode: string }> {
     const { login, email, password } = dto;

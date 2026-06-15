@@ -1,8 +1,7 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { UsersFactory } from '../../../users/application/factories/users.factory';
 import type { IRegistrationDto } from '../dto/registration.dto';
 import { UserRegistrationEvent } from '../events/user-registration.event';
-import { UsersFactory } from '../../../users/application/factories/users.factory';
-import { UsersService } from '../../../users/application/services/users.service';
 
 export class RegistrationCommand {
   constructor(public dto: IRegistrationDto) {}
@@ -12,14 +11,11 @@ export class RegistrationCommand {
 export class RegistrationUseCase implements ICommandHandler<RegistrationCommand> {
   constructor(
     private eventBus: EventBus,
-    private usersService: UsersService,
     private usersFactory: UsersFactory
   ) {}
 
   async execute({ dto }: RegistrationCommand): Promise<boolean> {
-    await this.usersService.ensureUserIsAvailable(dto);
-
-    const payload = await this.usersFactory.createUnconfirmedUser(dto);
+    const payload = await this.usersFactory.createUnverifiedUser(dto);
 
     this.eventBus.publish(new UserRegistrationEvent(payload));
 
