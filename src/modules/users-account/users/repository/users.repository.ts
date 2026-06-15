@@ -49,17 +49,17 @@ export class UsersRepository {
     return user;
   }
 
-  async findByLoginOrEmail(loginOrEmail: string): Promise<IUserEntityDto | null> {
-    const [user]: IUserEntityDto[] = await this.dataSource.query(
-      `
-      SELECT *
-        FROM users
-        WHERE (users.login = $1 OR users.email = $1) AND "deletedAt" IS NULL
-      `,
-      [loginOrEmail]
-    );
+  async findByLoginOrEmail(loginOrEmail: string): Promise<UserEntity | null> {
+    const user = await this.usersRepo.findOne({
+      where: [{ login: loginOrEmail }, { email: loginOrEmail }],
+      withDeleted: false,
+      relations: {
+        confirmation: true,
+        recoveryCodes: true,
+      },
+    });
 
-    return user || null;
+    return user;
   }
 
   async softDelete(userId: string): Promise<boolean> {

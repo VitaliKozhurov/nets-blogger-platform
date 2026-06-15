@@ -1,5 +1,4 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
-import { randomUUID } from 'crypto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { UsersRepository } from '../../../users/repository/users.repository';
 import type { IRegistrationEmailResendingDto } from '../dto/registration-email-resending.dto';
@@ -27,19 +26,11 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
       });
     }
 
-    const prevConfirmationData = await this.usersRepository.findRegistrationConfirmationData(
-      user.id
-    );
+    console.log('USER: ', user);
 
-    if (!prevConfirmationData) {
-      throw new DomainException({
-        code: DomainExceptionCode.BAD_REQUEST_ERROR,
-        message: 'Cannot resend confirmation email',
-        extensions: [{ field: 'email', message: 'Should register first' }],
-      });
-    }
+    const isConfirmed = user.checkIsConfirmed();
 
-    if (prevConfirmationData.isConfirmed) {
+    if (isConfirmed) {
       throw new DomainException({
         code: DomainExceptionCode.BAD_REQUEST_ERROR,
         message: 'Cannot resend confirmation email',
@@ -47,19 +38,13 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
       });
     }
 
-    const confirmationCode = randomUUID();
-    const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
-
-    await this.usersRepository.updateRegistrationConfirmationData({
-      userId: user.id,
-      confirmationCode,
-      expirationDate,
-    });
+    const updatedUser = user.updateConfirmationCode();
+    const savedUser = await this.usersRepository.save(updatedUser);
 
     this.eventBus.publish(
       new UserRegistrationEvent({
-        email: user.email,
-        confirmationCode,
+        email: savedUser.email,
+        confirmationCode: savedUser.confirmation.code as string,
       })
     );
 

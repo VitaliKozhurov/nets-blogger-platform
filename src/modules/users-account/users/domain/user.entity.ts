@@ -67,4 +67,18 @@ export class UserEntity extends BaseDBEntity {
 
     return newUser;
   }
+
+  checkIsConfirmed() {
+    return this.confirmation.isConfirmed;
+  }
+
+  updateConfirmationCode() {
+    const confirmationCode = randomUUID();
+    const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
+
+    this.confirmation.code = confirmationCode;
+    this.confirmation.expirationDate = expirationDate;
+
+    return this;
+  }
 }
