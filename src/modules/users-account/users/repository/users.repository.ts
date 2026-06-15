@@ -8,11 +8,14 @@ import {
   IUserEntityDto,
 } from '../domain/dto';
 import { UserEntity } from '../domain/user.entity';
+import { UserConfirmationEntity } from '../domain/user-confirmation.entity';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectRepository(UserEntity) private usersRepo: Repository<UserEntity>,
+    @InjectRepository(UserConfirmationEntity)
+    private usersConfirmationRepo: Repository<UserConfirmationEntity>,
     @InjectDataSource() protected dataSource: DataSource
   ) {}
 
@@ -95,17 +98,12 @@ export class UsersRepository {
   }
 
   async confirmRegistrationByCode(code: string) {
-    const [rows]: [{ userId: string }[], number] = await this.dataSource.query(
-      `
-      UPDATE "user_confirmations"
-        SET "isConfirmed" = true, code = NULL, "expirationDate" = NULL
-        WHERE code = $1 AND "isConfirmed" = false AND "expirationDate" > NOW()
-        RETURNING "userId"
-      `,
-      [code]
+    const { affected } = await this.usersConfirmationRepo.update(
+      { code },
+      { isConfirmed: true, code: null, expirationDate: null }
     );
 
-    return rows.length > 0;
+    return affected === 1;
   }
 
   async updateRegistrationConfirmationData(dto: {
