@@ -21,11 +21,11 @@ export class PasswordRecoveryUseCase implements ICommandHandler<PasswordRecovery
       const updatedUser = user.generatePasswordRecoveryCode();
       const savedUser = await this.usersRepository.save(updatedUser);
 
-      if (savedUser.recoveryCode) {
+      if (savedUser.passwordRecovery) {
         this.eventBus.publish(
           new UserPasswordRecoveryEvent({
             email: savedUser.email,
-            recoveryCode: savedUser.recoveryCode.code,
+            recoveryCode: savedUser.passwordRecovery.code,
           })
         );
       }

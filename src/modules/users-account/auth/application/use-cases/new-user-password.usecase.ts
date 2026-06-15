@@ -16,11 +16,9 @@ export class NewUserPasswordUseCase implements ICommandHandler<NewUserPasswordCo
   ) {}
 
   async execute({ dto }: NewUserPasswordCommand): Promise<boolean> {
-    const passwordRecoveryData = await this.usersRepository.findPasswordRecoveryData(
-      dto.recoveryCode
-    );
+    const user = await this.usersRepository.findByRecoveryCode(dto.recoveryCode);
 
-    if (!passwordRecoveryData) {
+    if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.BAD_REQUEST_ERROR,
         message: 'Recovery code is invalid',
@@ -35,25 +33,9 @@ export class NewUserPasswordUseCase implements ICommandHandler<NewUserPasswordCo
 
     const passwordHash = await this.passwordHasherService.createHash(dto.newPassword);
 
-    const isUpdated = await this.usersRepository.updateUserPassword({
-      userId: passwordRecoveryData.userId,
-      passwordHash,
-    });
+    const updatedUser = user.updatePassword(passwordHash);
 
-    if (!isUpdated) {
-      throw new DomainException({
-        code: DomainExceptionCode.BAD_REQUEST_ERROR,
-        message: 'Recovery code is invalid',
-        extensions: [
-          {
-            field: 'recoveryCode',
-            message: 'Invalid recovery code',
-          },
-        ],
-      });
-    }
-
-    await this.usersRepository.deletePasswordRecoveryData(passwordRecoveryData.userId);
+    await this.usersRepository.save(updatedUser);
 
     return true;
   }

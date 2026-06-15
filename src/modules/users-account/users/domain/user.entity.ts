@@ -28,7 +28,7 @@ export class UserEntity extends BaseDBEntity {
     cascade: true, // для сохранения связанных сущностей
     nullable: true,
   })
-  recoveryCode: UserPasswordRecoveryEntity | null;
+  passwordRecovery: UserPasswordRecoveryEntity | null;
 
   static createVerifiedUser(dto: ICreateVerifiedUserDto) {
     const newUser = new UserEntity();
@@ -83,15 +83,22 @@ export class UserEntity extends BaseDBEntity {
     return this;
   }
 
+  updatePassword(passwordHash: string) {
+    this.passwordHash = passwordHash;
+    this.passwordRecovery = null;
+
+    return this;
+  }
+
   generatePasswordRecoveryCode() {
-    const recoveryData = new UserPasswordRecoveryEntity();
+    const passwordRecovery = new UserPasswordRecoveryEntity();
     const recoveryCode = randomUUID();
     const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
 
-    recoveryData.code = recoveryCode;
-    recoveryData.expirationDate = expirationDate;
+    passwordRecovery.code = recoveryCode;
+    passwordRecovery.expirationDate = expirationDate;
 
-    this.recoveryCode = recoveryData;
+    this.passwordRecovery = passwordRecovery;
 
     return this;
   }
