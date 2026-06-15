@@ -59,28 +59,6 @@ export class UsersRepository {
     return user || null;
   }
 
-  async createConfirmedUser(dto: { login: string; email: string; passwordHash: string }) {
-    const user = this.usersRepo.create(dto);
-
-    user.confirmation.isConfirmed = true;
-
-    return user;
-  }
-
-  async createUnconfirmedUser(dto: {
-    login: string;
-    email: string;
-    passwordHash: string;
-    confirmationCode: string;
-    expirationDate: Date;
-  }) {
-    const user = this.usersRepo.create(dto);
-
-    user.confirmation.isConfirmed = false;
-
-  //   return user;
-  // }
-
   async softDelete(userId: string): Promise<boolean> {
     const { affected } = await this.usersRepo.softDelete({ id: userId });
 
