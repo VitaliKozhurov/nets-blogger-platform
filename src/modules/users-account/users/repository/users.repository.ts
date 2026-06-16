@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { UserEntity } from '../domain/user.entity';
 import { UserConfirmationEntity } from '../domain/user-confirmation.entity';
+import { UserPasswordRecoveryEntity } from '../domain/user-password-recovery.entity';
 
 @Injectable()
 export class UsersRepository {
   constructor(
     @InjectRepository(UserEntity) private usersRepo: Repository<UserEntity>,
     @InjectRepository(UserConfirmationEntity)
-    private usersConfirmationRepo: Repository<UserConfirmationEntity>
+    private usersConfirmationRepo: Repository<UserConfirmationEntity>,
+    @InjectRepository(UserPasswordRecoveryEntity)
+    private usersRecoveryCodeRepo: Repository<UserPasswordRecoveryEntity>
   ) {}
 
   async save(user: UserEntity) {
@@ -62,9 +65,17 @@ export class UsersRepository {
 
   async confirmRegistrationByCode(code: string) {
     const { affected } = await this.usersConfirmationRepo.update(
-      { code },
+      { code, expirationDate: MoreThanOrEqual(new Date()) },
       { isConfirmed: true, code: null, expirationDate: null }
     );
+
+    return affected === 1;
+  }
+
+  async deleteRecoveryCode(code: string) {
+    const { affected } = await this.usersRecoveryCodeRepo.delete({
+      code,
+    });
 
     return affected === 1;
   }

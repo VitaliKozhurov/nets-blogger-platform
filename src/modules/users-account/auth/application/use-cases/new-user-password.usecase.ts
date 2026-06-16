@@ -36,6 +36,7 @@ export class NewUserPasswordUseCase implements ICommandHandler<NewUserPasswordCo
     const updatedUser = user.updatePassword(passwordHash);
 
     await this.usersRepository.save(updatedUser);
+    await this.usersRepository.deleteRecoveryCode(dto.recoveryCode);
 
     return true;
   }

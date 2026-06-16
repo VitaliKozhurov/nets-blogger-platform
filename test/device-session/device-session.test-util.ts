@@ -15,7 +15,7 @@ export class DeviceSessionTestUtil {
   getAllSessions() {
     return this.dataSource.query(`
       SELECT *
-      FROM "user_device_sessions"
+      FROM "device_session"
     `);
   }
 

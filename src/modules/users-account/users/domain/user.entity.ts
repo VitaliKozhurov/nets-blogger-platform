@@ -85,7 +85,6 @@ export class UserEntity extends BaseDBEntity {
 
   updatePassword(passwordHash: string) {
     this.passwordHash = passwordHash;
-    this.passwordRecovery = null;
 
     return this;
   }

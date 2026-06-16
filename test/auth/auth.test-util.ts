@@ -83,7 +83,7 @@ export class AuthTestUtil {
       `
       SELECT urc.code
       FROM users u
-      JOIN user_recovery_codes urc ON urc."userId" = u.id
+      JOIN user_password_recovery_codes urc ON urc."userId" = u.id
       WHERE u.email = $1
     `,
       [email]

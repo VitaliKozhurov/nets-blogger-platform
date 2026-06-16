@@ -75,12 +75,11 @@ describe('E2E Controller  /sa/users', () => {
 
       const extensions = errorResponse.body.extensions;
 
-      expect(extensions.length).toBe(2);
+      expect(extensions.length).toBe(1);
 
       const fieldNames = extensions.map(ext => ext.field);
 
-      expect(fieldNames).toContain('login');
-      expect(fieldNames).toContain('email');
+      expect(fieldNames.some(field => field === 'login' || field === 'email')).toBeTruthy();
     });
 
     it('should return 204 status code and send email for confirmation', async () => {

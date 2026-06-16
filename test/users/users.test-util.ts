@@ -1,11 +1,16 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
-import { ICreateUserDto } from '../../src/modules/users-account/users/application/dto';
+
+type CreateUser = {
+  login: string;
+  password: string;
+  email: string;
+};
 
 export class UsersTestUtil {
   constructor(private readonly app: NestExpressApplication) {}
 
-  createUser(userDto: Partial<ICreateUserDto> = {}) {
+  createUser(userDto: Partial<CreateUser> = {}) {
     return request(this.app.getHttpServer())
       .post('/sa/users')
       .send({

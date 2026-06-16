@@ -26,8 +26,6 @@ export class RegistrationEmailResendingUseCase implements ICommandHandler<Regist
       });
     }
 
-    console.log('USER: ', user);
-
     const isConfirmed = user.checkIsConfirmed();
 
     if (isConfirmed) {

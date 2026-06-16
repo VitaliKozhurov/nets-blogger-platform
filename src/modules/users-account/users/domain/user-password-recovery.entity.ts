@@ -20,7 +20,7 @@ export class UserPasswordRecoveryEntity {
   @Column({ type: 'timestamp with time zone' })
   expirationDate: Date;
 
-  @OneToOne(() => UserEntity, user => user.passwordRecovery , {
+  @OneToOne(() => UserEntity, user => user.passwordRecovery, {
     onDelete: 'CASCADE', // для удаления связанных сущностей при удалении родительской
   })
   @JoinColumn({ name: 'userId' })
