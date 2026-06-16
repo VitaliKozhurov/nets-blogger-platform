@@ -3,14 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOperator, ILike, Repository } from 'typeorm';
 import { UserEntity } from '../domain/user.entity';
 import { IGetUsersParamsDto } from './dto/get-users.params.dto';
-import { IUserQueryDto } from './dto/user-query.dto';
 
 @Injectable()
 export class UsersQueryRepository {
   constructor(@InjectRepository(UserEntity) private usersRepo: Repository<UserEntity>) {}
 
   async findAll(query: IGetUsersParamsDto): Promise<{
-    items: IUserQueryDto[];
+    items: UserEntity[];
     totalCount: number;
   }> {
     const { searchEmailTerm, searchLoginTerm, sortBy, sortDirection, limit, offset } = query;
