@@ -41,6 +41,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './users/domain/user.entity';
 import { UserConfirmationEntity } from './users/domain/user-confirmation.entity';
 import { UserPasswordRecoveryEntity } from './users/domain/user-password-recovery.entity';
+import { UserDeviceSessionEntity } from './device-session/domain/user-device-session.entity';
 
 const commandHandlers = [
   RegistrationUseCase,
@@ -61,7 +62,12 @@ const queryHandlers = [GetUsersHandler, GetDeviceSessionsHandler];
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, UserConfirmationEntity, UserPasswordRecoveryEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      UserConfirmationEntity,
+      UserPasswordRecoveryEntity,
+      UserDeviceSessionEntity,
+    ]),
     CryptoModule,
     JwtModule,
     ThrottlerModule.forRoot({ throttlers: [{ ttl: 10000, limit: 5 }] }),

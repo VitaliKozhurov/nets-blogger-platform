@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ICreateSessionParamsDto } from './dto/create-session.params.dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { IUpdateSessionParamsDto } from './dto/update-session.params.dto';
 import { IDeleteSessionParamsDto } from './dto/delete-session.params.dto';
-import { IDeviceSessionEntityDto } from '../domain/dto';
+import { UserDeviceSessionEntity } from '../domain/user-device-session.entity';
 
 @Injectable()
 export class DeviceSessionsRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(UserDeviceSessionEntity)
+    private userDeviceSessionsRepo: Repository<UserDeviceSessionEntity>
+  ) {}
 
   async createSession(dto: ICreateSessionParamsDto) {
     const { userId, deviceId, deviceName, ip, iat, expirationAt } = dto;
@@ -43,42 +47,27 @@ export class DeviceSessionsRepository {
   async deleteSession(dto: IDeleteSessionParamsDto) {
     const { userId, deviceId, iat } = dto;
 
-    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
-      `
-      DELETE FROM "user_device_sessions"
-        WHERE "userId" = $1 AND "deviceId" = $2 AND iat = $3
-        RETURNING id
-      `,
-      [userId, deviceId, iat]
-    );
+    const { affected } = await this.userDeviceSessionsRepo.delete({
+      userId,
+      deviceId,
+      iat,
+    });
 
-    return rows.length > 0;
+    return affected === 1;
   }
 
   async deleteAllUserSessionsExceptCurrent(dto: { userId: string; deviceId: string }) {
     const { userId, deviceId } = dto;
 
-    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
-      `
-      DELETE FROM "user_device_sessions"
-        WHERE "userId" = $1 AND "deviceId" != $2
-        RETURNING id
-      `,
-      [userId, deviceId]
-    );
+    const { affected } = await this.userDeviceSessionsRepo.delete({ userId, deviceId });
 
-    return rows.length > 0;
+    return affected && affected > 0;
   }
 
-  async findByIdOrThrow(deviceId: string): Promise<IDeviceSessionEntityDto> {
-    const [session]: IDeviceSessionEntityDto[] = await this.dataSource.query(
-      `
-      SELECT * 
-        FROM "user_device_sessions"
-        WHERE "deviceId" = $1
-      `,
-      [deviceId]
-    );
+  async findByIdOrThrow(deviceId: string): Promise<UserDeviceSessionEntity> {
+    const session = await this.userDeviceSessionsRepo.findOne({
+      where: { deviceId },
+    });
 
     if (!session) {
       throw new DomainException({
