@@ -16,6 +16,19 @@ export class UsersRepository {
     return await this.usersRepo.save(user);
   }
 
+  async findById(id: string): Promise<UserEntity | null> {
+    const user = await this.usersRepo.findOne({
+      where: { id },
+      withDeleted: false,
+      relations: {
+        confirmation: true,
+        passwordRecovery: true,
+      },
+    });
+
+    return user;
+  }
+
   async findByLoginOrEmail(loginOrEmail: string): Promise<UserEntity | null> {
     const user = await this.usersRepo.findOne({
       where: [{ login: loginOrEmail }, { email: loginOrEmail }],
@@ -55,30 +68,4 @@ export class UsersRepository {
 
     return affected === 1;
   }
-
-  // async findById(id: string): Promise<IUserEntityDto | null> {
-  //   const [user]: IUserEntityDto[] = await this.dataSource.query(
-  //     `
-  //     SELECT *
-  //       FROM users
-  //       WHERE users.id = $1 AND "deletedAt" IS NULL
-  //     `,
-  //     [id]
-  //   );
-
-  //   return user || null;
-  // }
-
-  // async findByIdOrThrow(id: string): Promise<IUserEntityDto> {
-  //   const user = await this.findById(id);
-
-  //   if (!user) {
-  //     throw new DomainException({
-  //       code: DomainExceptionCode.NOT_FOUND_ERROR,
-  //       message: 'User not found',
-  //     });
-  //   }
-
-  //   return user;
-  // }
 }

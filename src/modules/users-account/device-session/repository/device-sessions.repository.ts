@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import { ICreateSessionParamsDto } from './dto/create-session.params.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { IUpdateSessionParamsDto } from './dto/update-session.params.dto';
 import { IDeleteSessionParamsDto } from './dto/delete-session.params.dto';
@@ -10,38 +9,23 @@ import { UserDeviceSessionEntity } from '../domain/user-device-session.entity';
 @Injectable()
 export class DeviceSessionsRepository {
   constructor(
-    @InjectDataSource() protected dataSource: DataSource,
     @InjectRepository(UserDeviceSessionEntity)
     private userDeviceSessionsRepo: Repository<UserDeviceSessionEntity>
   ) {}
 
-  async createSession(dto: ICreateSessionParamsDto) {
-    const { userId, deviceId, deviceName, ip, iat, expirationAt } = dto;
-
-    await this.dataSource.query(
-      `
-      INSERT INTO "user_device_sessions"
-        ("userId", "deviceId", "deviceName", ip, iat, "expirationAt")
-        VALUES ($1, $2, $3, $4, $5, $6)
-      `,
-      [userId, deviceId, deviceName, ip, iat, expirationAt]
-    );
+  async save(deviceSession: UserDeviceSessionEntity) {
+    return this.userDeviceSessionsRepo.save(deviceSession);
   }
 
   async updateSession(dto: IUpdateSessionParamsDto) {
     const { userId, deviceId, iat, newIat, newExpirationAt } = dto;
 
-    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
-      `
-      UPDATE "user_device_sessions"
-        SET iat = $4, "expirationAt" = $5
-        WHERE "userId" = $1 AND "deviceId" = $2 AND iat = $3
-        RETURNING id
-      `,
-      [userId, deviceId, iat, newIat, newExpirationAt]
+    const { affected } = await this.userDeviceSessionsRepo.update(
+      { userId, deviceId, iat },
+      { iat: newIat, expirationAt: newExpirationAt }
     );
 
-    return rows.length > 0;
+    return affected === 1;
   }
 
   async deleteSession(dto: IDeleteSessionParamsDto) {

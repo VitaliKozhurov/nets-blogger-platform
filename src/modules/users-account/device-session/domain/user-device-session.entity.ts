@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { ICreateSessionDto } from './dto/create-session.dto';
 
 @Entity({ name: 'device_session' })
 export class UserDeviceSessionEntity {
@@ -34,4 +35,17 @@ export class UserDeviceSessionEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  static createNewSession(dto: ICreateSessionDto) {
+    const newSession = new UserDeviceSessionEntity();
+
+    newSession.userId = dto.userId;
+    newSession.deviceId = dto.deviceId;
+    newSession.ip = dto.ip;
+    newSession.deviceName = dto.deviceName;
+    newSession.iat = dto.iat;
+    newSession.expirationAt = dto.expirationAt;
+
+    return newSession;
+  }
 }

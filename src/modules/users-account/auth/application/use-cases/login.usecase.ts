@@ -1,11 +1,11 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import type { ILoginDto } from '../dto/login.dto';
-
 import { randomUUID } from 'crypto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { DeviceSessionsRepository } from '../../../device-session/repository/device-sessions.repository';
 import { UsersService } from '../../../users/application/services/users.service';
 import { TokenService } from '../services/token.service';
+import { UserDeviceSessionEntity } from 'src/modules/users-account/device-session/domain/user-device-session.entity';
 
 type LoginResult = {
   accessToken: string;
@@ -52,7 +52,7 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
 
     const { iat, expirationAt, deviceId, refreshToken } = refreshTokenWithMeta;
 
-    await this.deviceSessionsRepository.createSession({
+    const session = UserDeviceSessionEntity.createNewSession({
       userId: user.userId,
       deviceId,
       deviceName: dto.deviceName,
@@ -60,6 +60,8 @@ export class LoginUseCase implements ICommandHandler<LoginCommand> {
       iat,
       expirationAt,
     });
+
+    await this.deviceSessionsRepository.save(session);
 
     return { accessToken, refreshToken };
   }
