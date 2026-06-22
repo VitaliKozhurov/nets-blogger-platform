@@ -1,7 +1,12 @@
 import { LikeStatus } from '../../../likes/domain/dto';
-import { IPostEntityDto } from '../../domain/dto';
 
-export interface IPostWithDetails extends Omit<IPostEntityDto, 'deletedAt'> {
+export interface IPostWithDetails {
+  id: string;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  createdAt: Date;
   blogName: string;
   likesCount: number;
   dislikesCount: number;

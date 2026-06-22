@@ -1,13 +1,6 @@
 import { INewestLike } from '../../repository/dto/newest-like.dto';
 import { LikeStatus } from '../../../likes/domain/dto';
-import { IPostEntityDto } from '../../domain/dto';
-
-export interface IPostWithDetails extends Omit<IPostEntityDto, 'deletedAt'> {
-  blogName: string;
-  likesCount: number;
-  dislikesCount: number;
-  myStatus: LikeStatus;
-}
+import { IPostWithDetails } from '../../repository/dto/post-with-details.dto';
 
 export class PostViewMapper {
   id: string;
