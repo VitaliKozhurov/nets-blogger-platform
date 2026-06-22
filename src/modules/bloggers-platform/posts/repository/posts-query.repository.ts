@@ -21,90 +21,55 @@ export class PostsQueryRepository {
     posts: { post: IPostWithDetails; newestLikes: INewestLike[] }[];
     totalCount: number;
   }> {
-    const { query, userId } = args;
+    const { query, userId: _userId } = args;
     const { sortBy, sortDirection, limit, offset } = query;
 
-    const postsPromise: Promise<IPostWithDetails[]> = this.dataSource.query(
-      `
-          SELECT p.*, 
-            b."name" as "blogName",
-            (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Like')::int as "likesCount",
-            (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND status = 'Dislike')::int as "dislikesCount",
-            COALESCE(
-            (SELECT status FROM post_likes pl WHERE pl."postId" = p."id" AND "userId" = $1 LIMIT 1),
-            'None') as "myStatus"
-            FROM posts p
-            LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE p."deletedAt" IS NULL
-            ORDER BY ${`"${sortBy}"`} ${sortDirection}
-            LIMIT $2
-            OFFSET $3
-          `,
-      [userId ?? null, limit, offset]
-    );
+    const postsQuery = this.postsRepo
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.blog', 'blog')
+      .select([
+        'post.id',
+        'post.title',
+        'post.shortDescription',
+        'post.content',
+        'post.blogId',
+        'post.createdAt',
+        'blog.name',
+      ])
+      .where('post.deletedAt IS NULL')
+      .orderBy(`post.${sortBy}`, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
+      .skip(offset)
+      .take(limit)
+      .getMany();
 
-    const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
-      `
-          SELECT COUNT(*)
-            FROM posts p
-            LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE p."deletedAt" IS NULL
-          `,
-      []
-    );
+    const totalCountQuery = this.postsRepo.createQueryBuilder('post').getCount();
 
-    const [posts, countResult] = await Promise.all([postsPromise, totalCountPromise]);
+    const [posts, totalCount] = await Promise.all([postsQuery, totalCountQuery]);
 
-    const postMap = posts.map(p => p.id);
-
-    const newestLikes: ({ postId: string } & INewestLike)[] = await this.dataSource.query(
-      `
-          SELECT ranked."postId", ranked."addedAt", ranked."userId", ranked."login"
-            FROM (
-               SELECT 
-                  pl."postId",
-                  pl."createdAt" as "addedAt",
-                  u."id" as "userId",
-                  u."login",
-                  ROW_NUMBER() OVER (
-                  PARTITION BY pl."postId"
-                  ORDER BY pl."createdAt" DESC
-                  ) as rn
-                FROM post_likes pl
-                LEFT JOIN users u ON pl."userId" = u."id"
-                WHERE pl."postId" = ANY($1) AND pl.status = 'Like'
-                  ) ranked
-              WHERE ranked.rn <= 3
-              ORDER BY ranked."postId", ranked."addedAt" DESC
-          `,
-      [postMap]
-    );
-
-    const entries = newestLikes.reduce<Record<string, INewestLike[]>>((acc, curr) => {
-      const { postId, ...restData } = curr;
-
-      if (acc[postId]) {
-        acc[postId].push(restData);
-      } else {
-        acc[postId] = [restData];
-      }
-
-      return acc;
-    }, {});
-
-    const rawPosts = posts.map(post => ({
-      post,
-      newestLikes: entries[post.id] ?? [],
+    const result = posts.map(p => ({
+      post: {
+        id: p.id,
+        title: p.title,
+        shortDescription: p.shortDescription,
+        content: p.content,
+        blogId: p.blogId,
+        blogName: p.blog.name,
+        createdAt: p.createdAt,
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: LikeStatus.None,
+      },
+      newestLikes: [],
     }));
 
-    return { posts: rawPosts, totalCount: Number(countResult[0].count) };
+    return { posts: result, totalCount };
   }
 
   async findAllForBlogId(args: IGetPostsParamsDto): Promise<{
     posts: { post: IPostWithDetails; newestLikes: INewestLike[] }[];
     totalCount: number;
   }> {
-    const { blogId, query } = args;
+    const { blogId, userId: _userId, query } = args;
 
     const { sortBy, sortDirection, limit, offset } = query;
 
@@ -121,6 +86,7 @@ export class PostsQueryRepository {
         'blog.name',
       ])
       .where('post.blogId = :blogId', { blogId })
+      .andWhere('post.deletedAt IS NULL')
       .orderBy(`post.${sortBy}`, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
       .skip(offset)
       .take(limit)
@@ -155,37 +121,40 @@ export class PostsQueryRepository {
   async findById(
     args: IGetPostParamsDto
   ): Promise<{ post: IPostWithDetails; newestLikes: INewestLike[] } | null> {
-    const { postId, userId } = args;
+    const { postId, userId: _userId } = args;
 
-    const [post]: IPostWithDetails[] = await this.dataSource.query(
-      `
-      SELECT p.*, 
-          b."name" as "blogName", 
-          (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND pl.status = 'Like')::int as "likesCount",
-          (SELECT COUNT(*) FROM post_likes pl WHERE pl."postId" = p."id" AND pl.status = 'Dislike')::int as "dislikesCount",
-          COALESCE(
-          (SELECT pl.status FROM post_likes pl WHERE pl."postId" = p."id" AND pl."userId" = $2 LIMIT 1),
-          'None') as "myStatus"
-            FROM posts p
-            LEFT JOIN blogs b ON p."blogId" = b."id"
-            WHERE p."id" = $1 AND p."deletedAt" IS NULL
-          `,
-      [postId, userId ?? null]
-    );
+    const post = await this.postsRepo
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.blog', 'blog')
+      .select([
+        'post.id',
+        'post.title',
+        'post.shortDescription',
+        'post.content',
+        'post.blogId',
+        'post.createdAt',
+        'blog.name',
+      ])
+      .where('post.id = :postId', { postId })
+      .getOne();
 
-    const newestLikes: INewestLike[] = await this.dataSource.query(
-      `
-      SELECT pl."createdAt" as "addedAt",pl. "userId", u."login"
-          FROM post_likes pl
-          LEFT JOIN users u ON pl."userId" = u."id"
-          WHERE pl."postId" = $1 AND pl.status = 'Like'
-          ORDER BY pl."createdAt" DESC
-          LIMIT 3
-      `,
-      [postId]
-    );
-
-    return post ? { post, newestLikes } : null;
+    return post
+      ? {
+          post: {
+            id: post.id,
+            title: post.title,
+            content: post.content,
+            shortDescription: post.shortDescription,
+            blogId: post.blogId,
+            blogName: post.blog.name,
+            createdAt: post.createdAt,
+            likesCount: 0,
+            dislikesCount: 0,
+            myStatus: LikeStatus.None,
+          },
+          newestLikes: [],
+        }
+      : null;
   }
 
   async findByIdOrThrow(
