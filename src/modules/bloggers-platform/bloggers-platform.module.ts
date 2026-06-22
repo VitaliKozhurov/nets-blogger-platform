@@ -42,6 +42,9 @@ import {
   GetPostsByIdHandler,
   GetPostsHandler,
 } from './posts/application';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BlogEntity } from './blogs/domain/blog.entity';
+import { PostEntity } from './posts/domain/post.entity';
 
 const commandHandlers = [
   CreateBlogUseCase,
@@ -69,7 +72,7 @@ const queryHandlers = [
 ];
 
 @Module({
-  imports: [JwtModule, UsersAccountModule],
+  imports: [JwtModule, UsersAccountModule, TypeOrmModule.forFeature([BlogEntity, PostEntity])],
   controllers: [SuperAdminBlogsController, BlogsController, PostsController, CommentsController],
   providers: [
     ...commandHandlers,

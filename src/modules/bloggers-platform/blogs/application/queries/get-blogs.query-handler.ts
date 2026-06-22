@@ -30,10 +30,10 @@ export class GetBlogsHandler implements IQueryHandler<GetBlogsQuery> {
       offset,
     };
 
-    const { blogs, totalCount } = await this.blogsQueryRepository.findAll(params);
+    const { items, totalCount } = await this.blogsQueryRepository.findAll(params);
 
     const result = PaginationViewMapper.mapToViewModel({
-      items: blogs.map(BlogViewMapper.mapToView),
+      items: items.map(BlogViewMapper.mapToView),
       totalCount,
       page: dto.pageNumber,
       size: dto.pageSize,

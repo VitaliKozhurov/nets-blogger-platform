@@ -1,4 +1,4 @@
-import { IBlogEntityDto } from '../../domain/dto';
+import { BlogEntity } from '../../domain/blog.entity';
 
 export class BlogViewMapper {
   id: string;
@@ -8,7 +8,7 @@ export class BlogViewMapper {
   createdAt: string;
   isMembership: boolean;
 
-  static mapToView(dbBlog: IBlogEntityDto): BlogViewMapper {
+  static mapToView(dbBlog: BlogEntity): BlogViewMapper {
     const dto = new BlogViewMapper();
 
     dto.id = dbBlog.id;

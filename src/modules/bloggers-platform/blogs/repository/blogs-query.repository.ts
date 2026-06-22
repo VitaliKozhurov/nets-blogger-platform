@@ -1,59 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { IBlogRepositoryDto } from './dto/blog-repository.dto';
+import { ILike, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { IGetBlogsParamsDto } from './dto/get-blogs.params.dto';
-import { IBlogEntityDto } from '../domain/dto';
+import { BlogEntity } from '../domain/blog.entity';
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(@InjectRepository(BlogEntity) private blogsRepo: Repository<BlogEntity>) {}
 
   async findAll(query: IGetBlogsParamsDto): Promise<{
-    blogs: IBlogEntityDto[];
+    items: BlogEntity[];
     totalCount: number;
   }> {
     const { searchNameTerm, sortBy, sortDirection, limit, offset } = query;
 
-    const blogsPromise: Promise<IBlogRepositoryDto[]> = this.dataSource.query(
-      `
-      SELECT *
-        FROM blogs
-        WHERE (name ILIKE $1) AND "deletedAt" IS NULL
-        ORDER BY ${`"${sortBy}"`} ${sortDirection}
-        LIMIT $2
-        OFFSET $3
-      `,
-      [`%${searchNameTerm ?? ''}%`, limit, offset]
-    );
+    const result = await this.blogsRepo.findAndCount({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        websiteUrl: true,
+        createdAt: true,
+        isMembership: true,
+      },
+      where: searchNameTerm ? { name: ILike(`%${searchNameTerm}%`) } : {},
+      withDeleted: false,
+      order: { [sortBy]: sortDirection },
+      skip: offset,
+      take: limit,
+    });
 
-    const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
-      `
-      SELECT COUNT(*)
-        FROM blogs
-        WHERE (name ILIKE $1) AND "deletedAt" IS NULL
-      `,
-      [`%${searchNameTerm ?? ''}%`]
-    );
-
-    const [blogsResult, countResult] = await Promise.all([blogsPromise, totalCountPromise]);
-
-    return {
-      blogs: blogsResult,
-      totalCount: Number(countResult[0].count),
-    };
+    return { items: result[0], totalCount: result[1] };
   }
 
-  async findByIdOrThrow(id: string): Promise<IBlogEntityDto> {
-    const [blog]: IBlogEntityDto[] = await this.dataSource.query(
-      `
-      SELECT *
-        FROM blogs
-        WHERE id=$1 AND "deletedAt" IS NULL
-      `,
-      [id]
-    );
+  async findByIdOrThrow(id: string): Promise<BlogEntity> {
+    const blog = await this.blogsRepo.findOne({ where: { id }, withDeleted: false });
 
     if (!blog) {
       throw new DomainException({
