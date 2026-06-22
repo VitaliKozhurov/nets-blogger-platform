@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { IUpdateSessionParamsDto } from './dto/update-session.params.dto';
 import { IDeleteSessionParamsDto } from './dto/delete-session.params.dto';
@@ -43,7 +43,10 @@ export class DeviceSessionsRepository {
   async deleteAllUserSessionsExceptCurrent(dto: { userId: string; deviceId: string }) {
     const { userId, deviceId } = dto;
 
-    const { affected } = await this.userDeviceSessionsRepo.delete({ userId, deviceId });
+    const { affected } = await this.userDeviceSessionsRepo.delete({
+      userId,
+      deviceId: Not(deviceId),
+    });
 
     return affected && affected > 0;
   }

@@ -9,20 +9,28 @@ export class TestsController {
   @Delete('all-data')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAll() {
-    await this.dataSource.query(
-      `
-       TRUNCATE TABLE 
-       "users", 
-       "user_device_sessions", 
-       "user_confirmations", 
-       "user_recovery_codes",
-       "blogs", 
-       "posts",
-       "comments",
-       "post_likes",
-       "comment_likes"
-      `
-    );
+    const entities = this.dataSource.entityMetadatas;
+
+    for (const entity of entities) {
+      const repository = this.dataSource.getRepository(entity.name);
+
+      await repository.query(`TRUNCATE TABLE "${entity.tableName}" RESTART IDENTITY CASCADE;`);
+    }
+
+    // await this.dataSource.query(
+    //   `
+    //    TRUNCATE TABLE
+    //    "users",
+    //    "user_device_sessions",
+    //    "user_confirmations",
+    //    "user_recovery_codes",
+    //    "blogs",
+    //    "posts",
+    //    "comments",
+    //    "post_likes",
+    //    "comment_likes"
+    //   `
+    // );
 
     return {
       status: 'succeeded',
