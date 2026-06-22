@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { IBlogRepositoryDto } from './dto/blog-repository.dto';
-import { IBlogEntityDto } from '../domain/dto';
 import { ICreateBlogParamsDto } from './dto/create-blog.params.dto';
 import { IUpdateBlogParamsDto } from './dto/update-blog.params.dto';
+import { BlogEntity } from '../domain/blog.entity';
 
 @Injectable()
 export class BlogsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findById(id: string): Promise<IBlogEntityDto | null> {
-    const [blog]: IBlogEntityDto[] = await this.dataSource.query(
+  async findById(id: string): Promise<BlogEntity | null> {
+    const [blog]: BlogEntity[] = await this.dataSource.query(
       `
           SELECT *
             FROM blogs
@@ -23,10 +22,10 @@ export class BlogsRepository {
     return blog || null;
   }
 
-  async create(dto: ICreateBlogParamsDto): Promise<IBlogEntityDto> {
+  async create(dto: ICreateBlogParamsDto): Promise<BlogEntity> {
     const { name, description, websiteUrl } = dto;
 
-    const [blog]: IBlogRepositoryDto[] = await this.dataSource.query(
+    const [blog]: BlogEntity[] = await this.dataSource.query(
       `
           INSERT INTO blogs (name, description, "websiteUrl")
             VALUES ($1, $2, $3)
