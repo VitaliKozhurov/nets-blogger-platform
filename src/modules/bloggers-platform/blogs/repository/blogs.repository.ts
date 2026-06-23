@@ -1,13 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { ICreateBlogParamsDto } from './dto/create-blog.params.dto';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { IUpdateBlogParamsDto } from './dto/update-blog.params.dto';
 import { BlogEntity } from '../domain/blog.entity';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(BlogEntity) private blogsRepo: Repository<BlogEntity>
+  ) {}
+
+  async save(blog: BlogEntity) {
+    return this.blogsRepo.save(blog);
+  }
 
   async findById(id: string): Promise<BlogEntity | null> {
     const [blog]: BlogEntity[] = await this.dataSource.query(
@@ -22,50 +28,23 @@ export class BlogsRepository {
     return blog || null;
   }
 
-  async create(dto: ICreateBlogParamsDto): Promise<BlogEntity> {
-    const { name, description, websiteUrl } = dto;
-
-    const [blog]: BlogEntity[] = await this.dataSource.query(
-      `
-          INSERT INTO blogs (name, description, "websiteUrl")
-            VALUES ($1, $2, $3)
-            RETURNING *
-        `,
-      [name, description, websiteUrl]
-    );
-
-    return blog;
-  }
-
   async update(dto: IUpdateBlogParamsDto): Promise<boolean> {
     const { blogId, name, description, websiteUrl } = dto;
 
-    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
-      `
-          UPDATE blogs
-            SET name = $1,
-                description = $2,
-                "websiteUrl" = $3
-            WHERE blogs.id = $4 AND "deletedAt" IS NULL
-            RETURNING id
-        `,
-      [name, description, websiteUrl, blogId]
+    const { affected } = await this.blogsRepo.update(
+      { id: blogId, deletedAt: IsNull() },
+      { name, description, websiteUrl }
     );
 
-    return rows.length > 0;
+    return affected === 1;
   }
 
   async softDelete(blogId: string) {
-    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
-      `
-          UPDATE blogs
-            SET "deletedAt" = NOW()
-            WHERE blogs.id = $1 AND "deletedAt" IS NULL
-            RETURNING id
-        `,
-      [blogId]
+    const { affected } = await this.blogsRepo.update(
+      { id: blogId, deletedAt: IsNull() },
+      { deletedAt: new Date() }
     );
 
-    return rows.length > 0;
+    return affected === 1;
   }
 }

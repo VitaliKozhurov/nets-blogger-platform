@@ -16,7 +16,7 @@ export class UsersRepository {
   ) {}
 
   async save(user: UserEntity) {
-    return await this.usersRepo.save(user);
+    return this.usersRepo.save(user);
   }
 
   async findById(id: string): Promise<UserEntity | null> {
