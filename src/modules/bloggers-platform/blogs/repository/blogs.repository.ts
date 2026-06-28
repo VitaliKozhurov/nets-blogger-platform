@@ -1,31 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, IsNull, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { IUpdateBlogParamsDto } from './dto/update-blog.params.dto';
 import { BlogEntity } from '../domain/blog.entity';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(
-    @InjectDataSource() protected dataSource: DataSource,
-    @InjectRepository(BlogEntity) private blogsRepo: Repository<BlogEntity>
-  ) {}
+  constructor(@InjectRepository(BlogEntity) private blogsRepo: Repository<BlogEntity>) {}
 
   async save(blog: BlogEntity) {
     return this.blogsRepo.save(blog);
   }
 
-  async findById(id: string): Promise<BlogEntity | null> {
-    const [blog]: BlogEntity[] = await this.dataSource.query(
-      `
-          SELECT *
-            FROM blogs
-            WHERE id=$1 AND "deletedAt" IS NULL
-        `,
-      [id]
-    );
+  async findByIdOrThrow(id: string): Promise<BlogEntity> {
+    const blog = await this.blogsRepo.findOne({
+      where: { id },
+      withDeleted: false,
+    });
 
-    return blog || null;
+    if (!blog) {
+      throw new DomainException({
+        code: DomainExceptionCode.NOT_FOUND_ERROR,
+        message: 'Blog not found',
+      });
+    }
+
+    return blog;
   }
 
   async update(dto: IUpdateBlogParamsDto): Promise<boolean> {

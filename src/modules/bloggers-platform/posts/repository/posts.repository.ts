@@ -1,40 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { IPostEntityDto } from '../domain/dto';
-import { ICreatePostParamsDto } from './dto/create-post.params.dto';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { IUpdatePostParamsDto } from './dto/update-post.params.dto';
 import { IDeletePostParamsDto } from './dto/delete-post.params.dto';
+import { PostEntity } from '../domain/post.entity';
 
 @Injectable()
 export class PostsRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(PostEntity) private postsRepo: Repository<PostEntity>
+  ) {}
 
-  async findById(postId: string): Promise<(IPostEntityDto & { blogName: string }) | null> {
-    const [post]: (IPostEntityDto & { blogName: string })[] = await this.dataSource.query(
-      `
-          SELECT *, b."name" as blogName
-            FROM posts p
-            LEFT JOIN blogs b on p."blogId" = b."id"
-            WHERE p."id" = $1 AND p."deletedAt" IS NULL
-          `,
-      [postId]
-    );
-
-    return post || null;
+  async save(blog: PostEntity) {
+    return this.postsRepo.save(blog);
   }
 
-  async create(dto: ICreatePostParamsDto): Promise<IPostEntityDto & { blogName: string }> {
-    const { blogId, title, shortDescription, content } = dto;
-
-    const [post]: (IPostEntityDto & { blogName: string })[] = await this.dataSource.query(
-      `
-          INSERT INTO "posts" ("blogId", title, "shortDescription", content)
-            VALUES ($1, $2, $3, $4)
-            RETURNING *, (SELECT name FROM blogs WHERE id = $1) as "blogName"
-        `,
-      [blogId, title, shortDescription, content]
-    );
+  async findById(id: string): Promise<PostEntity | null> {
+    const post = await this.postsRepo.findOne({
+      where: { id },
+      withDeleted: false,
+    });
 
     return post;
   }
@@ -42,34 +28,22 @@ export class PostsRepository {
   async update(dto: IUpdatePostParamsDto) {
     const { blogId, postId, title, shortDescription, content } = dto;
 
-    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
-      `
-          UPDATE "posts"
-            SET "title" = $3,
-                "shortDescription" = $4,
-                "content" = $5
-            WHERE "blogId" = $1 AND "id" = $2 AND "deletedAt" IS NULL
-            RETURNING id
-        `,
-      [blogId, postId, title, shortDescription, content]
+    const { affected } = await this.postsRepo.update(
+      { blogId, id: postId, deletedAt: IsNull() },
+      { title, shortDescription, content }
     );
 
-    return rows.length > 0;
+    return affected === 1;
   }
 
-  async delete(dto: IDeletePostParamsDto) {
+  async softDelete(dto: IDeletePostParamsDto) {
     const { blogId, postId } = dto;
 
-    const [rows]: [{ id: string }[], number] = await this.dataSource.query(
-      `
-          UPDATE "posts"
-            SET "deletedAt" = NOW()
-            WHERE "blogId" = $1 AND "id" = $2 AND "deletedAt" IS NULL
-            RETURNING id
-        `,
-      [blogId, postId]
+    const { affected } = await this.postsRepo.update(
+      { blogId, id: postId, deletedAt: IsNull() },
+      { deletedAt: new Date() }
     );
 
-    return rows.length > 0;
+    return affected === 1;
   }
 }

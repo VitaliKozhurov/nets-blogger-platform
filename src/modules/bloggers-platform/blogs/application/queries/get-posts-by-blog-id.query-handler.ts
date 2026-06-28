@@ -1,5 +1,5 @@
 import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
-import { BlogsQueryRepository } from '../../repository';
+import { BlogsRepository } from '../../repository';
 import { IPaginationResponseDto, PaginationViewMapper } from 'src/core/dto';
 import {
   IGetPostsQueryDto,
@@ -25,7 +25,7 @@ export class GetPostsByBlogIdQuery extends Query<IPaginationResponseDto<IPostVie
 @QueryHandler(GetPostsByBlogIdQuery)
 export class GetPostsByBlogIdHandler implements IQueryHandler<GetPostsByBlogIdQuery> {
   constructor(
-    private blogsQueryRepository: BlogsQueryRepository,
+    private blogsRepository: BlogsRepository,
     private postsQueryRepository: PostsQueryRepository
   ) {}
 
@@ -37,7 +37,7 @@ export class GetPostsByBlogIdHandler implements IQueryHandler<GetPostsByBlogIdQu
       pageSize: query.pageSize,
     });
 
-    await this.blogsQueryRepository.findByIdOrThrow(blogId);
+    await this.blogsRepository.findByIdOrThrow(blogId);
 
     const params: IGetPostsParamsDto = {
       blogId,

@@ -1,4 +1,4 @@
-export interface ICreatePostParamsDto {
+export interface ICreatePostDto {
   title: string;
   shortDescription: string;
   content: string;

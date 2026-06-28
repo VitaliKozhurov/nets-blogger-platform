@@ -28,6 +28,7 @@ export class BlogEntity extends BaseDBEntity {
     newBlog.name = dto.name;
     newBlog.description = dto.description;
     newBlog.websiteUrl = dto.websiteUrl;
+    newBlog.isMembership = false;
 
     return newBlog;
   }

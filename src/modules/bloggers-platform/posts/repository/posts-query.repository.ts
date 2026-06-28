@@ -9,6 +9,7 @@ import { IGetPostParamsDto } from './dto/get-post.params.dto';
 import { PostEntity } from '../domain/post.entity';
 import { LikeStatus } from '../../likes/domain/dto';
 import { SortDirection } from 'src/core/dto';
+import { PostsSortBy } from '../domain/dto';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -24,6 +25,8 @@ export class PostsQueryRepository {
     const { query, userId: _userId } = args;
     const { sortBy, sortDirection, limit, offset } = query;
 
+    const orderByField = sortBy === PostsSortBy.BlogName ? `blog.name` : `post.${sortBy}`;
+
     const postsQuery = this.postsRepo
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.blog', 'blog')
@@ -37,7 +40,7 @@ export class PostsQueryRepository {
         'blog.name',
       ])
       .where('post.deletedAt IS NULL')
-      .orderBy(`post.${sortBy}`, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
+      .orderBy(orderByField, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
       .skip(offset)
       .take(limit)
       .getMany();

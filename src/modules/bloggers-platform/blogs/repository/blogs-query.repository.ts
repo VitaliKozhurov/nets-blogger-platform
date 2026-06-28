@@ -35,7 +35,10 @@ export class BlogsQueryRepository {
   }
 
   async findByIdOrThrow(id: string): Promise<BlogEntity> {
-    const blog = await this.blogsRepo.findOne({ where: { id }, withDeleted: false });
+    const blog = await this.blogsRepo.findOne({
+      where: { id },
+      withDeleted: false,
+    });
 
     if (!blog) {
       throw new DomainException({

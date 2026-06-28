@@ -1,7 +1,7 @@
 import { BaseDBEntity } from 'src/core/db';
-import { Column, Entity, JoinColumn } from 'typeorm';
-import { ManyToOne } from 'typeorm/browser';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BlogEntity } from '../../blogs/domain/blog.entity';
+import { ICreatePostDto } from './dto/create-post.dto';
 
 @Entity({ name: 'posts' })
 export class PostEntity extends BaseDBEntity {
@@ -22,4 +22,15 @@ export class PostEntity extends BaseDBEntity {
   })
   @JoinColumn({ name: 'blogId' })
   blog: BlogEntity;
+
+  static createPost(dto: ICreatePostDto) {
+    const newPost = new PostEntity();
+
+    newPost.blogId = dto.blogId;
+    newPost.title = dto.title;
+    newPost.content = dto.content;
+    newPost.shortDescription = dto.shortDescription;
+
+    return newPost;
+  }
 }
