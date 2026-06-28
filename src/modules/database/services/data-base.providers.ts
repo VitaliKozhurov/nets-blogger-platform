@@ -12,7 +12,7 @@ export const getDatabaseProviders = () => [
         password: configService.postgresPassword,
         database: configService.postgresDB,
         schema: 'public',
-        autoLoadEntities: true,
+        // autoLoadEntities: true,
         // synchronize: true,
         logging: true,
       };
