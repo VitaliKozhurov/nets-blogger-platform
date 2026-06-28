@@ -1,12 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { ICreateCommentParamsDto } from './dto/create-comment.params.dto';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ICommentEntityDto } from '../domain/dto';
+import { CommentEntity } from '../domain/comment.entity';
 
 @Injectable()
 export class CommentsRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(CommentEntity) private commentsRepo: Repository<CommentEntity>
+  ) {}
+
+  async save(comment: CommentEntity) {
+    return this.commentsRepo.save(comment);
+  }
 
   async getById(commentId: string) {
     const [comment]: ICommentEntityDto[] = await this.dataSource.query(
@@ -15,21 +22,6 @@ export class CommentsRepository {
             WHERE c."id" = $1 AND c."deletedAt" IS NULL 
         `,
       [commentId]
-    );
-
-    return comment;
-  }
-
-  async create(args: ICreateCommentParamsDto): Promise<ICommentEntityDto> {
-    const { userId, postId, content } = args;
-
-    const [comment]: ICommentEntityDto[] = await this.dataSource.query(
-      `
-          INSERT INTO "comments" ("ownerId", "postId", "content")
-            VALUES ($1, $2, $3)
-            RETURNING *
-        `,
-      [userId, postId, content]
     );
 
     return comment;
