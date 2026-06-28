@@ -1,4 +1,4 @@
-import { BaseDBEntity } from 'src/core/db';
+import { BaseDBEntity } from '../../../../core/db';
 import { Column, Entity, OneToOne, Unique } from 'typeorm';
 import { ICreateVerifiedUserDto } from './dto/create-verified-user.dto';
 import { UserConfirmationEntity } from './user-confirmation.entity';

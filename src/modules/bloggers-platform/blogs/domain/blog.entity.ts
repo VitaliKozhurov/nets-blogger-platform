@@ -1,4 +1,4 @@
-import { BaseDBEntity } from 'src/core/db';
+import { BaseDBEntity } from '../../../../core/db';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { PostEntity } from '../../posts/domain/post.entity';
 import { ICreateBlogDto } from './dto/create-blog.dto';

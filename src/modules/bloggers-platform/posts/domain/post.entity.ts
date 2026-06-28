@@ -1,7 +1,9 @@
-import { BaseDBEntity } from 'src/core/db';
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { BaseDBEntity } from '../../../../core/db';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BlogEntity } from '../../blogs/domain/blog.entity';
 import { ICreatePostDto } from './dto/create-post.dto';
+import { CommentEntity } from '../../comments/domain/comment.entity';
+import { PostLikeEntity } from '../../likes/domain/post-like.entity';
 
 @Entity({ name: 'posts' })
 export class PostEntity extends BaseDBEntity {
@@ -16,6 +18,16 @@ export class PostEntity extends BaseDBEntity {
 
   @Column('text')
   content: string;
+
+  @OneToMany(() => CommentEntity, comment => comment.post, {
+    cascade: true, // для сохранения связанных сущностей
+  })
+  comments: CommentEntity[];
+
+  @OneToMany(() => PostLikeEntity, like => like.post, {
+    cascade: true, // для сохранения связанных сущностей
+  })
+  likes: PostLikeEntity[];
 
   @ManyToOne(() => BlogEntity, blog => blog.posts, {
     onDelete: 'CASCADE', // для удаления связанных сущностей при удалении родительской
