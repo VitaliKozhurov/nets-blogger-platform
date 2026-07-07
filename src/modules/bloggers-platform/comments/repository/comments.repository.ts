@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { ICommentEntityDto } from '../domain/dto';
+
 import { CommentEntity } from '../domain/comment.entity';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class CommentsRepository {
   }
 
   async getById(commentId: string) {
-    const [comment]: ICommentEntityDto[] = await this.dataSource.query(
+    const [comment]: any[] = await this.dataSource.query(
       `  SELECT c.* 
             FROM comments c
             WHERE c."id" = $1 AND c."deletedAt" IS NULL 

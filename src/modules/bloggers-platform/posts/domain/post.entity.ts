@@ -28,7 +28,7 @@ export class PostEntity extends BaseDBEntity {
     cascade: true, // для сохранения связанных сущностей
   })
   likes: PostLikeEntity[];
-
+  PostLikeEntity;
   @ManyToOne(() => BlogEntity, blog => blog.posts, {
     onDelete: 'CASCADE', // для удаления связанных сущностей при удалении родительской
   })

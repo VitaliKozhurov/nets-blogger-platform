@@ -1,10 +1,11 @@
+import { randomUUID } from 'crypto';
+import { Column, Entity, OneToMany, OneToOne, Unique } from 'typeorm';
 import { BaseDBEntity } from '../../../../core/db';
-import { Column, Entity, OneToOne, Unique } from 'typeorm';
+import { ICreateUnverifiedUserDto } from './dto/create-unverified-user.dto';
 import { ICreateVerifiedUserDto } from './dto/create-verified-user.dto';
 import { UserConfirmationEntity } from './user-confirmation.entity';
-import { ICreateUnverifiedUserDto } from './dto/create-unverified-user.dto';
 import { UserPasswordRecoveryEntity } from './user-password-recovery.entity';
-import { randomUUID } from 'crypto';
+import { PostLikeEntity } from 'src/modules/bloggers-platform/likes/domain/post-like.entity';
 
 @Entity({ name: 'users' })
 @Unique('UQ_USER_LOGIN', ['login'])
@@ -29,6 +30,9 @@ export class UserEntity extends BaseDBEntity {
     nullable: true,
   })
   passwordRecovery: UserPasswordRecoveryEntity | null;
+
+  @OneToMany(() => PostLikeEntity, like => like.user)
+  postLikes: PostLikeEntity[];
 
   static createVerifiedUser(dto: ICreateVerifiedUserDto) {
     const newUser = new UserEntity();

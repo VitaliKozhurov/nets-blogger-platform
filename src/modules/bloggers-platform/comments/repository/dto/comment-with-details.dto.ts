@@ -1,10 +1,9 @@
 import { LikeStatus } from 'src/modules/bloggers-platform/likes/domain/dto';
-import { ICommentEntityDto } from '../../domain/dto';
 
-export interface ICommentsWithDetailsDto extends Omit<
-  ICommentEntityDto,
-  'ownerId' | 'postId' | 'deletedAt'
-> {
+export interface ICommentsWithDetailsDto {
+  id: string;
+  content: string;
+  createdAt: Date;
   userId: string;
   userLogin: string;
   likesCount: number;

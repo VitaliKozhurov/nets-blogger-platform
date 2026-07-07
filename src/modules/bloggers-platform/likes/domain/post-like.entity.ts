@@ -1,7 +1,8 @@
-import { BaseDBEntity } from '../../../../core/db';
+import { UserEntity } from 'src/modules/users-account/users/domain/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
-import { LikeStatus } from './dto';
+import { BaseDBEntity } from '../../../../core/db';
 import { PostEntity } from '../../posts/domain/post.entity';
+import { LikeStatus } from './dto';
 
 @Entity({ name: 'post_likes' })
 @Unique(['userId', 'postId'])
@@ -20,4 +21,10 @@ export class PostLikeEntity extends BaseDBEntity {
   })
   @JoinColumn({ name: 'postId' })
   post: PostEntity;
+
+  @ManyToOne(() => UserEntity, user => user.postLikes, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
+  user: UserEntity;
 }
