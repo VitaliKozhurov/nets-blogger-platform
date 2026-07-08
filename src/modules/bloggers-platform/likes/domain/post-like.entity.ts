@@ -1,6 +1,6 @@
-import { UserEntity } from 'src/modules/users-account/users/domain/user.entity';
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from 'typeorm';
 import { BaseDBEntity } from '../../../../core/db';
+import { UserEntity } from '../../../users-account/users/domain/user.entity';
 import { PostEntity } from '../../posts/domain/post.entity';
 import { LikeStatus } from './dto';
 

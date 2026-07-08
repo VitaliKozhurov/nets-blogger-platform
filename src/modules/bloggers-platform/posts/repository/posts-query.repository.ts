@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { SortDirection } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { SelectQueryBuilder } from 'typeorm/browser';
 import { LikeStatus } from '../../likes/domain/dto';
 import { PostLikeEntity } from '../../likes/domain/post-like.entity';
 import { PostsSortBy } from '../domain/dto';
@@ -16,7 +17,8 @@ import { IPostWithDetails } from './dto/post-with-details.dto';
 export class PostsQueryRepository {
   constructor(
     @InjectDataSource() protected dataSource: DataSource,
-    @InjectRepository(PostEntity) private postsRepo: Repository<PostEntity>
+    @InjectRepository(PostEntity) private postsRepo: Repository<PostEntity>,
+    @InjectRepository(PostLikeEntity) private postLikeRepo: Repository<PostLikeEntity>
   ) {}
 
   async findAll(args: Omit<IGetPostsParamsDto, 'blogId'>): Promise<{
@@ -26,21 +28,21 @@ export class PostsQueryRepository {
     const { query, userId } = args;
     const { sortBy, sortDirection, limit, offset } = query;
 
-    const orderByField = sortBy === PostsSortBy.BlogName ? `blog.name` : `post.${sortBy}`;
+    const orderByField = sortBy === PostsSortBy.BlogName ? `blog.name` : `p.${sortBy}`;
 
     const postLikesCounts = (sq: SelectQueryBuilder<PostLikeEntity>) =>
       sq
         .select(['pl.postId as "postId"', 'count(*) as "likesCount"'])
         .from(PostLikeEntity, 'pl')
         .where('pl.status = :status', { status: LikeStatus.Like })
-        .groupBy('postId');
+        .groupBy('pl."postId"');
 
     const postDislikesCounts = (sq: SelectQueryBuilder<PostLikeEntity>) =>
       sq
         .select(['pl.postId as "postId"', 'count(*) as "dislikesCount"'])
         .from(PostLikeEntity, 'pl')
         .where('pl.status = :status', { status: LikeStatus.Dislike })
-        .groupBy('postId');
+        .groupBy('pl."postId"');
 
     const postsQuery = this.postsRepo
       .createQueryBuilder('p')
@@ -51,10 +53,9 @@ export class PostsQueryRepository {
         'p.content as "content"',
         'p.blogId as "blogId"',
         'p.createdAt as "createdAt"',
-        '"postLikesCounts".likesCount as "likesCount"',
-        '"postDislikesCounts".dislikesCount as "dislikesCount"',
         'blog.name',
-        '"myStatus"',
+        '"postLikesCounts"."likesCount" as "likesCount"',
+        '"postDislikesCounts"."dislikesCount" as "dislikesCount"',
       ])
       .addSelect(
         sq =>
@@ -67,30 +68,31 @@ export class PostsQueryRepository {
         'myStatus'
       )
       .where('p.deletedAt IS NULL')
-      .leftJoin(postLikesCounts, 'postLikesCounts', '"postLikesCounts"."postId" = p."id"')
-      .leftJoin(postDislikesCounts, 'postDislikesCounts', '"postDislikesCounts"."postId" = p."id"')
-      .leftJoin('p.blog', 'blog')
       .leftJoinAndMapMany(
-        'p.newestLikes',
+        'p."newestLikes"',
         subQuery =>
           subQuery
             .select([
               'inner_pl.postId as "postId"',
               'inner_pl.userId as "userId"',
+              'inner_pl.createdAt as "addedAt"',
               'user.login as "login"',
-              'ROW_NUMBER() OVER (PARTITION BY w."ownerId" ORDER BY w."balance" DESC) as rank',
+              'ROW_NUMBER() OVER (PARTITION BY inner_pl."postId" ORDER BY inner_pl."createdAt" DESC) as rank',
             ])
             .from(PostLikeEntity, 'inner_pl')
-            .leftJoin('p.user', 'user'),
+            .leftJoin('inner_pl.user', 'user'),
         'inner_pl',
-        'inner_pl."postId" = pl."postId" AND inner_pl.rank <= 3'
+        'inner_pl."postId" = p."id" AND inner_pl.rank <= 3'
       )
+      .leftJoin('p.blog', 'blog')
+      .leftJoin(postLikesCounts, 'postLikesCounts', '"postLikesCounts"."postId" = p."id"')
+      .leftJoin(postDislikesCounts, 'postDislikesCounts', '"postDislikesCounts"."postId" = p."id"')
       .orderBy(orderByField, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
       .skip(offset)
       .take(limit)
       .getRawMany();
 
-    const totalCountQuery = this.postsRepo.createQueryBuilder('post').getCount();
+    const totalCountQuery = this.postsRepo.createQueryBuilder('p').getCount();
 
     const [posts, totalCount] = await Promise.all([postsQuery, totalCountQuery]);
 
@@ -169,22 +171,74 @@ export class PostsQueryRepository {
   async findById(
     args: IGetPostParamsDto
   ): Promise<{ post: IPostWithDetails; newestLikes: INewestLike[] } | null> {
-    const { postId, userId: _userId } = args;
+    const { postId, userId } = args;
 
     const post = await this.postsRepo
-      .createQueryBuilder('post')
-      .leftJoinAndSelect('post.blog', 'blog')
+      .createQueryBuilder('p')
       .select([
-        'post.id',
-        'post.title',
-        'post.shortDescription',
-        'post.content',
-        'post.blogId',
-        'post.createdAt',
+        'p.id',
+        'p.title',
+        'p.shortDescription',
+        'p.content',
+        'p.blogId',
+        'p.createdAt',
+        'likesCount."likesCount"',
+        'dislikesCount."dislikesCount"',
         'blog.name',
       ])
-      .where('post.id = :postId', { postId })
-      .getOne();
+      .addSelect(
+        sq =>
+          sq
+            .select("COALESCE(pl.status, 'None')")
+            .from(PostLikeEntity, 'pl')
+            .where('pl."postId" = p."id"')
+            .andWhere('pl."userId" = :userId', { userId })
+            .limit(1),
+        'myStatus'
+      )
+      .where('p.id = :postId AND p.deletedAt IS NULL', { postId })
+      .leftJoinAndMapMany(
+        'p."newestLikes"',
+        subQuery =>
+          subQuery
+            .select([
+              'inner_pl.postId as "postId"',
+              'inner_pl.userId as "userId"',
+              'inner_pl.createdAt as "addedAt"',
+              'user.login as "login"',
+              'ROW_NUMBER() OVER (PARTITION BY inner_pl."postId" ORDER BY inner_pl."createdAt" DESC) as rank',
+            ])
+            .from(PostLikeEntity, 'inner_pl')
+            .leftJoin('inner_pl.user', 'user'),
+        'inner_pl',
+        'inner_pl."postId" = p."id" AND inner_pl.rank <= 3'
+      )
+      .leftJoin('p.blog', 'blog')
+      .leftJoin(
+        subQuery => {
+          return subQuery
+            .select('pl."postId"', 'postId')
+            .addSelect('COUNT(*)', 'likesCount')
+            .from(PostLikeEntity, 'pl')
+            .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Like })
+            .groupBy('pl."postId"');
+        },
+        'likesCount',
+        'likesCount."postId" = p.id'
+      )
+      .leftJoin(
+        subQuery => {
+          return subQuery
+            .select('pl."postId"', 'postId')
+            .addSelect('COUNT(*)', 'dislikesCount')
+            .from(PostLikeEntity, 'pl')
+            .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Dislike })
+            .groupBy('pl."postId"');
+        },
+        'dislikesCount',
+        'dislikesCount."postId" = p.id'
+      )
+      .getRawOne();
 
     return post
       ? {
@@ -196,11 +250,11 @@ export class PostsQueryRepository {
             blogId: post.blogId,
             blogName: post.blog.name,
             createdAt: post.createdAt,
-            likesCount: 0,
-            dislikesCount: 0,
-            myStatus: LikeStatus.None,
+            likesCount: post.likesCount,
+            dislikesCount: post.dislikesCount,
+            myStatus: post.myStatus,
           },
-          newestLikes: [],
+          newestLikes: post.newestLikes,
         }
       : null;
   }

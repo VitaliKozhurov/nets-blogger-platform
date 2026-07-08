@@ -1,11 +1,11 @@
 import { randomUUID } from 'crypto';
 import { Column, Entity, OneToMany, OneToOne, Unique } from 'typeorm';
 import { BaseDBEntity } from '../../../../core/db';
+import { PostLikeEntity } from '../../../bloggers-platform/likes/domain/post-like.entity';
 import { ICreateUnverifiedUserDto } from './dto/create-unverified-user.dto';
 import { ICreateVerifiedUserDto } from './dto/create-verified-user.dto';
 import { UserConfirmationEntity } from './user-confirmation.entity';
 import { UserPasswordRecoveryEntity } from './user-password-recovery.entity';
-import { PostLikeEntity } from 'src/modules/bloggers-platform/likes/domain/post-like.entity';
 
 @Entity({ name: 'users' })
 @Unique('UQ_USER_LOGIN', ['login'])
