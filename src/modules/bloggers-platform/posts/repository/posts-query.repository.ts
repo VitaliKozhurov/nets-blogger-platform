@@ -119,28 +119,80 @@ export class PostsQueryRepository {
     posts: { post: IPostWithDetails; newestLikes: INewestLike[] }[];
     totalCount: number;
   }> {
-    const { blogId, userId: _userId, query } = args;
+    const { blogId, userId, query } = args;
 
     const { sortBy, sortDirection, limit, offset } = query;
 
     const postsQuery = this.postsRepo
-      .createQueryBuilder('post')
-      .leftJoinAndSelect('post.blog', 'blog')
+      .createQueryBuilder('p')
       .select([
-        'post.id',
-        'post.title',
-        'post.shortDescription',
-        'post.content',
-        'post.blogId',
-        'post.createdAt',
+        'p.id',
+        'p.title',
+        'p.shortDescription',
+        'p.content',
+        'p.blogId',
+        'p.createdAt',
+        'likesCount."likesCount"',
+        'dislikesCount."dislikesCount"',
         'blog.name',
       ])
-      .where('post.blogId = :blogId', { blogId })
-      .andWhere('post.deletedAt IS NULL')
+      .addSelect(
+        sq =>
+          sq
+            .select("COALESCE(pl.status, 'None')")
+            .from(PostLikeEntity, 'pl')
+            .where('pl."postId" = p."id"')
+            .andWhere('pl."userId" = :userId', { userId })
+            .limit(1),
+        'myStatus'
+      )
+      .where('p', { blogId })
+      .andWhere('p.deletedAt IS NULL')
+      .leftJoinAndMapMany(
+        'p."newestLikes"',
+        subQuery =>
+          subQuery
+            .select([
+              'inner_pl.postId as "postId"',
+              'inner_pl.userId as "userId"',
+              'inner_pl.createdAt as "addedAt"',
+              'user.login as "login"',
+              'ROW_NUMBER() OVER (PARTITION BY inner_pl."postId" ORDER BY inner_pl."createdAt" DESC) as rank',
+            ])
+            .from(PostLikeEntity, 'inner_pl')
+            .leftJoin('inner_pl.user', 'user'),
+        'inner_pl',
+        'inner_pl."postId" = p."id" AND inner_pl.rank <= 3'
+      )
+      .leftJoin('p.blog', 'blog')
+      .leftJoin(
+        subQuery => {
+          return subQuery
+            .select('pl."postId"', 'postId')
+            .addSelect('COUNT(*)', 'likesCount')
+            .from(PostLikeEntity, 'pl')
+            .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Like })
+            .groupBy('pl."postId"');
+        },
+        'likesCount',
+        'likesCount."postId" = p.id'
+      )
+      .leftJoin(
+        subQuery => {
+          return subQuery
+            .select('pl."postId"', 'postId')
+            .addSelect('COUNT(*)', 'dislikesCount')
+            .from(PostLikeEntity, 'pl')
+            .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Dislike })
+            .groupBy('pl."postId"');
+        },
+        'dislikesCount',
+        'dislikesCount."postId" = p.id'
+      )
       .orderBy(`post.${sortBy}`, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
       .skip(offset)
       .take(limit)
-      .getMany();
+      .getRawMany();
 
     const totalCountQuery = this.postsRepo
       .createQueryBuilder('post')
@@ -158,11 +210,11 @@ export class PostsQueryRepository {
         blogId: p.blogId,
         blogName: p.blog.name,
         createdAt: p.createdAt,
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: LikeStatus.None,
+        likesCount: p.likesCount,
+        dislikesCount: p.dislikesCount,
+        myStatus: p.myStatus,
       },
-      newestLikes: [],
+      newestLikes: p.newestLikes,
     }));
 
     return { posts: result, totalCount };
