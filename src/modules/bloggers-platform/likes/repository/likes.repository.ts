@@ -1,12 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { ICommentLikeEntityDto, IPostLikeEntityDto } from '../domain/dto/like-entity.dto';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { CommentLikeEntity } from '../domain/comment-like.entity';
 import { LikeStatus } from '../domain/dto';
+import { ICommentLikeEntityDto, IPostLikeEntityDto } from '../domain/dto/like-entity.dto';
+import { PostLikeEntity } from '../domain/post-like.entity';
 
 @Injectable()
 export class LikesRepository {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    @InjectRepository(PostLikeEntity) private postLikesRepo: Repository<PostLikeEntity>,
+    @InjectRepository(CommentLikeEntity) private commentLikesRepo: Repository<CommentLikeEntity>
+  ) {}
 
   async getPostLike(args: { userId: string; postId: string }) {
     const { userId, postId } = args;
@@ -43,26 +49,24 @@ export class LikesRepository {
     return like;
   }
 
-  async upsertPostLike(dto: {
+  async updatePostLike(dto: {
     userId: string;
     postId: string;
     likeStatus: LikeStatus;
-  }): Promise<ICommentLikeEntityDto> {
+  }): Promise<boolean> {
     const { userId, postId, likeStatus } = dto;
 
-    const [like]: IPostLikeEntityDto[] = await this.dataSource.query(
-      `
-           INSERT INTO "post_likes" 
-            ("userId", "postId", "status")
-            VALUES ($1, $2, $3)
-            ON CONFLICT ("userId", "postId")
-            DO UPDATE SET status = EXCLUDED.status 
-            RETURNING *
-         `,
-      [userId, postId, likeStatus]
-    );
+    const { identifiers } = await this.postLikesRepo
+      .createQueryBuilder('pl')
+      .insert()
+      .values([{ userId, postId, status: likeStatus }])
+      .orUpdate(
+        ['status'], // Columns to overwrite on conflict
+        ['userId', 'postId'] // Conflict target column(s)
+      )
+      .execute();
 
-    return like;
+    return identifiers.length > 0;
   }
 
   async getCommentLike(args: { userId: string; commentId: string }) {

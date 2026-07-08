@@ -25,7 +25,7 @@ export class UpdatePostLikeStatusUseCase implements ICommandHandler<UpdatePostLi
       });
     }
 
-    await this.likesRepository.upsertPostLike(dto);
+    await this.likesRepository.updatePostLike(dto);
 
     return true;
   }
