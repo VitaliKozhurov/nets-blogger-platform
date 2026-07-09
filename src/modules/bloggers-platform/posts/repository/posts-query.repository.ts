@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { SortDirection } from 'src/core/dto';
 import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { SelectQueryBuilder } from 'typeorm/browser';
 import { LikeStatus } from '../../likes/domain/dto';
 import { PostLikeEntity } from '../../likes/domain/post-like.entity';
@@ -15,11 +15,7 @@ import { IPostWithDetails } from './dto/post-with-details.dto';
 
 @Injectable()
 export class PostsQueryRepository {
-  constructor(
-    @InjectDataSource() protected dataSource: DataSource,
-    @InjectRepository(PostEntity) private postsRepo: Repository<PostEntity>,
-    @InjectRepository(PostLikeEntity) private postLikeRepo: Repository<PostLikeEntity>
-  ) {}
+  constructor(@InjectRepository(PostEntity) private postsRepo: Repository<PostEntity>) {}
 
   async findAll(args: Omit<IGetPostsParamsDto, 'blogId'>): Promise<{
     posts: { post: IPostWithDetails; newestLikes: INewestLike[] }[];
@@ -168,7 +164,7 @@ export class PostsQueryRepository {
       .leftJoin(
         subQuery => {
           return subQuery
-            .select('pl."postId"', 'postId')
+            .select('pl."postId"')
             .addSelect('COUNT(*)', 'likesCount')
             .from(PostLikeEntity, 'pl')
             .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Like })
@@ -180,7 +176,7 @@ export class PostsQueryRepository {
       .leftJoin(
         subQuery => {
           return subQuery
-            .select('pl."postId"', 'postId')
+            .select('pl."postId"')
             .addSelect('COUNT(*)', 'dislikesCount')
             .from(PostLikeEntity, 'pl')
             .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Dislike })

@@ -1,4 +1,6 @@
 import { randomUUID } from 'crypto';
+import { CommentEntity } from 'src/modules/bloggers-platform/comments/domain/comment.entity';
+import { CommentLikeEntity } from 'src/modules/bloggers-platform/likes/domain/comment-like.entity';
 import { Column, Entity, OneToMany, OneToOne, Unique } from 'typeorm';
 import { BaseDBEntity } from '../../../../core/db';
 import { PostLikeEntity } from '../../../bloggers-platform/likes/domain/post-like.entity';
@@ -31,8 +33,16 @@ export class UserEntity extends BaseDBEntity {
   })
   passwordRecovery: UserPasswordRecoveryEntity | null;
 
+  @OneToMany(() => CommentEntity, comment => comment.author, {
+    cascade: true, // для сохранения связанных сущностей
+  })
+  comment: CommentEntity[];
+
   @OneToMany(() => PostLikeEntity, like => like.user)
   postLikes: PostLikeEntity[];
+
+  @OneToMany(() => CommentLikeEntity, like => like.user)
+  commentLikes: CommentLikeEntity[];
 
   static createVerifiedUser(dto: ICreateVerifiedUserDto) {
     const newUser = new UserEntity();
