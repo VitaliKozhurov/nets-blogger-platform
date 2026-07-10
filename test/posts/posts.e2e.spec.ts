@@ -236,7 +236,7 @@ describe('E2E Controller /posts', () => {
       expect(extensions[0].field).toBe('likeStatus');
     });
 
-    it('should return 204 status code and change lik', async () => {
+    it('should return 204 status code and change like', async () => {
       const createBlogResponse = await blogsTestUtils.createBlog();
       const createPostResponse = await postsTestUtils.createPost(createBlogResponse.body.id);
       const postId = createPostResponse.body.id;

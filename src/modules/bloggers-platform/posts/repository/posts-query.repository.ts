@@ -91,7 +91,7 @@ export class PostsQueryRepository {
             .where('newest_likes.status = :postLikeStatus', { postLikeStatus: LikeStatus.Like })
             .leftJoin('newest_likes.user', 'user'),
         'newest_likes',
-        'newest_likes.rank <= 3'
+        'newest_likes."postId" = p."id" AND newest_likes.rank <= 3'
       )
       .leftJoin(postLikesCounts, 'like_count', '"like_count"."postId" = p."id"')
       .leftJoin(postDislikesCounts, 'dislike_count', '"dislike_count"."postId" = p."id"')
@@ -101,8 +101,8 @@ export class PostsQueryRepository {
       .addGroupBy('like_count.count')
       .addGroupBy('dislike_count.count')
       .orderBy(orderByField, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
-      .skip(offset)
-      .take(limit)
+      .offset(offset)
+      .limit(limit)
       .getRawMany();
 
     const totalCountQuery = this.postsRepo.createQueryBuilder('p').getCount();
@@ -122,7 +122,10 @@ export class PostsQueryRepository {
         dislikesCount: p.dislikesCount,
         myStatus: p.myStatus,
       },
-      newestLikes: p.newestLikes,
+      newestLikes: p.newestLikes.map(like => ({
+        ...like,
+        addedAt: new Date(like.addedAt),
+      })),
     }));
 
     return { posts: result, totalCount };
@@ -220,8 +223,8 @@ export class PostsQueryRepository {
       .addGroupBy('like_count.count')
       .addGroupBy('dislike_count.count')
       .orderBy(`p.${sortBy}`, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
-      .skip(offset)
-      .take(limit)
+      .offset(offset)
+      .limit(limit)
       .getRawMany();
 
     const totalCountQuery = this.postsRepo
@@ -244,7 +247,10 @@ export class PostsQueryRepository {
         dislikesCount: p.dislikesCount,
         myStatus: p.myStatus,
       },
-      newestLikes: p.newestLikes,
+      newestLikes: p.newestLikes.map(like => ({
+        ...like,
+        addedAt: new Date(like.addedAt),
+      })),
     }));
 
     return { posts: result, totalCount };
@@ -353,7 +359,10 @@ export class PostsQueryRepository {
             dislikesCount: post.dislikesCount,
             myStatus: post.myStatus,
           },
-          newestLikes: post.newestLikes,
+          newestLikes: post.newestLikes.map(like => ({
+            ...like,
+            addedAt: new Date(like.addedAt),
+          })),
         }
       : null;
   }
