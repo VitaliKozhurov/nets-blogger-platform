@@ -14,7 +14,7 @@ export const getDatabaseProviders = () => [
         schema: 'public',
         autoLoadEntities: true,
         synchronize: true,
-        logging: true,
+        // logging: true,
       };
     },
     inject: [CoreConfig],

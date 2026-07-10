@@ -7,6 +7,7 @@ import { LikeStatus } from '../../likes/domain/dto';
 import { CommentEntity } from '../domain/comment.entity';
 import { ICommentsWithDetailsDto } from './dto/comment-with-details.dto';
 import { IGetCommentsByPostParamsDto } from './dto/get-comments-by-post.dto';
+import { SortDirection } from 'src/core/dto';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -18,38 +19,62 @@ export class CommentsQueryRepository {
     const { postId, userId, query } = args;
     const { sortBy, sortDirection, limit, offset } = query;
 
-    const commentsPromise: Promise<ICommentsWithDetailsDto[]> = this.dataSource.query(
-      `
-          SELECT 
-            c."id", 
-            c."content",
-            c."createdAt",
-            u."id" as "userId",
-            u."login" as "userLogin",
-              (SELECT COUNT(*) FROM comment_likes 
-              WHERE comment_likes."commentId" =  c."id" AND comment_likes."status" = 'Like')::int as "likesCount",
-              (SELECT COUNT(*) FROM comment_likes 
-              WHERE comment_likes."commentId" =  c."id" AND comment_likes."status" = 'Dislike')::int as "dislikesCount",
-              COALESCE((SELECT status FROM comment_likes 
-              WHERE comment_likes."commentId" =  c."id" AND comment_likes."userId" = $1 LIMIT 1), 'None') as "myStatus"
-              FROM comments c
-              LEFT JOIN users u ON c."ownerId" = u."id"
-              WHERE c."deletedAt" IS NULL AND c."postId" = $2 
-              ORDER BY ${`"${sortBy}"`} ${sortDirection}
-              LIMIT $3
-              OFFSET $4
-        `,
-      [userId ?? null, postId, limit, offset]
-    );
+    const commentsPromise = this.commentsRepo
+      .createQueryBuilder('c')
+      .select([
+        'c.id as "id',
+        'c.content as ""content"',
+        'c.createdAt as "createdAt"',
+        'c.authorId as "userId"',
+        'author.login as "userLogin"',
+        'likesCount."likesCount"',
+        'dislikesCount."dislikesCount"',
+      ])
+      .addSelect(
+        sq =>
+          sq
+            .select("COALESCE(cl.status, 'None')")
+            .from(CommentLikeEntity, 'cl')
+            .where('cl."commentId" = c."id"')
+            .andWhere('cl."userId" = :userId', { userId })
+            .limit(1),
+        'myStatus'
+      )
+      .where('c.deletedAt IS NULL AND c.postId = :postId', { postId: postId })
+      .leftJoin('c.author', 'author')
+      .leftJoin(
+        subQuery => {
+          return subQuery
+            .select('cl."commentId"')
+            .addSelect('COUNT(*)', 'likesCount')
+            .from(CommentLikeEntity, 'cl')
+            .where('cl.status = :likeStatus', { likeStatus: LikeStatus.Like })
+            .groupBy('cl."commentId"');
+        },
+        'likesCount',
+        'likesCount."commentId" = c.id'
+      )
+      .leftJoin(
+        subQuery => {
+          return subQuery
+            .select('cl.commentId')
+            .addSelect('COUNT(*)', 'dislikesCount')
+            .from(CommentLikeEntity, 'cl')
+            .where('cl.status = :likeStatus', { likeStatus: LikeStatus.Dislike })
+            .groupBy('cl."postId"');
+        },
+        'dislikesCount',
+        'dislikesCount."commentId" = c.id'
+      )
+      .orderBy(`c.${sortBy}`, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
+      .skip(offset)
+      .take(limit)
+      .getRawMany();
 
-    const totalCountPromise: Promise<[{ count: string }]> = this.dataSource.query(
-      `
-          SELECT COUNT(*)
-            FROM comments c
-            WHERE c."deletedAt" IS NULL AND c."postId" = $1 
-          `,
-      [postId]
-    );
+    const totalCountPromise = this.commentsRepo
+      .createQueryBuilder('c')
+      .where('c.deletedAt IS NULL AND c.postId = :postId', { postId: postId })
+      .getCount();
 
     const [comments, countResult] = await Promise.all([commentsPromise, totalCountPromise]);
 
@@ -72,9 +97,9 @@ export class CommentsQueryRepository {
         'c.content as ""content"',
         'c.createdAt as "createdAt"',
         'c.authorId as "userId"',
+        'author.login as "userLogin"',
         'likesCount."likesCount"',
         'dislikesCount."dislikesCount"',
-        'author.login as "userLogin"',
       ])
       .addSelect(
         sq =>

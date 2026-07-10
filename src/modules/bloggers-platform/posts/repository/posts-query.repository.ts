@@ -28,16 +28,16 @@ export class PostsQueryRepository {
 
     const postLikesCounts = (sq: SelectQueryBuilder<PostLikeEntity>) =>
       sq
-        .select(['pl.postId as "postId"', 'count(*) as "likesCount"'])
+        .select(['pl.postId as "postId"', 'count(*) as "count"'])
         .from(PostLikeEntity, 'pl')
-        .where('pl.status = :status', { status: LikeStatus.Like })
+        .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Like })
         .groupBy('pl."postId"');
 
     const postDislikesCounts = (sq: SelectQueryBuilder<PostLikeEntity>) =>
       sq
-        .select(['pl.postId as "postId"', 'count(*) as "dislikesCount"'])
+        .select(['pl.postId as "postId"', 'count(*) as "count"'])
         .from(PostLikeEntity, 'pl')
-        .where('pl.status = :status', { status: LikeStatus.Dislike })
+        .where('pl.status = :dislikeStatus', { dislikeStatus: LikeStatus.Dislike })
         .groupBy('pl."postId"');
 
     const postsQuery = this.postsRepo
@@ -49,40 +49,57 @@ export class PostsQueryRepository {
         'p.content as "content"',
         'p.blogId as "blogId"',
         'p.createdAt as "createdAt"',
-        'blog.name',
-        '"postLikesCounts"."likesCount" as "likesCount"',
-        '"postDislikesCounts"."dislikesCount" as "dislikesCount"',
+        'CAST(COALESCE(like_count.count, 0) AS INTEGER) as "likesCount"', // ✅ CAST
+        'CAST(COALESCE(dislike_count.count, 0) AS INTEGER) as "dislikesCount"', // ✅ CAS
+        'blog.name as "blogName"',
       ])
+      .addSelect(`COALESCE(my_like.status, 'None')`, 'myStatus')
       .addSelect(
-        sq =>
-          sq
-            .select("COALESCE(pl.status, 'None')")
-            .from(PostLikeEntity, 'pl')
-            .where('pl."postId" = p."id"')
-            .andWhere('pl."userId" = :userId', { userId })
-            .limit(1),
-        'myStatus'
+        `COALESCE(
+      jsonb_agg(
+        jsonb_build_object(
+          'postId', newest_likes."postId",
+          'userId', newest_likes."userId",
+          'addedAt', newest_likes."createdAt",
+          'login', newest_likes."login"
+        )
+        ORDER BY newest_likes."createdAt" DESC
+      ) FILTER (WHERE newest_likes."userId" IS NOT NULL),
+      '[]'::jsonb
+    )`,
+        'newestLikes'
       )
       .where('p.deletedAt IS NULL')
-      .leftJoinAndMapMany(
-        'p."newestLikes"',
+      .leftJoin('p.blog', 'blog')
+      .leftJoin(
+        PostLikeEntity,
+        'my_like',
+        'my_like."postId" = p."id" AND my_like."userId" = :userId',
+        { userId: userId ?? null }
+      )
+      .leftJoin(
         subQuery =>
           subQuery
             .select([
-              'inner_pl.postId as "postId"',
-              'inner_pl.userId as "userId"',
-              'inner_pl.createdAt as "addedAt"',
+              'newest_likes.postId as "postId"',
+              'newest_likes.userId as "userId"',
+              'newest_likes.createdAt as "createdAt"',
               'user.login as "login"',
-              'ROW_NUMBER() OVER (PARTITION BY inner_pl."postId" ORDER BY inner_pl."createdAt" DESC) as rank',
+              'ROW_NUMBER() OVER (PARTITION BY newest_likes."postId" ORDER BY newest_likes."createdAt" DESC) as rank',
             ])
-            .from(PostLikeEntity, 'inner_pl')
-            .leftJoin('inner_pl.user', 'user'),
-        'inner_pl',
-        'inner_pl."postId" = p."id" AND inner_pl.rank <= 3'
+            .from(PostLikeEntity, 'newest_likes')
+            .where('newest_likes.status = :postLikeStatus', { postLikeStatus: LikeStatus.Like })
+            .leftJoin('newest_likes.user', 'user'),
+        'newest_likes',
+        'newest_likes.rank <= 3'
       )
-      .leftJoin('p.blog', 'blog')
-      .leftJoin(postLikesCounts, 'postLikesCounts', '"postLikesCounts"."postId" = p."id"')
-      .leftJoin(postDislikesCounts, 'postDislikesCounts', '"postDislikesCounts"."postId" = p."id"')
+      .leftJoin(postLikesCounts, 'like_count', '"like_count"."postId" = p."id"')
+      .leftJoin(postDislikesCounts, 'dislike_count', '"dislike_count"."postId" = p."id"')
+      .groupBy('p.id')
+      .addGroupBy('blog.name')
+      .addGroupBy('my_like.status')
+      .addGroupBy('like_count.count')
+      .addGroupBy('dislike_count.count')
       .orderBy(orderByField, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
       .skip(offset)
       .take(limit)
@@ -99,7 +116,7 @@ export class PostsQueryRepository {
         shortDescription: p.shortDescription,
         content: p.content,
         blogId: p.blogId,
-        blogName: p.blog.name,
+        blogName: p.blogName,
         createdAt: p.createdAt,
         likesCount: p.likesCount,
         dislikesCount: p.dislikesCount,
@@ -122,70 +139,87 @@ export class PostsQueryRepository {
     const postsQuery = this.postsRepo
       .createQueryBuilder('p')
       .select([
-        'p.id',
-        'p.title',
-        'p.shortDescription',
-        'p.content',
-        'p.blogId',
-        'p.createdAt',
-        'likesCount."likesCount"',
-        'dislikesCount."dislikesCount"',
-        'blog.name',
+        'p.id as "id"',
+        'p.title as "title"',
+        'p.shortDescription as "shortDescription"',
+        'p.content as "content"',
+        'p.blogId as "blogId"',
+        'p.createdAt as "createdAt"',
+        'CAST(COALESCE(like_count.count, 0) AS INTEGER) as "likesCount"', // ✅ CAST
+        'CAST(COALESCE(dislike_count.count, 0) AS INTEGER) as "dislikesCount"', // ✅ CAS
+        'blog.name as "blogName"',
       ])
+      .addSelect(`COALESCE(my_like.status, 'None')`, 'myStatus')
       .addSelect(
-        sq =>
-          sq
-            .select("COALESCE(pl.status, 'None')")
-            .from(PostLikeEntity, 'pl')
-            .where('pl."postId" = p."id"')
-            .andWhere('pl."userId" = :userId', { userId })
-            .limit(1),
-        'myStatus'
+        `COALESCE(
+      jsonb_agg(
+        jsonb_build_object(
+          'postId', newest_likes."postId",
+          'userId', newest_likes."userId",
+          'addedAt', newest_likes."createdAt",
+          'login', newest_likes."login"
+        )
+        ORDER BY newest_likes."createdAt" DESC
+      ) FILTER (WHERE newest_likes."userId" IS NOT NULL),
+      '[]'::jsonb
+    )`,
+        'newestLikes'
       )
-      .where('p', { blogId })
+      .where('p.blogId = :blogId', { blogId })
       .andWhere('p.deletedAt IS NULL')
-      .leftJoinAndMapMany(
-        'p."newestLikes"',
+      .leftJoin(
+        PostLikeEntity,
+        'my_like',
+        'my_like."postId" = p."id" AND my_like."userId" = :userId',
+        { userId: userId ?? null }
+      )
+      .leftJoin(
         subQuery =>
           subQuery
             .select([
-              'inner_pl.postId as "postId"',
-              'inner_pl.userId as "userId"',
-              'inner_pl.createdAt as "addedAt"',
+              'newest_likes.postId as "postId"',
+              'newest_likes.userId as "userId"',
+              'newest_likes.createdAt as "createdAt"',
               'user.login as "login"',
-              'ROW_NUMBER() OVER (PARTITION BY inner_pl."postId" ORDER BY inner_pl."createdAt" DESC) as rank',
+              'ROW_NUMBER() OVER (PARTITION BY newest_likes."postId" ORDER BY newest_likes."createdAt" DESC) as rank',
             ])
-            .from(PostLikeEntity, 'inner_pl')
-            .leftJoin('inner_pl.user', 'user'),
-        'inner_pl',
-        'inner_pl."postId" = p."id" AND inner_pl.rank <= 3'
+            .from(PostLikeEntity, 'newest_likes')
+            .where('newest_likes.status = :postLikeStatus', { postLikeStatus: LikeStatus.Like })
+            .leftJoin('newest_likes.user', 'user'),
+        'newest_likes',
+        'newest_likes."postId" = p."id" AND newest_likes.rank <= 3'
       )
       .leftJoin('p.blog', 'blog')
       .leftJoin(
         subQuery => {
           return subQuery
             .select('pl."postId"')
-            .addSelect('COUNT(*)', 'likesCount')
+            .addSelect('COUNT(*)', 'count')
             .from(PostLikeEntity, 'pl')
             .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Like })
             .groupBy('pl."postId"');
         },
-        'likesCount',
-        'likesCount."postId" = p.id'
+        'like_count',
+        'like_count."postId" = p.id'
       )
       .leftJoin(
         subQuery => {
           return subQuery
             .select('pl."postId"')
-            .addSelect('COUNT(*)', 'dislikesCount')
+            .addSelect('COUNT(*)', 'count')
             .from(PostLikeEntity, 'pl')
-            .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Dislike })
+            .where('pl.status = :dislikeStatus', { dislikeStatus: LikeStatus.Dislike })
             .groupBy('pl."postId"');
         },
-        'dislikesCount',
-        'dislikesCount."postId" = p.id'
+        'dislike_count',
+        'dislike_count."postId" = p.id'
       )
-      .orderBy(`post.${sortBy}`, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
+      .groupBy('p.id')
+      .addGroupBy('blog.name')
+      .addGroupBy('my_like.status')
+      .addGroupBy('like_count.count')
+      .addGroupBy('dislike_count.count')
+      .orderBy(`p.${sortBy}`, sortDirection === SortDirection.Asc ? 'ASC' : 'DESC')
       .skip(offset)
       .take(limit)
       .getRawMany();
@@ -204,7 +238,7 @@ export class PostsQueryRepository {
         shortDescription: p.shortDescription,
         content: p.content,
         blogId: p.blogId,
-        blogName: p.blog.name,
+        blogName: p.blogName,
         createdAt: p.createdAt,
         likesCount: p.likesCount,
         dislikesCount: p.dislikesCount,
@@ -224,68 +258,85 @@ export class PostsQueryRepository {
     const post = await this.postsRepo
       .createQueryBuilder('p')
       .select([
-        'p.id',
-        'p.title',
-        'p.shortDescription',
-        'p.content',
-        'p.blogId',
-        'p.createdAt',
-        'likesCount."likesCount"',
-        'dislikesCount."dislikesCount"',
-        'blog.name',
+        'p.id as "id"',
+        'p.title as "title"',
+        'p.shortDescription as "shortDescription"',
+        'p.content as "content"',
+        'p.blogId as "blogId"',
+        'p.createdAt as "createdAt"',
+        'CAST(COALESCE(like_count.count, 0) AS INTEGER) as "likesCount"', // ✅ CAST
+        'CAST(COALESCE(dislike_count.count, 0) AS INTEGER) as "dislikesCount"', // ✅ CAS
+        'blog.name as "blogName"',
       ])
+      .addSelect(`COALESCE(my_like.status, 'None')`, 'myStatus')
       .addSelect(
-        sq =>
-          sq
-            .select("COALESCE(pl.status, 'None')")
-            .from(PostLikeEntity, 'pl')
-            .where('pl."postId" = p."id"')
-            .andWhere('pl."userId" = :userId', { userId })
-            .limit(1),
-        'myStatus'
+        `COALESCE(
+      jsonb_agg(
+        jsonb_build_object(
+          'postId', newest_likes."postId",
+          'userId', newest_likes."userId",
+          'addedAt', newest_likes."createdAt",
+          'login', newest_likes."login"
+        )
+        ORDER BY newest_likes."createdAt" DESC
+      ) FILTER (WHERE newest_likes."userId" IS NOT NULL),
+      '[]'::jsonb
+    )`,
+        'newestLikes'
       )
       .where('p.id = :postId AND p.deletedAt IS NULL', { postId })
-      .leftJoinAndMapMany(
-        'p."newestLikes"',
+      .leftJoin(
+        PostLikeEntity,
+        'my_like',
+        'my_like."postId" = p."id" AND my_like."userId" = :userId',
+        { userId: userId ?? null }
+      )
+      .leftJoin(
         subQuery =>
           subQuery
             .select([
-              'inner_pl.postId as "postId"',
-              'inner_pl.userId as "userId"',
-              'inner_pl.createdAt as "addedAt"',
+              'newest_likes.postId as "postId"',
+              'newest_likes.userId as "userId"',
+              'newest_likes.createdAt as "createdAt"',
               'user.login as "login"',
-              'ROW_NUMBER() OVER (PARTITION BY inner_pl."postId" ORDER BY inner_pl."createdAt" DESC) as rank',
+              'ROW_NUMBER() OVER (PARTITION BY newest_likes."postId" ORDER BY newest_likes."createdAt" DESC) as rank',
             ])
-            .from(PostLikeEntity, 'inner_pl')
-            .leftJoin('inner_pl.user', 'user'),
-        'inner_pl',
-        'inner_pl."postId" = p."id" AND inner_pl.rank <= 3'
+            .from(PostLikeEntity, 'newest_likes')
+            .where('newest_likes.status = :postLikeStatus', { postLikeStatus: LikeStatus.Like })
+            .leftJoin('newest_likes.user', 'user'),
+        'newest_likes',
+        'newest_likes."postId" = p."id" AND newest_likes.rank <= 3'
       )
       .leftJoin('p.blog', 'blog')
       .leftJoin(
         subQuery => {
           return subQuery
-            .select('pl."postId"', 'postId')
-            .addSelect('COUNT(*)', 'likesCount')
+            .select('pl."postId"')
+            .addSelect('COUNT(*)', 'count')
             .from(PostLikeEntity, 'pl')
             .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Like })
             .groupBy('pl."postId"');
         },
-        'likesCount',
-        'likesCount."postId" = p.id'
+        'like_count',
+        'like_count."postId" = p.id'
       )
       .leftJoin(
         subQuery => {
           return subQuery
-            .select('pl."postId"', 'postId')
-            .addSelect('COUNT(*)', 'dislikesCount')
+            .select('pl."postId"')
+            .addSelect('COUNT(*)', 'count')
             .from(PostLikeEntity, 'pl')
-            .where('pl.status = :likeStatus', { likeStatus: LikeStatus.Dislike })
+            .where('pl.status = :dislikeStatus', { dislikeStatus: LikeStatus.Dislike })
             .groupBy('pl."postId"');
         },
-        'dislikesCount',
-        'dislikesCount."postId" = p.id'
+        'dislike_count',
+        'dislike_count."postId" = p.id'
       )
+      .groupBy('p.id')
+      .addGroupBy('blog.name')
+      .addGroupBy('my_like.status')
+      .addGroupBy('like_count.count')
+      .addGroupBy('dislike_count.count')
       .getRawOne();
 
     return post
@@ -296,7 +347,7 @@ export class PostsQueryRepository {
             content: post.content,
             shortDescription: post.shortDescription,
             blogId: post.blogId,
-            blogName: post.blog.name,
+            blogName: post.blogName,
             createdAt: post.createdAt,
             likesCount: post.likesCount,
             dislikesCount: post.dislikesCount,

@@ -1,8 +1,8 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '@modules/bloggers-platform/comments/repository';
-import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 import { IUpdateCommentLikeStatusDto } from '@modules/bloggers-platform/comments/application/dto';
+import { CommentsRepository } from '@modules/bloggers-platform/comments/repository';
 import { LikesRepository } from '@modules/bloggers-platform/likes/repository';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { DomainException, DomainExceptionCode } from 'src/core/exceptions';
 
 export class UpdateCommentLikeStatusCommand {
   constructor(public dto: IUpdateCommentLikeStatusDto) {}
@@ -29,7 +29,7 @@ export class UpdateCommentLikeStatusUseCase implements ICommandHandler<UpdateCom
 
     const commentId = comment.id;
 
-    await this.likesRepository.upsertCommentLike({
+    await this.likesRepository.updateCommentLike({
       userId,
       commentId,
       likeStatus,
